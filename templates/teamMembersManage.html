@@ -14,8 +14,8 @@
     <h2>| 팀원 관리</h2>
 
     <div class="btn-box">
-      <button class="btn-add">+ 팀원 추가</button>
-      <button class="btn-back">뒤로 가기</button>
+      <button class="btn-add" onclick="location.href='{{ url_for('teamMemberAdd') }}'">+ 팀원 추가</button>
+      <button class="btn-back" onclick="window.history.back()">뒤로 가기</button>
     </div>
 
     <table class="member-table">
@@ -29,40 +29,31 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>홍길동</td>
-          <td>user1@email.com</td>
-          <td>기획</td>
-          <td>
-            <span class="status-dot green"></span>
-            <select>
-              <option selected>참여 중</option>
-              <option>대기</option>
-            </select>
-          </td>
-          <td>
-            <button class="btn-save">저장</button>
-            <button class="btn-delete">삭제</button>
-          </td>
-        </tr>
-        <tr>
-          <td>김길동</td>
-          <td>user1@email.com</td>
-          <td>백 엔드</td>
-          <td>
-            <span class="status-dot red"></span>
-            <select>
-              <option>참여 중</option>
-              <option selected>대기</option>
-            </select>
-          </td>
-          <td>
-            <button class="btn-save">저장</button>
-            <button class="btn-delete">삭제</button>
-          </td>
-        </tr>
-        <!-- ... 추가 팀원 반복 -->
-      </tbody>
+  {% for member in team_members %}
+  <tr>
+    <td>{{ member.name }}</td>
+    <td>{{ member.email }}</td>
+    <td>{{ member.role }}</td>
+    <td>{{ member.status }}</td>
+    <td>
+      {% if member.status == '참여 중' %}
+        <span class="status-dot green"></span>
+      {% else %}
+        <span class="status-dot red"></span>
+      {% endif %}
+      <select>
+        <option {% if member.status == '참여 중' %}selected{% endif %}>참여 중</option>
+        <option {% if member.status == '대기' %}selected{% endif %}>대기</option>
+      </select>
+    </td>
+    <td>
+      <button class="btn-save">저장</button>
+      <button class="btn-delete">삭제</button>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+
     </table>
   </main>
 </body>

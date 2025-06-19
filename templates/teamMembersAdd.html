@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
-    <link rel="stylesheet" href="../static/assets/css/teamMembersAdd.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}"/>
+    <link rel="stylesheet" href="../static/assets/css/teamMembersAdd.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <title>팀원 추가</title>
 </head>
 
@@ -13,31 +13,39 @@
     {% include 'components/nav.html' %}
     <main class="container">
         <h2>| 팀원 추가</h2>
-        <form class="member-form">
+            <form class="member-form" method="POST" action="{{ url_for('teamMemberAdd') }}">
             <label for="name">이름</label>
-            <select id="name" name="name">
-                <option>홍길동</option>
+            <select id="name" name="name" required>
+                {% for user in users %}
+                <option value="{{ user.name }}">{{ user.name }}</option>
+                {% endfor %}
             </select>
 
-            <div class="member-info-box">
-                <p>이메일 : user1@email.com</p>
-                <p>역할 : 프론트엔드</p>
-                <p>소속 : AI 분석 플랫폼</p>
-            </div>
+        {% if selected_user %}
+        <div class="member-info-box">
+            <p>이메일 : {{ selected_user.email }}</p>
+            <p>역할 : {{ selected_user.role }}</p>
+            <p>소속 : {{ selected_user.department }}</p>
+        </div>
+        {% else %}
+        <div class="member-info-box">
+            <p>이메일 : 선택된 팀원이 없습니다.</p>
+        </div>
+        {% endif %}
 
-            <label for="status">상태</label>
-            <select id="status" name="status">
-                <option>참여중</option>
-                <option>대기</option>
-            </select>
+        <label for="status">상태</label>
+        <select id="status" name="status" required>
+            <option value="참여중">참여중</option>
+            <option value="대기">대기</option>
+        </select>
 
-            <div class="form-buttons">
-                <button type="submit" class="btn-submit">✅등록 완료</button>
-                <button type="button" class="btn-cancel">❌취소</button>
-            </div>
+        <div class="form-buttons">
+            <button type="submit" class="btn-submit">✅ 등록 완료</button>
+            <button type="button" class="btn-cancel" onclick="window.history.back()">❌ 취소</button>
+        </div>
         </form>
     </main>
 
     {% include 'components/footer.html' %}
-</body>
+    </body>
 </html>
