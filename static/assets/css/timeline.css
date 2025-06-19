@@ -1,0 +1,527 @@
+/* timeline.css */
+
+/*
+   이 파일은 timeline.html 페이지에만 적용되는 고유한 스타일을 정의합니다.
+   body, h1, p, button, header, footer 등의 일반적인 스타일은
+   style.css 파일에서 관리되므로 여기서는 중복을 피하고,
+   timeline 고유의 레이아웃, 컴포넌트, 상태에 집중합니다.
+*/
+
+/* 메인 콘텐츠 영역 (캘린더와 상세 정보 섹션이 나란히 배치) */
+.schedule-page {
+    display: flex;
+    justify-content:space-between; /* 중앙 정렬 */
+    padding: 20px;
+    gap: 20px; /* 섹션 간 간격 */
+    margin-top: 20px; /* 헤더 및 네비박스 아래 여백 */
+    flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */
+}
+
+/* 캘린더 섹션 */
+.calendar-section {
+    background-color: #fff;
+    text-align: center;
+    border-radius: 10px; /* style.css의 .nav-box와 유사한 둥근 모서리 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* style.css의 box-shadow와 일관성 유지 */
+    padding: 20px;
+    width: 45%; /* 캘린더 너비 조정 */
+    border: 1px solid #ddd; /* 이미지의 캘린더 경계선 */
+    padding-bottom: 0; /* 캘린더 그리드의 하단 패딩과 겹치지 않도록 조정 */
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-month-year {
+    font-size: 24px; /* h2, h3와 유사한 크기지만 캘린더 전용 */
+    font-weight: 700; /* 더 굵게 */
+    color: #333; /* style.css의 기본 텍스트 색상 */
+}
+
+.calendar-nav .nav-arrow {
+    font-size: 20px;
+    color: #888;
+    cursor: pointer;
+    margin: 0 5px;
+    transition: color 0.2s;
+}
+
+.calendar-nav .nav-arrow:hover {
+    color: #2563EB; /* style.css의 파란색 강조 */
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7열 그리드 */
+    text-align: center;
+    gap: 1px; /* 셀 사이의 간격 */
+    background-color: #eee; /* 셀 경계선처럼 보이게 하는 배경색 */
+    border-top: 1px solid #eee; /* 상단 경계선 */
+    border-left: 1px solid #eee; /* 좌측 경계선 */
+    padding-bottom: 1px; /* 하단 경계선 */
+    height: 500px;
+}
+
+.day-name, .day {
+    background-color: #fff;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 14px; /* 캘린더 날짜 글자 크기 */
+    border-right: 1px solid #eee; /* 우측 경계선 */
+    border-bottom: 1px solid #eee; /* 하단 경계선 */
+    box-sizing: border-box; /* 패딩과 경계선이 너비에 포함되도록 */
+}
+
+.day-name {
+    font-weight: bold;
+    color: #555;
+    background-color: #f8f8f8; /* 요일 배경색 */
+}
+
+.day {
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.day:hover {
+    background-color: #f0f0f0;
+}
+
+.day.current-day {
+    background-color: #2563EB; /* 이미지의 선택된 날짜 (파란색, style.css의 파란색과 동일) */
+    color: #fff;
+    border-radius: 4px; /* 살짝 둥근 모서리 */
+    box-shadow: 0 0 0 2px #2563EB; /* 선택된 날짜 강조 테두리 */
+    margin: 2px; /* 주변과의 간격으로 테두리처럼 보이게 함 */
+    position: relative;
+    z-index: 1; /* 다른 날짜 위에 오도록 */
+    font-weight: bold;
+}
+
+.day.inactive {
+    color: #bbb; /* 이전 달/다음 달 날짜 색상 */
+}
+
+/* 상세 정보 섹션 */
+.detail-section {
+    background-color: #fff;
+    border-radius: 10px; /* style.css의 .nav-box와 유사한 둥근 모서리 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* style.css의 box-shadow와 일관성 유지 */
+    padding: 20px;
+    width: 45%; /* 상세 정보 너비 조정 */
+    border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column; /* 자식 요소를 세로로 정렬 */
+}
+
+.detail-header h3 {
+    margin-top: 0;
+    padding: 0; /* style.css의 h3 패딩 오버라이드 */
+    margin-bottom: 15px;
+}
+
+.schedule-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.schedule-list li {
+    font-size: 15px; /* style.css의 기본 폰트 사이즈 16px보다 약간 작게 */
+    color: #555;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+/* 프로젝트 및 개인 태그 색상 (원형 아이콘) */
+.project-tag, .personal-tag {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0; /* 내용이 길어져도 줄어들지 않게 */
+}
+
+.project-tag.project-a { background-color: #FF6B6B; } /* 빨간색 (프로젝트 A) */
+.project-tag.project-b { background-color: #4CAF50; } /* 초록색 (프로젝트 B) */
+.project-tag.project-c { background-color: #FFC107; } /* 노란색 (프로젝트 C) */
+.personal-tag { background-color: #9C27B0; } /* 보라색 (개인 일정) */
+
+
+/* 일정 추가 버튼 */
+.add-schedule-btn-container {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.add-schedule-btn {
+    /* style.css의 .btn-blue와 유사하지만 특정 위치에만 적용 */
+    background-color: #2563EB;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px; /* style.css의 .btn과 통일 */
+    cursor: pointer;
+    font-size: 15px; /* style.css의 button과 통일 */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto; /* 부모 flex-direction: column에서 오른쪽 정렬 */
+    transition: background-color 0.2s;
+}
+
+.add-schedule-btn:hover {
+    opacity: 0.8; /* style.css의 .btn-blue:hover와 통일 */
+}
+
+.add-schedule-btn i {
+    font-size: 12px;
+}
+
+/* 선택된 업무 상세 정보 */
+.selected-schedule-detail {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    margin-top: auto; /* 상세 정보가 항상 하단에 위치하도록 */
+}
+
+.selected-schedule-detail h4 {
+    margin-top: 0;
+    font-size: 18px; /* h2, h3, .section-title보다는 작게 */
+    color: #333;
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.selected-schedule-detail h4 .project-tag,
+.selected-schedule-detail h4 .personal-tag {
+    margin-left: 8px; /* 제목 옆 태그 아이콘과 제목 사이 간격 */
+}
+
+.selected-schedule-detail p {
+    margin: 8px 0;
+    padding: 0; /* p 태그의 전역 패딩 오버라이드 */
+    font-size: 15px;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* 상태 뱃지 */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #fff;
+    font-weight: bold;
+    display: inline-block; /* 텍스트와 분리되어 보이도록 */
+    margin-left: 5px; /* 텍스트와의 간격 */
+    white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
+}
+
+.status-badge.progress { background-color: #2563EB; } /* 진행중 - style.css의 파란색 */
+.status-badge.completed { background-color: #4CAF50; } /* 완료 - 초록색 */
+.status-badge.pending { background-color: #FFC107; } /* 미완료/지연 - 노란색 */
+.status-badge.holiday { background-color: #9C27B0; } /* 휴가 - 보라색 (개인 태그와 일관성) */
+.status-badge.출장 { background-color: #007bff; } /* 출장 (이미지 색상) */
+.status-badge.지연 { background-color: #dc3545; } /* 지연 (빨간색 계열) */
+
+
+/* 일정 내용 박스 */
+.schedule-content {
+    background-color: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.schedule-content p {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: bold;
+    padding: 0; /* p 태그의 전역 패딩 오버라이드 */
+}
+
+.schedule-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.schedule-content li {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+/* 업무 상태 아이콘 (작은 원형) */
+.status-icon {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.status-icon.completed { background-color: #4CAF50; }
+.status-icon.progress { background-color: #2563EB; }
+.status-icon.pending { background-color: #FFC107; }
+
+/* 상세 정보 액션 버튼들 */
+.detail-actions {
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 정렬 */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    /* style.css의 .btn과 유사하지만 특정 섹션에서만 사용 */
+    background-color: #eee;
+    color: #555;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 10px; /* style.css의 .btn과 통일 */
+    cursor: pointer;
+    font-size: 15px; /* style.css의 button과 통일 */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.action-btn:hover {
+    background-color: #e0e0e0;
+    border-color: #bbb;
+}
+
+/* 일정 추가 드롭다운 컨테이너 (3.png) */
+.add-schedule-dropdown-container {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.schedule-type-select {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.schedule-type-select p {
+    margin-right: 10px;
+    font-weight: bold;
+    margin-bottom: 0;
+    padding: 0; /* p 태그의 전역 패딩 오버라이드 */
+}
+
+.schedule-type-select select {
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    flex-grow: 1; /* 너비 확장 */
+    max-width: 200px; /* 최대 너비 제한 */
+}
+
+/* 수정 모드 입력 필드 컨테이너 (4.png) */
+.schedule-edit-mode {
+    /* 초기에는 hidden 클래스로 숨겨집니다. */
+    border-top: 1px solid #eee; /* 상세 정보와 분리 */
+    padding-top: 20px;
+}
+
+.schedule-edit-mode .input-group {
+    margin-bottom: 15px;
+}
+
+.schedule-edit-mode .input-group label {
+    display: block; /* 라벨을 블록 레벨로 설정하여 인풋 위에 위치 */
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 15px; /* style.css의 p와 유사 */
+    color: #333;
+    padding: 0; /* style.css의 p 패딩 오버라이드 */
+}
+
+.schedule-edit-mode input[type="text"],
+.schedule-edit-mode input[type="datetime-local"],
+.schedule-edit-mode textarea {
+    width: calc(100% - 18px); /* 패딩 8px * 2 + 보더 1px * 2 = 18px 고려 */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* 패딩과 경계선이 너비에 포함되도록 */
+    font-size: 15px; /* style.css의 기본 폰트 사이즈 16px보다 약간 작게 */
+}
+
+.schedule-edit-mode textarea {
+    min-height: 80px;
+    resize: vertical; /* 세로 크기 조절 가능 */
+}
+
+.status-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* 라디오 버튼 그룹 내 간격 */
+}
+
+.status-radio-group label {
+    display: inline-flex; /* 라디오 버튼과 텍스트 정렬 */
+    align-items: center;
+    font-size: 15px; /* style.css의 기본 폰트 사이즈 16px보다 약간 작게 */
+    color: #555;
+    margin-right: 0; /* 기본 마진 제거 */
+}
+
+.status-radio-group input[type="radio"] {
+    margin-right: 5px;
+    accent-color: #2563EB; /* 라디오 버튼 색상 강조 */
+}
+
+.action-btn.save-btn {
+    background-color: #28a745; /* 저장 버튼 색상 (초록, style.css의 success와 유사) */
+    color: #fff;
+    border: none;
+}
+.action-btn.save-btn:hover {
+    background-color: #218838; /* style.css의 .alert-box.success .btn.confirm과 동일 */
+}
+
+.action-btn.cancel-btn {
+    background-color: #6c757d; /* 취소 버튼 색상 (회색, style.css의 .btn-gray와 유사) */
+    color: #fff;
+    border: none;
+}
+.action-btn.cancel-btn:hover {
+    background-color: #5a6268; /* style.css의 .btn-gray:hover와 유사 */
+}
+
+/* 삭제 확인 팝업 (5.png) */
+.delete-confirmation {
+    background-color: #fcebea; /* style.css의 .alert-box.danger와 동일 */
+    border: 1px solid #ef9a9a; /* style.css의 .alert-box.danger와 동일 */
+    border-radius: 10px; /* style.css의 .alert-box와 통일 */
+    padding: 15px;
+    text-align: center;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.delete-confirmation p {
+    color: #721c24; /* style.css의 .alert-box.danger와 동일 */
+    font-weight: bold;
+    margin-bottom: 0; /* 기본 마진 제거 */
+    padding: 0; /* p 태그의 전역 패딩 오버라이드 */
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+}
+
+.confirm-btn {
+    /* style.css의 .btn과 유사하나, 삭제 확인 팝업 내에서만 사용 */
+    padding: 8px 15px;
+    border: none;
+    border-radius: 10px; /* style.css의 .btn과 통일 */
+    cursor: pointer;
+    font-size: 15px; /* style.css의 button과 통일 */
+    transition: background-color 0.2s;
+    min-width: 80px; /* style.css의 .btn과 통일 */
+}
+
+.confirm-btn.yes-btn {
+    background-color: #2563EB; /* YES 버튼 색상 (style.css의 파란색) */
+    color: #fff;
+}
+.confirm-btn.yes-btn:hover {
+    opacity: 0.8; /* style.css의 .btn-blue:hover와 통일 */
+}
+
+.confirm-btn.no-btn {
+    background-color: #6C6D74; /* NO 버튼 색상 (style.css의 회색) */
+    color: #fff;
+}
+.confirm-btn.no-btn:hover {
+    opacity: 0.8; /* style.css의 .btn-gray:hover와 통일 */
+}
+
+
+/* 유틸리티 클래스 */
+.hidden {
+    display: none !important; /* 중요! 이 클래스가 적용되면 요소를 숨깁니다. */
+}
+
+/* -------------------------------------------- */
+/* ✅ 반응형 미디어 쿼리 추가 */
+/* -------------------------------------------- */
+@media (max-width: 1000px) {
+    .schedule-page {
+        flex-direction: column; /* 세로로 정렬 */
+        align-items: center; /* 가운데 정렬 */
+    }
+    .calendar-section, .detail-section {
+        width: 100%; /* 너비 100% */
+        max-width: 550px; /* 최대 너비 제한 */
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .calendar-section, .detail-section {
+        padding: 15px; /* 작은 화면에서 패딩 조정 */
+    }
+
+    .calendar-month-year {
+        font-size: 20px;
+    }
+
+    .calendar-grid .day-name,
+    .calendar-grid .day {
+        font-size: 13px;
+        padding: 8px 0;
+    }
+
+    .add-schedule-btn,
+    .action-btn,
+    .confirm-btn {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .selected-schedule-detail h4 {
+        font-size: 16px;
+    }
+    .selected-schedule-detail p,
+    .schedule-list li,
+    .schedule-type-select p,
+    .schedule-type-select select,
+    .schedule-edit-mode input,
+    .schedule-edit-mode textarea,
+    .schedule-edit-mode label {
+        font-size: 14px;
+    }
+
+    .status-radio-group label {
+        font-size: 14px;
+    }
+}
