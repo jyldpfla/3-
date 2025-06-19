@@ -10,12 +10,13 @@
 /* 메인 콘텐츠 영역 (캘린더와 상세 정보 섹션이 나란히 배치) */
 .schedule-page {
     display: flex;
-    justify-content:space-between; /* 중앙 정렬 */
+    justify-content : space-around; /* 중앙 정렬 */
     padding: 20px;
     gap: 20px; /* 섹션 간 간격 */
     margin-top: 20px; /* 헤더 및 네비박스 아래 여백 */
     flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */
 }
+
 
 /* 캘린더 섹션 */
 .calendar-section {
@@ -64,6 +65,13 @@
     border-left: 1px solid #eee; /* 좌측 경계선 */
     padding-bottom: 1px; /* 하단 경계선 */
     height: 500px;
+}
+
+.calendar-grid > div {
+    display: flex;
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-content: center; /* 수평 중앙 정렬 */
+    height: 100%; /* 셀 높이를 꽉 채워서 flex 정렬이 적용되도록 */
 }
 
 .day-name, .day {
