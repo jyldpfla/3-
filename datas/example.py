@@ -22,6 +22,7 @@ project_data = {
 
 user_data = {
     "email": "예시입니다",
+    "name": "장예림",
     "userPassword": "hashed_password123",
     "role": "기획자",
     "profile": "자기소개 및 사진",

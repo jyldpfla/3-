@@ -1,4 +1,139 @@
+/* 공통 설정 */
 body {
     max-width: 1600px;
     margin: 0 auto;
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    padding-bottom: 80px; /* footer 가리지 않게 여백 */
+}
+
+/* 헤더 */
+header {
+    padding: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    color: #2b2b2b;
+}
+
+.header-title {
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* 네비 박스 */
+.nav-box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    gap: 20px;
+    margin-top: 10px;
+    flex-wrap: wrap; /* 반응형에서 줄바꿈 허용 */
+}
+
+/* 네비 항목 */
+.nav-item {
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px 15px;
+}
+
+/* 구분선 */
+.divider {
+    width: 1px;
+    height: 40px;
+    background-color: #ddd;
+}
+
+/* 사용자 정보 */
+.user-info {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logout-btn {
+    padding: 6px 12px;
+    background-color: #eee;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* 푸터 (바깥쪽 고정 박스) */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    color: white;
+    font-size: 13px;
+    z-index: 1000;
+}
+
+/* 푸터 안쪽 내용 (정렬 컨테이너) */
+.footer-inner {
+    max-width: 1600px;
+    background-color: #1f3c5c;
+    border-radius: 10px 10px 0 0;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+}
+
+/* 링크 스타일 */
+footer a {
+    color: white;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+/* -------------------------------------------- */
+/* ✅ 반응형 미디어 쿼리 추가 */
+/* -------------------------------------------- */
+@media screen and (max-width: 768px) {
+    h1 {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .nav-box {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .nav-item {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .user-info {
+        margin-left: 0;
+        justify-content: flex-end;
+    }
+
+    .footer-inner {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px 10px;
+        gap: 10px;
+    }
 }

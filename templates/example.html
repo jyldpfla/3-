@@ -1,12 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>3조 Main</title>
 </head>
 <body>
-    <h1>Team</h1>
+    <header>
+        <h1 class="header-title"><i class="fa-solid fa-building"></i> Team 3</h1>
+        <div class="nav-box">
+        <div class="nav-item"><i class="fa-solid fa-folder-open"></i><br>프로젝트</div>
+        <div class="divider"></div>
+        <div class="nav-item"><i class="fa-solid fa-calendar-days"></i><br>업무 일정</div>
+        <div class="divider"></div>
+        <div class="nav-item"><i class="fa-solid fa-chess-board"></i><br>게시판</div>
+        <div class="divider"></div>
+        <div class="nav-item"><i class="fa-solid fa-user-tie"></i><br>마이 페이지</div>
+        <div class="user-info">
+            <span><i class="fa-solid fa-user"></i> Yerim</span>
+            <button class="logout-btn">Logout</button>
+        </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 콘텐츠 영역 (비어 있음) -->
+    </main>
+
+    <footer>
+    <div class="footer-inner">
+        <div class="footer-left">© 2025 MyCompany. All rights reserved.</div>
+        <div class="footer-right">
+        <a href="#">개인정보처리방침</a> |
+        <a href="#">이용약관</a> |
+        <a href="#">고객센터</a>
+        </div>
+    </div>
+    </footer>
+
 </body>
 </html>
