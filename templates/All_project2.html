@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/All_list2.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>3조 Main</title>
+</head>
+<body>
+    {% include 'components/nav.html' %}
+
+    <main>
+        <h2><span class="bar"></span> 새로운 프로젝트 추가</h2>
+<div class="container">
+
+    <form class="project-form">
+      <label>
+        프로젝트 이름
+        <input type="text" placeholder="다크모드 지원">
+      </label>
+      <label>
+        클라이언트
+        <input type="text" placeholder="UK Holdings">
+      </label>
+      <label>
+        담당자
+        <input type="text" placeholder="기길동">
+      </label>
+      <label>
+        시작일
+        <input type="date" value="2025-06-26">
+      </label>
+      <label>
+        마감일
+        <input type="date" value="2025-07-13">
+      </label>
+      <label>
+        상태
+        <select>
+          <option>진행 중</option>
+          <option selected>진행 대기</option>
+        </select>
+      </label>
+      <div class="btns">
+        <button type="submit">등록</button>
+        <button type="reset">취소</button>
+      </div>
+    </form>
+  </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+</body>
+</html>

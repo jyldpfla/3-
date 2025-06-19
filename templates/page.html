@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/page.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>3조 Main</title>
+</head>
+<head>
+  <meta charset="UTF-8">
+  <title>프로젝트 상세보기 수정</title>
+  <link rel="stylesheet" href="style.css"> <!-- 여기! -->
+</head>
+<body>
+    {% include 'components/nav.html' %}
+
+    <main>
+        <h2><span class="bar"></span> 프로젝트 상세보기 수정</h2>
+<div class="container">
+    <div class="header">
+      <div class="buttons">
+        <button class="primary">수정 완료</button>
+        <button class="secondary">뒤로 가기</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <form class="left-form">
+        <label>프로젝트명 <input type="text" value="UI 디자인"></label>
+        <label>클라이언트 <input type="text" value="UK Holdings"></label>
+        <label>담당자 <input type="text" value="홍길동"></label>
+        <label>팀원 <input type="text" value="김길동, 이길동, 박길동"></label>
+        <label>시작일 <input type="date" value="2025-06-05"></label>
+        <label>마감일 <input type="date" value="2025-06-24"></label>
+        <label>진행 상태
+          <select>
+            <option selected>진행 중</option>
+            <option>진행 대기</option>
+          </select>
+        </label>
+      </form>
+
+      <div class="right-box">
+        <!-- 오른쪽 비어있는 박스 -->
+      </div>
+    </div>
+  </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+</body>
+</html>
+

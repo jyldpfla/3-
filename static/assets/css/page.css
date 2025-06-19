@@ -1,0 +1,82 @@
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  font-size: 22px;             /* 20보다 이게 더 낫다면 유지 */
+  font-weight: bold;
+  margin-left: 0;
+}
+
+
+.bar {
+  width: 4px;
+  height: 20px;
+  background-color: black;
+  margin-right: 10px;
+}
+
+.buttons button {
+  padding: 8px 16px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  background-color: #f0f4fa;
+  cursor: pointer;
+}
+
+.main {
+  display: flex;
+  justify-content: space-between;
+  gap: 50px;
+}
+
+.left-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 45%;
+}
+
+.left-form label {
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-form input,
+.left-form select {
+  margin-top: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  background-color: white;
+}
+
+.right-box {
+  width: 45%;
+  height: 250px;
+  background-color: #f4f8ff;
+  border-radius: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}

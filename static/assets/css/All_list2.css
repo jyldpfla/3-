@@ -1,0 +1,64 @@
+body {
+    margin: 0 auto;
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.bar {
+  display: inline-block;
+  width: 5px;
+  height: 20px;
+  background-color: #000;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.project-form label {
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.project-form input,
+.project-form select {
+  margin-top: 6px;
+  padding: 10px 14px;
+  border: 1px solid #888;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.btns {
+  display: flex;
+  gap: 10px;
+}
+
+.btns button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #e0e6f5;
+}
+
+.btns button[type="submit"] {
+  background-color: #c8d8ff;
+}
