@@ -8,37 +8,51 @@
     <title>3조 Main</title>
 </head>
 <body>
-    <header>
-        <h1 class="header-title"><i class="fa-solid fa-building"></i> Team 3</h1>
-        <div class="nav-box">
-        <div class="nav-item"><i class="fa-solid fa-folder-open"></i><br>프로젝트</div>
-        <div class="divider"></div>
-        <div class="nav-item"><i class="fa-solid fa-calendar-days"></i><br>업무 일정</div>
-        <div class="divider"></div>
-        <div class="nav-item"><i class="fa-solid fa-chess-board"></i><br>게시판</div>
-        <div class="divider"></div>
-        <div class="nav-item"><i class="fa-solid fa-user-tie"></i><br>마이 페이지</div>
-        <div class="user-info">
-            <span><i class="fa-solid fa-user"></i> Yerim</span>
-            <button class="logout-btn">Logout</button>
-        </div>
-        </div>
-    </header>
+    {% include 'components/nav.html' %}
 
     <main>
-        <!-- 콘텐츠 영역 (비어 있음) -->
+        <!-- 제목 및 내용 등 font size 확인하사구 사용해주시면 됩니다 -->
+        <h1>페이지 제목</h1>
+        <h2 class="section-title">소제목</h2>
+        <p>본문 내용</p>
+        <!-- 버튼 -->
+        <button class="btn btn-blue">메인 버튼</button>
+        <button class="btn btn-gray">서브 버튼</button>
+        <!-- alert -->
+        <div class="alert-box success">
+            <div class="alert-message">작업이 성공적으로 완료되었습니다.</div>
+            <div class="alert-actions">
+                <button class="btn cancel">취소</button>
+                <button class="btn confirm">확인</button>
+            </div>
+        </div>
+
+        <div class="alert-box warning">
+            <div class="alert-message">입력값을 확인해주세요.</div>
+            <div class="alert-actions">
+                <button class="btn cancel">취소</button>
+                <button class="btn confirm">확인</button>
+            </div>
+        </div>
+
+        <div class="alert-box danger">
+            <div class="alert-message">에러가 발생했습니다.</div>
+            <div class="alert-actions">
+                <button class="btn cancel">취소</button>
+                <button class="btn confirm">확인</button>
+            </div>
+        </div>
+
+        <div class="alert-box info">
+            <div class="alert-message">안내 메시지를 확인하세요.</div>
+            <div class="alert-actions">
+                <button class="btn cancel">닫기</button>
+                <button class="btn confirm">확인</button>
+            </div>
+        </div>
+
     </main>
 
-    <footer>
-    <div class="footer-inner">
-        <div class="footer-left">© 2025 MyCompany. All rights reserved.</div>
-        <div class="footer-right">
-        <a href="#">개인정보처리방침</a> |
-        <a href="#">이용약관</a> |
-        <a href="#">고객센터</a>
-        </div>
-    </div>
-    </footer>
-
+    {% include 'components/footer.html' %}
 </body>
 </html>

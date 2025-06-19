@@ -2,10 +2,49 @@
 body {
     max-width: 1600px;
     margin: 0 auto;
-    font-family: 'Arial', sans-serif;
     background-color: #f9f9f9;
     color: #333;
     padding-bottom: 80px; /* footer 가리지 않게 여백 */
+}
+/* Font 설정 */
+body {
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 16px; /* 기본 글자 */
+}
+
+/* 페이지 제목 */
+h1 {
+    padding: 0 25px;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+/* 소제목 */
+h2, h3 {
+    padding: 0 25px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* nav */
+.nav-item {
+    padding: 15px 25px;
+    font-size: 16px;
+    padding: 10px 15px;
+}
+
+
+/* 본문 */
+p {
+    padding: 15px 25px;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* 버튼 */
+button {
+    font-size: 15px;
+    padding: 8px 16px;
 }
 
 /* 헤더 */
@@ -23,6 +62,25 @@ h1 {
     cursor: pointer;
 }
 
+.section-title {
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    padding-left: 45px;
+    color: #2b2b2b;
+}
+
+/* | 세로 막대 스타일 */
+.section-title::before {
+    padding: 0 25px;
+    content: '|';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #2563EB; /* 파란색 세로선 */
+    font-weight: bold;
+}
+
 /* 네비 박스 */
 .nav-box {
     display: flex;
@@ -30,7 +88,7 @@ h1 {
     justify-content: flex-start;
     background-color: white;
     padding: 15px 25px;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     gap: 20px;
     margin-top: 10px;
@@ -39,7 +97,6 @@ h1 {
 
 /* 네비 항목 */
 .nav-item {
-    font-size: 16px;
     text-align: center;
     cursor: pointer;
     padding: 10px 15px;
@@ -60,13 +117,113 @@ h1 {
     gap: 10px;
 }
 
-.logout-btn {
-    padding: 6px 12px;
-    background-color: #eee;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 버튼 사이 간격 */
 }
+
+.join-btn {
+    padding: 6px 12px;
+    background-color: #fff;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* 공통 버튼 스타일 */
+/* 버튼 공통 */
+.btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    min-width: 80px;
+}
+
+/* 파란 버튼 */
+.btn-blue {
+    color: #fff;
+    background-color: #2563EB;
+}
+
+.btn-blue:hover {
+    opacity: 0.8;
+}
+
+/* 회색 버튼 */
+.btn-gray {
+    color: #fff;
+    background-color: #6C6D74;
+}
+
+.btn-gray:hover {
+    opacity: 0.8;
+}
+
+/* 공통 Alert 스타일 */
+.alert-box {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* 메시지 */
+.alert-message {
+    font-size: 17px;
+    margin-bottom: 20px;
+}
+
+
+/* 버튼 영역 */
+.alert-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn.cancel {
+    background-color: #ccc;
+    color: #333;
+}
+
+.btn.confirm {
+    background-color: #4caf50;
+    color: white;
+}
+
+/* 스타일별 배경색 */
+.alert-box.success {
+    background-color: #e6f4ea;
+    border: 1px solid #b2dfdb;
+}
+
+.alert-box.warning {
+    background-color: #fff8e1;
+    border: 1px solid #ffe082;
+}
+
+.alert-box.danger {
+    background-color: #fcebea;
+    border: 1px solid #ef9a9a;
+}
+
+.alert-box.info {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+}
+
+/* 버튼 색도 스타일별로 변경 (선택적) */
+.alert-box.success .btn.confirm { background-color: #388e3c; }
+.alert-box.warning .btn.confirm { background-color: #f57f17; }
+.alert-box.danger  .btn.confirm { background-color: #d32f2f; }
+.alert-box.info    .btn.confirm { background-color: #1976d2; }
 
 /* 푸터 (바깥쪽 고정 박스) */
 footer {
@@ -104,6 +261,27 @@ footer a {
 /* ✅ 반응형 미디어 쿼리 추가 */
 /* -------------------------------------------- */
 @media screen and (max-width: 768px) {
+    body {
+        font-size: 15px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    h2, h3, .section-title {
+        font-size: 20px;
+    }
+
+    p {
+        font-size: 15px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 7px 14px;
+    }
+
     h1 {
         font-size: 20px;
         text-align: center;
@@ -128,6 +306,20 @@ footer a {
     .user-info {
         margin-left: 0;
         justify-content: flex-end;
+    }
+
+    .alert-message {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        padding: 8px 18px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        min-width: 80px;
     }
 
     .footer-inner {
