@@ -61,16 +61,12 @@ personal_todo_data = {
 }
 
 board_data = {
-    "projectId": None,
+    "user_id": None,
     "title": "예시입니다",
-    "schedule.startDate": "2025-07-01",
-    "schedule.endDate": "2025-07-10",
-    "writer": None,
-    "member": "기획팀",
+    "category": "공지",
     "content": "초안 작성 및 회의",
     "update_date": "2025-07-09",
     "create_date": "2025-07-01",
-    "type": "중간일정"
 }
 
 team_data = {
