@@ -10,7 +10,7 @@ p {
 
 .dashboard {
     display: grid;
-    grid-template-columns: 3fr 4fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr;
     gap: 1rem;
     padding: 1rem;
@@ -222,11 +222,12 @@ hr {
 
 .tasks th:nth-child(2),
 .tasks td:nth-child(2) {
-    width: 25%;
+    width: 20%;
 }
 
 .tasks td:nth-child(2) {
     color: #808080;
+    font-size: 0.8rem;
 }
 
 .tasks th:nth-child(3),
@@ -295,41 +296,137 @@ hr {
     gap: 1rem;
 }
 
-.tab-header {
+/* 전체 탭 감싸는 컨테이너 */
+.tabs {
     display: flex;
     gap: 1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
 }
 
+/* 탭 하나 (제목 + 내용 포함) */
 .tab {
-    padding: 0.3rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    background: #eee;
-    font-size: 0.9rem;
+    flex: 1;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 300px;
 }
 
-.tab.active {
+/* 탭 제목 */
+.tab-header {
+    background: #eee;
+    padding: 0.6rem 1rem;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-bottom: 1px solid #ccc;
+    transition: background 0.2s, color 0.2s;
+}
+
+.tab.active .tab-header {
     background: #007aff;
     color: white;
 }
 
+/* 탭 내용 */
+.tab-content {
+    padding: 1rem;
+    display: block;
+}
+
+.tab:not(.active) .tab-content {
+    display: none;
+}
+
+/* 프로젝트 카드 스타일 그대로 유지 */
 .project {
-    background: #f0f0f0;
+    background: #fff;
     padding: 1rem;
     border-radius: 10px;
 }
 
-.project-header {
+.project-tab-container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.project-tabs {
+    margin: 0 auto;
+    display: flex;
+    border-bottom: none;
+    padding: 0.5rem 0 0 0;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: 8px 8px 0 0;
+    background-color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    color: #666;
+}
+
+.tab-btn:hover {
+    opacity: 0.8;
+}
+
+.tab-btn.active {
+    background-color: #e0e0e0;
+    color: #007aff;
+}
+
+.project-wrapper {
+    margin: 0 auto;
+    padding: 1rem;
+    background: #e0e0e0;
+    border-radius: 0 10px 10px 10px;
+    height: 200px;
+    overflow-y: auto;
+}
+
+.project-tab-content {
+    display: none;
+}
+
+.project-tab-content.active {
+    display: block;
+}
+
+.project-header-group {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+.project-name {
+    background: transparent;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem 0.5rem 0.6rem;
+}
+
+.project-name:hover {
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.project-name.active {
+    background: #fff;
+    border-radius: 6px 6px 0 0;
+}
+
+.project-body {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 0 10px 10px 10px;
+}
+
 .project-list {
     list-style: none;
     padding: 0;
-    margin-top: 1rem;
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
@@ -339,23 +436,114 @@ hr {
     display: grid;
     grid-template-columns: 1.5fr 2fr 2fr 1fr auto;
     align-items: center;
-    gap: 0.5rem;
     font-size: 0.95rem;
 }
 
 .task-id {
     color: #808080;
-    font-size: 0.9rem;
 }
 
 .status {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
     font-weight: bold;
+    gap: 0.4rem;
+}
+
+.status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status.done .dot {
+    background-color: green;
+}
+
+.status.inprogress .dot {
+    background-color: orange;
 }
 
 .task-date {
     color: green;
     font-weight: 500;
+}
+
+.btn-blue,
+.btn-gray {
+    padding: 0.2rem;
+}
+
+.btn.btn-gray {
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+
+@media screen and (max-width: 1024px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+    }
+
+    .task-add {
+        flex-direction: column;
+        position: static;
+        margin-top: 1rem;
+    }
+
+    .task-add input[type="text"],
+    .task-add input[type="date"],
+    .task-add button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .tab-header {
+        flex-wrap: wrap;
+    }
+
+    .project-list li {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        row-gap: 0.4rem;
+    }
+
+    .project-list li>*:nth-child(3),
+    .project-list li>*:nth-child(4),
+    .project-list li>*:nth-child(5) {
+        grid-column: span 2;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    .status {
+        font-size: 0.85rem;
+    }
+
+    .tab {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.6rem;
+    }
+
+    .project-list li {
+        font-size: 0.85rem;
+    }
+
+    .task-add input[type="text"],
+    .task-add input[type="date"],
+    .task-add button {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .task-add {
+        gap: 0.7rem;
+    }
 }

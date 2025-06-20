@@ -70,7 +70,7 @@ board_data = {
 }
 
 team_data = {
-    "projectId": None,
-    "member": "예시입니다",
+    "projectId": ObjectId("6853aebf690a71fa9ad4b6e2"),
+    "member": ["장예림", "백인호"],
     "status": "활동중"
 }

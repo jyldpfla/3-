@@ -20,8 +20,8 @@
                 <div class="user-top">
                     <div class="user-image">Image</div>
                     <div class="user-details">
-                        <h2>장예림</h2>
-                        <p>부서 / 사원</p>
+                        <h2>{{ user_info.name }}</h2>
+                        <p>{{ user_info.department }} / {{user_info.role }}</p>
                     </div>
                 </div>
                 <hr />
@@ -34,8 +34,12 @@
                         <span>담당 프로젝트</span>
                     </div>
                     <div class="stat-right">
-                        <div><span>진행중</span><strong>2</strong></div>
-                        <div><span>완료</span><strong>2</strong></div>
+                        <div>
+                            <span>진행중</span><strong>2</strong>
+                        </div>
+                        <div>
+                            <span>완료</span><strong>2</strong>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -72,8 +76,8 @@
                 <div class="task-header">
                     <h3>내 업무</h3>
                     <div class="task-actions">
-                        <button class="btn btn-blue">편집</button>
-                        <button class="btn btn-blue">삭제</button>
+                        <button class="btn btn-blue btn-edit">편집</button>
+                        <button class="btn btn-blue btn-del">삭제</button>
                     </div>
                 </div>
                 <table>
@@ -88,7 +92,23 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input type="radio" name="taskSelect" /></td>
+                            <td>
+                                <input type="radio" name="taskSelect" />
+                            </td>
+                            <td>#A101-156863</td>
+                            <td>유지보수</td>
+                            <td>
+                                <span class="status done">
+                                    <span class="dot"></span>
+                                    Done
+                                </span>
+                            </td>
+                            <td><span class="task-date">오늘</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="radio" name="taskSelect" />
+                            </td>
                             <td>#A101-156873</td>
                             <td>유지보수</td>
                             <td>
@@ -97,10 +117,12 @@
                                     Done
                                 </span>
                             </td>
-                            <td>오늘</td>
+                            <td><span class="task-date">오늘</span></td>
                         </tr>
                         <tr>
-                            <td><input type="radio" name="taskSelect" /></td>
+                            <td>
+                                <input type="radio" name="taskSelect" />
+                            </td>
                             <td>#A101-156873</td>
                             <td>유지보수</td>
                             <td>
@@ -109,10 +131,12 @@
                                     Done
                                 </span>
                             </td>
-                            <td>오늘</td>
+                            <td><span class="task-date">오늘</span></td>
                         </tr>
                         <tr>
-                            <td><input type="radio" name="taskSelect" /></td>
+                            <td>
+                                <input type="radio" name="taskSelect" />
+                            </td>
                             <td>#A101-156873</td>
                             <td>유지보수</td>
                             <td>
@@ -121,34 +145,12 @@
                                     Done
                                 </span>
                             </td>
-                            <td>오늘</td>
+                            <td><span class="task-date"><span class="task-date">오늘</span></span></td>
                         </tr>
                         <tr>
-                            <td><input type="radio" name="taskSelect" /></td>
-                            <td>#A101-156873</td>
-                            <td>유지보수</td>
                             <td>
-                                <span class="status done">
-                                    <span class="dot"></span>
-                                    Done
-                                </span>
+                                <input type="radio" name="taskSelect" />
                             </td>
-                            <td>오늘</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="taskSelect" /></td>
-                            <td>#A101-156873</td>
-                            <td>유지보수</td>
-                            <td>
-                                <span class="status done">
-                                    <span class="dot"></span>
-                                    Done
-                                </span>
-                            </td>
-                            <td>오늘</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="taskSelect" /></td>
                             <td>#A101-156875</td>
                             <td>미팅</td>
                             <td>
@@ -160,7 +162,9 @@
                             <td>2025.07.15</td>
                         </tr>
                         <tr>
-                            <td><input type="radio" name="taskSelect" /></td>
+                            <td>
+                                <input type="radio" name="taskSelect" />
+                            </td>
                             <td>#A101-156877</td>
                             <td>내부 회의</td>
                             <td>
@@ -179,64 +183,101 @@
                     <input type="text" placeholder="할 일 내용" />
                     <button class="btn btn-blue">추가</button>
                 </div>
-
             </div>
 
             <!-- 프로젝트 -->
             <div class="card projects">
                 <h3>프로젝트</h3>
-                <div class="tab-header">
-                    <span class="tab active" data-tab="in-progress">진행중</span>
-                    <span class="tab" data-tab="completed">완료</span>
-                </div>
+                <div class="project-tab-container">
+                    <div class="project-tabs">
+                        <button class="tab-btn active" data-tab="progress">진행중</button>
+                        <button class="tab-btn" data-tab="complete">완료</button>
+                    </div>
 
-                <!-- 진행중 탭 -->
-                <div class="tab-content" id="in-progress">
-                    <div class="project">
-                        <div class="project-header">
-                            <h4>B 프로젝트</h4>
-                            <button class="btn btn-view">상세보기</button>
+                    <div class="project-wrapper">
+                        <!-- 진행중 콘텐츠 -->
+                        <div class="project-tab-content active" id="progress">
+                            <div class="project-container">
+                                <div class="project-header-group">
+                                    <div class="project-name">B 프로젝트</div>
+                                    <button class="btn btn-blue">상세보기</button>
+                                </div>
+                                <div class="project-body" style="display: none;">
+                                    <ul class="project-list">
+                                        <li>
+                                            <span class="task-id">#A101-156873</span>
+                                            <span class="task-title">유지보수</span>
+                                            <span class="status done"><span class="dot"></span>Done</span>
+                                            <span class="task-date">오늘</span>
+                                            <button class="btn btn-gray">일정 보기</button>
+                                        </li>
+                                        <li>
+                                            <span class="task-id">#A101-156876</span>
+                                            <span class="task-title">UI 제작 발표</span>
+                                            <span class="status inprogress"><span class="dot"></span>In Progress</span>
+                                            <span class="task-date">오늘</span>
+                                            <button class="btn btn-gray">일정 보기</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="project-container">
+                                <div class="project-header-group">
+                                    <div class="project-name">C 프로젝트</div>
+                                    <button class="btn btn-blue">상세보기</button>
+                                </div>
+                                <div class="project-body" style="display: none;">
+                                    <ul class="project-list">
+                                        <li>
+                                            <span class="task-id">#A101-156873</span>
+                                            <span class="task-title">유지보수</span>
+                                            <span class="status done"><span class="dot"></span>Done</span>
+                                            <span class="task-date">오늘</span>
+                                            <button class="btn btn-gray">일정 보기</button>
+                                        </li>
+                                        <li>
+                                            <span class="task-id">#A101-156876</span>
+                                            <span class="task-title">UI 제작 발표</span>
+                                            <span class="status inprogress"><span class="dot"></span>In Progress</span>
+                                            <span class="task-date">오늘</span>
+                                            <button class="btn btn-gray">일정 보기</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                        <ul class="project-list">
-                            <li>
-                                <span class="task-id">#A101-156873</span>
-                                <span class="task-title">유지보수</span>
-                                <span class="status done"><span class="dot"></span>Done</span>
-                                <span class="task-date">오늘</span>
-                                <button class="btn btn-gray">일정 보기</button>
-                            </li>
-                            <li>
-                                <span class="task-id">#A101-156876</span>
-                                <span class="task-title">UI 제작 발표</span>
-                                <span class="status inprogress"><span class="dot"></span>In Progress</span>
-                                <span class="task-date">오늘</span>
-                                <button class="btn btn-gray">일정 보기</button>
-                            </li>
-                        </ul>
+
+                        <!-- 완료 콘텐츠 -->
+                        <div class="project-tab-content" id="complete">
+                            <div class="project-container">
+                                <div class="project-header-group">
+                                    <div class="project-name">C 프로젝트</div>
+                                    <button class="btn btn-blue">상세보기</button>
+                                </div>
+                                <div class="project-body" style="display: none;">
+                                    <ul class="project-list">
+                                        <li>
+                                            <span class="task-id">#A101-156873</span>
+                                            <span class="task-title">유지보수</span>
+                                            <span class="status done"><span class="dot"></span>Done</span>
+                                            <span class="task-date">오늘</span>
+                                            <button class="btn btn-gray">일정 보기</button>
+                                        </li>
+                                        <li>
+                                            <span class="task-id">#A101-156876</span>
+                                            <span class="task-title">UI 제작 발표</span>
+                                            <span class="status inprogress"><span class="dot"></span>In Progress</span>
+                                            <span class="task-date">오늘</span>
+                                            <button class="btn btn-gray">일정 보기</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 완료 탭 -->
-                <div class="tab-content" id="completed" style="display: none;">
-                    <div class="project">
-                        <div class="project-header">
-                            <h4>A 프로젝트</h4>
-                            <button class="btn btn-view">상세보기</button>
-                        </div>
-                        <ul class="project-list">
-                            <li>
-                                <span class="task-id">#A101-155555</span>
-                                <span class="task-title">배포 완료</span>
-                                <span class="status done"><span class="dot"></span>Done</span>
-                                <span class="task-date">오늘</span>
-                                <button class="btn btn-gray">일정 보기</button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
             </div>
-
-
         </div>
     </main>
 
