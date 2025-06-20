@@ -21,17 +21,17 @@ project_data = {
 }
 
 user_data = {
-    "email": "예시입니다",
-    "name": "장예림",
-    "userPassword": "hashed_password123",
-    "role": "기획자",
-    "profile": "자기소개 및 사진",
-    "department": "기획팀",
-    "position": "팀장",
-    "createAt": "2025-06-01",
-    "phone_num": "010-1234-5678",
-    "Personal_todoId": None,
-    "BoardId": None
+        "email": "wonji@example.com",
+        "name": "최홍석",
+        "userPassword": "hashed_pw_3",
+        "role": "마케팅 직원",
+        "profile": "영업사원",
+        "department": "마케팅팀",
+        "position": "팀원",
+        "createAt": "2025-06-03",
+        "phone_num": "010-3456-7890",
+        "Personal_todoId": None,
+        "BoardId": None
 }
 
 schedule_data = {

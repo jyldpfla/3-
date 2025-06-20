@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
-    <link rel="stylesheet" href="../static/assets/css/teamMembersManage.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>팀원 관리</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+  <link rel="stylesheet" href="../static/assets/css/teamMembersManage.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <title>팀원 관리</title>
 </head>
 <body>
   {% include 'components/nav.html' %}
@@ -29,33 +30,67 @@
         </tr>
       </thead>
       <tbody>
-  {% for member in team_members %}
-  <tr>
-    <td>{{ member.name }}</td>
-    <td>{{ member.email }}</td>
-    <td>{{ member.role }}</td>
-    <td>{{ member.status }}</td>
-    <td>
-      {% if member.status == '참여 중' %}
-        <span class="status-dot green"></span>
-      {% else %}
-        <span class="status-dot red"></span>
-      {% endif %}
-      <select>
-        <option {% if member.status == '참여 중' %}selected{% endif %}>참여 중</option>
-        <option {% if member.status == '대기' %}selected{% endif %}>대기</option>
-      </select>
-    </td>
-    <td>
-      <button class="btn-save">저장</button>
-      <button class="btn-delete">삭제</button>
-    </td>
-  </tr>
-  {% endfor %}
-</tbody>
-
+        {% for member in team_members %}
+        <form class="update_form" method="POST" action="{{ url_for('teamMemberUpdate') }}">
+          <tr>
+            <input type="hidden" name="name" value="{{ member.name }}">
+            <td>{{ member.name }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.role }}</td>
+            <td>
+              {% if member.status == '대기' %}
+                <span class="status-dot red"></span>
+              {% else %}
+                <span class="status-dot green"></span>
+              {% endif %}
+              <select name="status">
+                <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
+                <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
+              </select>
+            </td>
+            <td>
+              <button type="button" class="btn-save" onclick="showSaveAlert(this)">저장</button>
+              <button type="button" class="btn-delete" onclick="showDeleteAlert(this, '{{ url_for('teamMemberDelete', name=member.name) }}')">삭제</button>
+            </td>
+          </tr>
+        </form>
+        {% endfor %}
+      </tbody>
     </table>
   </main>
 </body>
 {% include 'components/footer.html' %}
-</html>
+
+<script>
+  function showSaveAlert(button) {
+    Swal.fire({
+      title: '저장하시겠습니까?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '저장',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.querySelector('.update_form').submit();
+      }
+    });
+  }
+
+  function showDeleteAlert(button, deleteUrl) {
+    Swal.fire({
+      title: '삭제하시겠습니까?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = deleteUrl;
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  }
+</script>

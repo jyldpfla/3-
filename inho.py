@@ -35,7 +35,6 @@ def teamMemberAdd():
     if request.method == "POST":
         name = request.form.get("name")
         status = request.form.get("status")
-
         user_info = user_collection.find_one({"name": name})
         if user_info:
             team_collection.insert_one({
@@ -48,7 +47,6 @@ def teamMemberAdd():
             return redirect(url_for("teamMemberManage"))
         else:
             return "해당 이름의 유저를 찾을 수 없습니다.", 404
-
     users = list(user_collection.find({}, {"_id": 0})) 
     return render_template("teamMembersAdd.html", users=users)
 
@@ -57,6 +55,30 @@ def teamMemberAdd():
 def teamMemberManage():
     team_members = list(team_collection.find({}, {'_id': 0}))  
     return render_template('teamMembersManage.html', team_members=team_members)
+
+@app.route('/teamMemberUpdate', methods=["POST"])
+def teamMemberUpdate():
+    name = request.form.get("name")
+    status = request.form.get("status")
+    result = team_collection.update_one(
+        {"name": name},
+        {"$set": {"status": status}}
+    )
+    if result.modified_count > 0:
+        print(f"{name}의 상태가 {status}로 업데이트 되었습니다.")
+    else:
+        print(f"{name} 상태 변경 없음 또는 실패.")
+    return redirect(url_for("teamMemberManage"))
+
+@app.route('/teamMemberDelete/<name>', methods=["POST"])
+def teamMemberDelete(name):
+    result = team_collection.delete_one({"name": name})
+    if result.deleted_count > 0:
+        print(f"{name} 팀원이 삭제되었습니다.")
+    else:
+        print(f"{name} 팀원 삭제 실패.")
+    return redirect(url_for("teamMemberManage", name=name))
+
 
 
 @app.route('/project-detail') # 원지님 코드
