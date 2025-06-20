@@ -28,9 +28,9 @@ def example_add(collection, data):
     collection.insert_one(data)
     
 if __name__ == "__main__":
-    example_add(project_collection, example.project_data)
-    example_add(user_collection, example.user_data)
-    example_add(schedule_collection, example.schedule_data)
-    example_add(personal_todo_collection, example.personal_todo_data)
-    example_add(board_collection, example.board_data)
+    # example_add(project_collection, example.project_data)
+    # example_add(user_collection, example.user_data)
+    # example_add(schedule_collection, example.schedule_data)
+    # example_add(personal_todo_collection, example.personal_todo_data)
+    # example_add(board_collection, example.board_data)
     example_add(team_collection, example.team_data)

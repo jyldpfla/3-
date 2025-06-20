@@ -52,7 +52,7 @@ h2 {
 }
 
 .member-form {
-    max-width: 400px;
+    max-width: 550px;
     margin: 0 auto;
 }
 
@@ -73,7 +73,7 @@ select {
 }
 
 .member-info-box {
-    background: #eee;
+    background: #efefef;
     padding: 20px;
     margin-top: 10px;
     border-radius: 4px;
@@ -88,6 +88,8 @@ select {
 }
 
 .btn-submit,
+.btn-add,
+.btn-remove,
 .btn-cancel {
     flex: 1;
     padding: 12px;
@@ -107,6 +109,18 @@ select {
 .btn-cancel {
     background-color: #f2f2f2;
     color: red;
+    font-weight: bold;
+}
+
+.btn-add {
+    background-color: #eaf1f8;
+    color: #000000;
+    font-weight: bold;
+}
+
+.btn-remove {
+    background-color: #eaf1f8;
+    color: #000000;
     font-weight: bold;
 }
 

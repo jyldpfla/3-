@@ -21,13 +21,13 @@ project_data = {
 }
 
 user_data = {
-        "email": "wonji@example.com",
-        "name": "최홍석",
+        "email": "ino456852@example.com",
+        "name": "백인호",
         "userPassword": "hashed_pw_3",
-        "role": "마케팅 직원",
-        "profile": "영업사원",
-        "department": "마케팅팀",
-        "position": "팀원",
+        "role": "개발자",
+        "profile": "개발자",
+        "department": "개발팀",
+        "position": "팀장",
         "createAt": "2025-06-03",
         "phone_num": "010-3456-7890",
         "Personal_todoId": None,
@@ -75,6 +75,6 @@ board_data = {
 
 team_data = {
     "projectId": None,
-    "member": "예시입니다",
-    "status": "활동중"
+    "member": ["장예림", "백인호"],
+    "status": ["참여중", "대기"]
 }

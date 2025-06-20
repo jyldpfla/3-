@@ -15,7 +15,7 @@
     <h2>| 팀원 관리</h2>
 
     <div class="btn-box">
-      <button class="btn-add" onclick="location.href='{{ url_for('teamMemberAdd') }}'">+ 팀원 추가</button>
+      <button class="btn-add" onclick="location.href='{{ url_for('teamMemberAdd', project_id=project_id) }}'">+ 팀원 추가</button>
       <button class="btn-back" onclick="window.history.back()">뒤로 가기</button>
     </div>
 
@@ -31,29 +31,31 @@
       </thead>
       <tbody>
         {% for member in team_members %}
-        <form class="update_form" method="POST" action="{{ url_for('teamMemberUpdate') }}">
-          <tr>
-            <input type="hidden" name="name" value="{{ member.name }}">
-            <td>{{ member.name }}</td>
-            <td>{{ member.email }}</td>
-            <td>{{ member.role }}</td>
-            <td>
-              {% if member.status == '대기' %}
-                <span class="status-dot red"></span>
-              {% else %}
-                <span class="status-dot green"></span>
-              {% endif %}
+        <tr>
+          <td>{{ member.name }}</td>
+          <td>{{ member.email }}</td>
+          <td>{{ member.role }}</td>
+          <td>
+            {% if member.status == '대기' %}
+              <span class="status-dot red"></span>
+            {% else %}
+              <span class="status-dot green"></span>
+            {% endif %}
+            <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}" style="display:inline;">
               <select name="status">
                 <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
                 <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
-              </select>
-            </td>
-            <td>
-              <button type="button" class="btn-save" onclick="showSaveAlert(this)">저장</button>
-              <button type="button" class="btn-delete" onclick="showDeleteAlert(this, '{{ url_for('teamMemberDelete', name=member.name) }}')">삭제</button>
-            </td>
-          </tr>
-        </form>
+            </select>
+          </td>
+          <td>
+              <button type="submit" class="btn-save">저장</button>
+            </form>
+
+            <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}" style="display:inline;">
+              <button type="submit" class="btn-delete">삭제</button>
+            </form>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
@@ -61,36 +63,12 @@
 </body>
 {% include 'components/footer.html' %}
 
-<script>
-  function showSaveAlert(button) {
-    Swal.fire({
-      title: '저장하시겠습니까?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: '저장',
-      cancelButtonText: '취소'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        document.querySelector('.update_form').submit();
-      }
-    });
-  }
+{#
+팀원 목록을 표 형태로 보여줍니다.
 
-  function showDeleteAlert(button, deleteUrl) {
-    Swal.fire({
-      title: '삭제하시겠습니까?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '삭제',
-      cancelButtonText: '취소'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = deleteUrl;
-        document.body.appendChild(form);
-        form.submit();
-      }
-    });
-  }
-</script>
+각 행마다 이름, 이메일, 역할, 참여 상태를 보여줍니다.
+
+참여 상태 옆에 상태를 변경할 수 있는 셀렉트 박스와 저장 버튼이 있습니다.
+
+각 행별 삭제 버튼을 누르면 해당 팀원을 프로젝트에서 삭제합니다.
+#}

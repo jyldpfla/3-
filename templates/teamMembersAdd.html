@@ -1,64 +1,66 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}" />
     <link rel="stylesheet" href="../static/assets/css/teamMembersAdd.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <title>팀원 추가</title>
-</head>
+  </head>
 
-<body>
+  <body>
     {% include 'components/nav.html' %}
     <main class="container">
-        <h2>| 팀원 추가</h2>
-            <form class="member-form" method="POST" action="{{ url_for('teamMemberAdd') }}">
+      <h2>| 팀원 추가</h2>
+      <form class="member-form" method="POST" action="{{ url_for('teamMemberAdd', project_id=project_id) }}">
+        <input type="hidden" name="project_id" value="project_id" />
+        <div id="member-fields">
+          <div class="member-field">
             <label for="name">이름</label>
-                <select id="name" name="name" onchange="updateUserInfo()" required>
-                    <option value="" disabled selected>팀원을 선택하세요</option>
-                    {% for user in users %}
-                    <option value="{{ user.name }}">{{ user.name }}</option>
-                    {% endfor %}
-                </select>
+            <select name="_id" class="name-select" onchange="updateUserInfo(this)" required>
+              <option value="" disabled selected>팀원을 선택하세요</option>
+              {% for user in users %}
+                <option value="{{ user._id }}">{{ user.name }}</option>
+              {% endfor %}
+            </select>
 
-                <div class="member-info-box">
-                    <p id="email">이메일: 선택된 팀원이 없습니다.</p>
-                    <p id="role">역할: -</p>
-                    <p id="department">소속: -</p>
-                </div>
-        {% if users %}
-        {% else %}
-        <div class="member-info-box">
-            <p>이메일 : 선택된 팀원이 없습니다.</p>
+            <div class="member-info-box">
+              <p class="email">이메일: 선택된 팀원이 없습니다.</p>
+              <p class="role">역할: -</p>
+              <p class="department">소속: -</p>
+            </div>
+
+            <label for="status">상태</label>
+            <select name="status" class="status-select" required>
+              <option value="참여중">참여중</option>
+              <option value="대기">대기</option>
+            </select>
+          </div>
         </div>
-        {% endif %}
-
-        <label for="status">상태</label>
-        <select id="status" name="status" required>
-            <option value="참여중">참여중</option>
-            <option value="대기">대기</option>
-        </select>
 
         <div class="form-buttons">
-            <button type="submit" class="btn-submit">✅ 등록 완료</button>
-            <button type="button" class="btn-cancel" onclick="window.history.back()">❌ 취소</button>
+          <button type="submit" class="btn-submit">✅ 등록 완료</button>
+          <button type="button" class="btn-add" onclick="addMemberField()">+ 팀원 추가</button>
+          <button type="button" class="btn-remove" onclick="removeLastMemberField(this)">❌ 삭제</button>
+          <button type="button" class="btn-cancel" onclick="window.history.back()">↩ 뒤로가기</button>
         </div>
-        </form>
+      </form>
     </main>
-
-    {% include 'components/footer.html' %}
-    </body>
-</html>
-<script>
-    const users = {{ users | tojson }};
-    
-    function updateUserInfo() {
-        const selectedName = document.getElementById("name").value;
-        const user = users.find(u => u.name === selectedName);
-
-        document.getElementById("email").innerText = "이메일: " + (user?.email || "없음");
-        document.getElementById("role").innerText = "역할: " + (user?.role || "없음");
-        document.getElementById("department").innerText = "소속: " + (user?.department || "없음");
-    }
+    <script>
+  const users = {{ users | tojson | safe }};
 </script>
+    <script src="{{ url_for('static', filename='js/teamMembersAdd.js') }}"></script>
+    {% include 'components/footer.html' %}
+  </body>
+</html>
+
+{#
+최초 한 명의 팀원 추가 입력 필드를 보여줍니다.
+
+"팀원 추가" 버튼 클릭 시 addMemberField() 함수로 새로운 .member-field 입력 폼을 추가합니다.
+
+"삭제" 버튼 클릭 시 removeLastMemberField() 함수로 가장 마지막에 추가한 팀원 입력 필드를 삭제합니다.
+
+폼 제출하면 /teamMemberAdd/<project_id>에 POST 요청이 갑니다. 
+#}
