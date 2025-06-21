@@ -12,8 +12,7 @@
 <body>
   {% include 'components/nav.html' %}
   <main class="container">
-    <h2>| 팀원 관리</h2>
-
+    <h2>| 👥팀원 관리</h2>
     <div class="btn-box">
       <button class="btn-add" onclick="location.href='{{ url_for('teamMemberAdd', project_id=project_id) }}'">+ 팀원 추가</button>
       <button class="btn-back" onclick="window.history.back()">뒤로 가기</button>

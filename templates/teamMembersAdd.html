@@ -12,7 +12,7 @@
   <body>
     {% include 'components/nav.html' %}
     <main class="container">
-      <h2>| 팀원 추가</h2>
+      <h2>|🗣 팀원 추가</h2>
       <form class="member-form" method="POST" action="{{ url_for('teamMemberAdd', project_id=project_id) }}">
         <input type="hidden" name="project_id" value="project_id" />
         <div id="member-fields">
@@ -48,15 +48,17 @@
       </form>
     </main>
     <script>
-  const users = {{ users | tojson | safe }};
-</script>
-    <script src="{{ url_for('static', filename='js/teamMembersAdd.js') }}"></script>
+      const users = {{ users | tojson | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/teamMemberAdd.js') }}"></script>
     {% include 'components/footer.html' %}
   </body>
 </html>
 
 {#
 최초 한 명의 팀원 추가 입력 필드를 보여줍니다.
+
+const users = {{ users | tojson | safe }}; flask 에서 list인 users를 js 리스트로 변환해주는 역할
 
 "팀원 추가" 버튼 클릭 시 addMemberField() 함수로 새로운 .member-field 입력 폼을 추가합니다.
 

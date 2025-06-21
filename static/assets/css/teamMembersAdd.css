@@ -73,12 +73,19 @@ select {
 }
 
 .member-info-box {
+    display: flex;
+    justify-self: center;
+    justify-content: center;
+    flex-direction: column;
     background: #efefef;
-    padding: 20px;
     margin-top: 10px;
-    border-radius: 4px;
-    font-size: 15px;
-    line-height: 1.6;
+    width: 400px;
+    height: 250px;
+}
+
+.member-info-box > p {
+    display: flex;
+    justify-content: center;
 }
 
 .form-buttons {
