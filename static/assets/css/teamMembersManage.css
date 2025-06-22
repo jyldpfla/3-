@@ -1,0 +1,100 @@
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0 auto;
+    background: #fff;
+    color: #222;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.btn-box {
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-add,
+.btn-back {
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 12px;
+    border: none;
+    background-color: #f2f4f7;
+    cursor: pointer;
+}
+
+.member-table {
+    text-align: center;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+.member-table thead {
+    background: #f0f6fc;
+    text-align: left;
+}
+
+.member-table th,
+.member-table td {
+    text-align: center;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+.member-table select {
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.status-dot.green {
+    background-color: #2ecc71;
+}
+
+.status-dot.red {
+    background-color: #e74c3c;
+}
+
+.btn-save {
+    background-color: #26a65b;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    margin-right: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}

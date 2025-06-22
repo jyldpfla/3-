@@ -21,17 +21,17 @@ project_data = {
 }
 
 user_data = {
-    "email": "예시입니다",
-    "name": "장예림",
-    "userPassword": "hashed_password123",
-    "role": "기획자",
-    "profile": "자기소개 및 사진",
-    "department": "기획팀",
-    "position": "팀장",
-    "createAt": "2025-06-01",
-    "phone_num": "010-1234-5678",
-    "Personal_todoId": None,
-    "BoardId": None
+        "email": "ino456852@example.com",
+        "name": "백인호",
+        "userPassword": "hashed_pw_3",
+        "role": "개발자",
+        "profile": "개발자",
+        "department": "개발팀",
+        "position": "팀장",
+        "createAt": "2025-06-03",
+        "phone_num": "010-3456-7890",
+        "Personal_todoId": None,
+        "BoardId": None
 }
 
 schedule_data = {
@@ -72,5 +72,5 @@ board_data = {
 team_data = {
     "projectId": ObjectId("6853aebf690a71fa9ad4b6e2"),
     "member": ["장예림", "백인호"],
-    "status": "활동중"
+    "status": ["참여중", "대기"]
 }
