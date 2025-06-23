@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextMonthBtn = document.querySelector('.next-month');
     const currentMonthSpan = document.querySelector('.current-month');
 
-
     let currentSelectedScheduleIdParam = '';
 
     // 모달 열기 함수 (스크롤 방지 추가)
@@ -102,7 +101,6 @@ document.addEventListener('DOMContentLoaded', function() {
             scheduleStatusSelect.appendChild(defaultOption);
         }
     }
-
 
     // 폼 데이터 수집 함수
     function collectFormData() {
@@ -199,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateDailySchedules(initialSelectedDate);
     }
 
-
     // "일정 추가" 버튼 클릭 시 모달 열기
     if (addScheduleButton) {
         addScheduleButton.addEventListener('click', function() {
@@ -280,7 +277,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert("상태를 선택해주세요.");
                 return;
             }
-
 
             let url = '';
             if (saveScheduleBtn.textContent === '일정 추가') {
@@ -396,7 +392,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const initialType = scheduleDataContainer.dataset.type || '';
     const initialStatus = scheduleDataContainer.dataset.status || '';
     populateStatusOptions(initialType, initialStatus);
-
 
     // 캘린더 이전 달/다음 달 이동 기능 추가
     function navigateMonth(direction) {

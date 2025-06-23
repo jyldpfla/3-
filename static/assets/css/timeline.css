@@ -166,7 +166,6 @@
     border-left: 5px solid #fd7e14; /* 출장 태그 */
 }
 
-
 .no-schedule-message {
     text-align: center;
     color: #888;
@@ -193,7 +192,6 @@
 .btn.add-schedule-small-btn:hover {
     background-color: #0056b3;
 }
-
 
 /* 일정 상세 정보 카드 */
 .schedule-detail-card {
@@ -267,7 +265,6 @@
 .detail-status-tag.월차 { background-color: #6f42c1; }
 .detail-status-tag.병가 { background-color: #dc3545; }
 .detail-status-tag.출장 { background-color: #fd7e14; } /* 출장 상태 추가 */
-
 
 .action-buttons {
     display: flex;
@@ -447,7 +444,6 @@
     justify-content: center;
     gap: 20px;
 }
-
 
 /* 모바일 반응형 디자인 */
 @media (max-width: 992px) {
