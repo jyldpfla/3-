@@ -32,7 +32,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextMonthBtn = document.querySelector('.next-month');
     const currentMonthSpan = document.querySelector('.current-month');
 
+    // 현재 선택된 일정 ID (수정 및 삭제 시 활용)
     let currentSelectedScheduleIdParam = '';
+    // 페이지 로드 시 URL에서 가져온 선택된 일정 ID (새로고침 후에도 유지 위함)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialSelectedScheduleId = urlParams.get('schedule_id');
 
     // 모달 열기 함수 (스크롤 방지 추가)
     function openModal() {
@@ -112,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const type = scheduleTypeSelect ? scheduleTypeSelect.value : '';
         const status = scheduleStatusSelect ? scheduleStatusSelect.value : '';
 
-        // const writerName = "홍길동 대리"; // 실제 로그인 사용자 정보로 대체 필요 -> 이제 입력 필드에서 가져옴
         const projectTitle = (type === '프로젝트' && scheduleProjectTitleSelect) ? scheduleProjectTitleSelect.value : null;
 
         const data = {
@@ -131,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 캘린더 날짜 클릭 시 일정 로드
-    function updateDailySchedules(date) {
+    function updateDailySchedules(date, scheduleToSelectId = null) { // scheduleToSelectId 파라미터 추가
         const formattedDate = date; 
         
         const dateParts = formattedDate.split('-');
@@ -144,22 +147,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 dailyScheduleList.innerHTML = '';
                 if (schedules.length === 0) {
                     dailyScheduleList.innerHTML = '<li class="no-schedule-message">일정 없음</li>';
+                    // 일정이 없을 경우 상세 정보도 초기화
+                    scheduleDetailCardContainer.innerHTML = '<p class="no-schedule-selected">일정을 선택해주세요.</p>';
+                    currentSelectedScheduleIdParam = '';
+                    return; // 더 이상 진행하지 않음
                 } else {
+                    let selectedFound = false; // 선택된 일정이 목록에 있는지 확인
                     schedules.forEach(schedule => {
                         const listItem = document.createElement('li');
                         listItem.classList.add('daily-schedule-item', schedule.tag_class);
                         listItem.dataset.scheduleId = schedule.schedule_id_param;
                         listItem.textContent = schedule.name;
+
+                        // 새로고침 시 특정 일정 ID가 주어졌을 경우 해당 일정을 선택 상태로 만듦
+                        if (scheduleToSelectId && schedule.schedule_id_param === scheduleToSelectId) {
+                            listItem.classList.add('active'); // 선택된 일정에 'active' 클래스 추가 (스타일링 필요)
+                            selectedFound = true;
+                        }
+                        
                         dailyScheduleList.appendChild(listItem);
 
                         listItem.addEventListener('click', function() {
                             const scheduleId = this.dataset.scheduleId;
-                            // 현재 URL에서 year, month 파라미터 유지
+                            // 현재 URL에서 year, month, date 파라미터 유지
                             const currentYear = urlParams.get('year') || new Date().getFullYear();
                             const currentMonth = urlParams.get('month') || (new Date().getMonth() + 1);
                             window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${formattedDate}&schedule_id=${encodeURIComponent(scheduleId)}`;
                         });
                     });
+
+                    // 만약 특정 scheduleToSelectId가 주어졌는데 목록에 없으면, 목록의 첫 번째 일정을 선택
+                    if (scheduleToSelectId && !selectedFound && schedules.length > 0) {
+                        const firstScheduleId = schedules[0].schedule_id_param;
+                        const currentYear = urlParams.get('year') || new Date().getFullYear();
+                        const currentMonth = urlParams.get('month') || (new Date().getMonth() + 1);
+                        window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${formattedDate}&schedule_id=${encodeURIComponent(firstScheduleId)}`;
+                    } else if (!scheduleToSelectId && schedules.length > 0) {
+                        // scheduleToSelectId가 없고, 현재 선택된 일정이 없으면 목록의 첫 번째 일정을 선택
+                        const firstScheduleId = schedules[0].schedule_id_param;
+                         const currentYear = urlParams.get('year') || new Date().getFullYear();
+                         const currentMonth = urlParams.get('month') || (new Date().getMonth() + 1);
+                        // 이미 선택된 일정이 있으면 해당 일정을 유지 (새로고침 없이)
+                        // 그렇지 않으면 목록의 첫 번째 일정을 선택
+                        const existingSelectedLi = dailyScheduleList.querySelector('.daily-schedule-item.active');
+                        if (!existingSelectedLi) {
+                            dailyScheduleList.querySelector(`[data-schedule-id="${firstScheduleId}"]`).classList.add('active');
+                            // 여기에 scheduleDetailCardContainer 업데이트 로직 추가
+                            // 즉시 상세 정보를 보여주기 위해 API 호출 없이 HTML 파싱해서 보여주는 로직 필요
+                            // 하지만 지금은 페이지 전체를 새로고침하는 방식이므로, 다음 로직이 이 부분을 처리함
+                        }
+                    }
                 }
             })
             .catch(error => {
@@ -175,17 +212,18 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('selected-day');
 
             const selectedDate = this.dataset.date;
-            updateDailySchedules(selectedDate);
-
-            scheduleDetailCardContainer.innerHTML = '<p class="no-schedule-selected">일정을 선택해주세요.</p>';
-            currentSelectedScheduleIdParam = '';
+            // 날짜 클릭 시 schedule_id는 초기화 (해당 날짜의 첫 번째 일정 선택을 위함)
+            const currentYear = urlParams.get('year') || new Date().getFullYear();
+            const currentMonth = urlParams.get('month') || (new Date().getMonth() + 1);
+            window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}`;
+            // updateDailySchedules(selectedDate); // 이제는 전체 페이지 새로고침으로 처리되므로 주석 처리
+            // scheduleDetailCardContainer.innerHTML = '<p class="no-schedule-selected">일정을 선택해주세요.</p>';
+            // currentSelectedScheduleIdParam = '';
         });
     });
 
     // 초기 로드 시 URL 파라미터에 따라 현재 선택된 날짜와 일정을 하이라이트
-    const urlParams = new URLSearchParams(window.location.search);
     const initialSelectedDate = urlParams.get('date');
-    
     if (initialSelectedDate) {
         document.querySelectorAll('.calendar-day').forEach(dayElement => {
             if (dayElement.dataset.date === initialSelectedDate) {
@@ -194,8 +232,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 dayElement.classList.remove('selected-day');
             }
         });
-        updateDailySchedules(initialSelectedDate);
+        // 페이지 로드 시 initialSelectedScheduleId가 있으면 해당 일정을 선택하도록 updateDailySchedules 호출
+        updateDailySchedules(initialSelectedDate, initialSelectedScheduleId);
+    } else {
+        // 날짜 파라미터가 없으면 오늘 날짜를 선택된 날짜로 설정
+        const today = new Date().toISOString().slice(0, 10);
+        document.querySelectorAll('.calendar-day').forEach(dayElement => {
+            if (dayElement.dataset.date === today) {
+                dayElement.classList.add('selected-day');
+            } else {
+                dayElement.classList.remove('selected-day');
+            }
+        });
+        updateDailySchedules(today, initialSelectedScheduleId);
     }
+
 
     // "일정 추가" 버튼 클릭 시 모달 열기
     if (addScheduleButton) {
@@ -279,11 +330,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             let url = '';
-            if (saveScheduleBtn.textContent === '일정 추가') {
+            let isCreate = (saveScheduleBtn.textContent === '일정 추가');
+            let redirectToScheduleId = '';
+
+            if (isCreate) {
                 url = '/timeline/create_schedule';
             } else {
                 url = '/timeline/update_schedule';
                 scheduleData.original_schedule_id_param = currentSelectedScheduleIdParam;
+                redirectToScheduleId = currentSelectedScheduleIdParam; // 수정 시 현재 선택된 ID 유지
             }
 
             try {
@@ -296,16 +351,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (result.success) {
                     alert(result.message);
                     closeModal();
+                    
                     // 현재 캘린더의 연도와 월, 선택된 날짜 파라미터를 유지하면서 새로고침
                     const currentYear = urlParams.get('year') || new Date().getFullYear();
                     const currentMonth = urlParams.get('month') || (new Date().getMonth() + 1);
                     const currentSelectedDate = document.querySelector('.calendar-day.selected-day')?.dataset.date || new Date().toISOString().slice(0,10);
                     
-                    if (saveScheduleBtn.textContent === '일정 추가' && result.new_schedule_id) {
-                         window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${currentSelectedDate}&schedule_id=${encodeURIComponent(result.new_schedule_id)}`;
-                    } else {
-                        window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${currentSelectedDate}`;
+                    // 일정 추가 시 새로 생성된 ID로 리다이렉트
+                    if (isCreate && result.new_schedule_id) {
+                        redirectToScheduleId = result.new_schedule_id;
                     }
+
+                    window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${currentSelectedDate}&schedule_id=${encodeURIComponent(redirectToScheduleId)}`;
                 } else {
                     alert('작업 실패: ' + result.message);
                 }
@@ -351,6 +408,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         const currentYear = urlParams.get('year') || new Date().getFullYear();
                         const currentMonth = urlParams.get('month') || (new Date().getMonth() + 1);
                         const currentSelectedDate = document.querySelector('.calendar-day.selected-day')?.dataset.date || new Date().toISOString().slice(0,10);
+                        
+                        // 삭제 후에는 schedule_id 파라미터를 제거하거나 다른 기본 일정으로 설정 (여기서는 제거)
                         window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${currentSelectedDate}`;
                     } else {
                         alert('삭제 실패: ' + result.message);
@@ -389,9 +448,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 페이지 로드 시 초기 상태 옵션 채움
-    const initialType = scheduleDataContainer.dataset.type || '';
-    const initialStatus = scheduleDataContainer.dataset.status || '';
-    populateStatusOptions(initialType, initialStatus);
+    // Flask 템플릿에서 selected_schedule_detail이 없을 경우 빈 객체가 넘어오므로, 
+    // dataset 속성이 undefined 또는 null이 될 수 있습니다.
+    // 이에 대비하여 기본값 설정을 좀 더 명확히 합니다.
+    const initialTypeFromDetail = scheduleDataContainer.dataset.type || '';
+    const initialStatusFromDetail = scheduleDataContainer.dataset.status || '';
+    populateStatusOptions(initialTypeFromDetail, initialStatusFromDetail);
+
 
     // 캘린더 이전 달/다음 달 이동 기능 추가
     function navigateMonth(direction) {
@@ -411,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 새 월의 1일로 기본 날짜 설정
         const newDate = `${newYear}-${String(newMonth).padStart(2, '0')}-01`;
 
-        // URL 파라미터를 업데이트하여 페이지를 새로고침
+        // URL 파라미터를 업데이트하여 페이지를 새로고침 (schedule_id 초기화)
         window.location.href = `/timeline?year=${newYear}&month=${newMonth}&date=${newDate}`;
     }
 
@@ -427,4 +490,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // 일정이 로드된 후 현재 URL의 schedule_id와 일치하는 항목에 active 클래스 추가
+    // 이 부분은 updateDailySchedules 내부에서 처리하도록 변경되었으므로, 여기서는 불필요.
+    // 하지만, 페이지 로드 시 Flask에서 직접 전달된 selected_schedule_detail에 기반하여
+    // daily-schedule-list의 해당 항목에 'active' 클래스를 즉시 적용하는 로직은 필요할 수 있습니다.
+    // 현재 Flask에서 selected_schedule_detail을 넘겨주고 있으므로,
+    // HTML 렌더링 시 이미 active 클래스가 붙어 있을 것으로 가정하고 있습니다.
+    // 만약 그렇지 않다면, 이 위치에 DOM 조작을 추가해야 합니다.
+    const activeScheduleId = scheduleDataContainer.dataset.scheduleId;
+    if (activeScheduleId && activeScheduleId !== 'undefined' && activeScheduleId !== 'None') {
+        const listItemToActivate = dailyScheduleList.querySelector(`[data-schedule-id="${activeScheduleId}"]`);
+        if (listItemToActivate) {
+            listItemToActivate.classList.add('active');
+        }
+    }
 });

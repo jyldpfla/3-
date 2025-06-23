@@ -61,6 +61,7 @@ def timeline():
     year = request.args.get('year', type=int)
     month = request.args.get('month', type=int)
     selected_date_str = request.args.get('date')
+    selected_schedule_id_param = request.args.get('schedule_id') # 추가: 선택된 일정 ID 파라미터
 
     today = datetime.now().date()
 
@@ -111,10 +112,11 @@ def timeline():
                     "full_date": current_date_in_calendar.strftime("%Y-%m-%d")
                 })
     
+    # 변경: 일정 목록을 start_date 내림차순으로 정렬
     daily_schedules_from_db = list(schedules_collection.find({
         "start_date": {"$lte": datetime(selected_date.year, selected_date.month, selected_date.day, 23, 59, 59)},
         "end_date": {"$gte": datetime(selected_date.year, selected_date.month, selected_date.day, 0, 0, 0)}
-    }).sort("start_date", 1))
+    }).sort("start_date", -1)) # 정렬 순서 변경: 1 -> -1 (내림차순)
 
     daily_schedules_for_display = []
     for sched in daily_schedules_from_db:
@@ -133,30 +135,21 @@ def timeline():
             "schedule_id_param": str(sched["_id"])
         })
 
-    default_schedule_param = ""
-    if daily_schedules_for_display:
-        default_schedule_param = daily_schedules_for_display[0]["schedule_id_param"]
-    elif schedules_collection.count_documents({}) > 0:
-        first_schedule = schedules_collection.find_one(sort=[("start_date", 1)])
-        if first_schedule:
-            default_schedule_param = str(first_schedule["_id"])
-    
-    selected_schedule_id_param = request.args.get('schedule_id', default_schedule_param)
-
     # 선택된 일정 상세 정보 (MongoDB에서 조회)
     selected_schedule_detail = {}
     selected_schedule = None
-    if selected_schedule_id_param:
+
+    if selected_schedule_id_param: # URL 파라미터로 넘어온 schedule_id가 있으면 최우선
         try:
             selected_schedule = schedules_collection.find_one({"_id": ObjectId(selected_schedule_id_param)})
         except Exception:
             selected_schedule = None
 
-    if not selected_schedule:
+    if not selected_schedule: # URL 파라미터의 일정이 없거나 유효하지 않으면, 해당 날짜의 첫 번째 일정
         if daily_schedules_from_db:
             selected_schedule = daily_schedules_from_db[0]
-        elif schedules_collection.count_documents({}) > 0:
-            selected_schedule = schedules_collection.find_one(sort=[("start_date", 1)])
+        elif schedules_collection.count_documents({}) > 0: # 해당 날짜에 일정이 없으면, 전체 일정 중 가장 최근 일정 (내림차순 정렬이므로)
+            selected_schedule = schedules_collection.find_one(sort=[("start_date", -1)]) # 변경: -1로 정렬하여 가장 최근 일정 가져옴
 
     if selected_schedule:
         display_title = ""
@@ -164,7 +157,7 @@ def timeline():
             display_title = "개인"
         elif selected_schedule.get("type") == "프로젝트" and selected_schedule.get("project_title"):
             display_title = selected_schedule["project_title"]
-        elif selected_schedule.get("type") == "프로젝트":
+        elif selected_schedule.get("type") == "프로젝트": # project_title이 없는 경우 schedule_name 사용
             display_title = selected_schedule.get("schedule_name", "프로젝트 일정")
 
         selected_schedule_detail = {
@@ -236,10 +229,11 @@ def get_schedules_by_date():
         return jsonify({"error": "유효하지 않은 날짜 형식입니다. YYYY-MM-DD 형식이어야 합니다."}), 400
 
     schedules_on_date = []
+    # 변경: 일정 목록을 start_date 내림차순으로 정렬
     schedules_from_db = schedules_collection.find({
         "start_date": {"$lte": datetime(query_date.year, query_date.month, query_date.day, 23, 59, 59)},
         "end_date": {"$gte": datetime(query_date.year, query_date.month, query_date.day, 0, 0, 0)}
-    }).sort("start_date", 1)
+    }).sort("start_date", -1) # 정렬 순서 변경: 1 -> -1 (내림차순)
 
     for sched in schedules_from_db:
         tag_class = ""
@@ -321,7 +315,7 @@ def update_schedule():
         "schedule_name": data["schedule_name"],
         "writer_name": writer_name_to_use,
         "start_date": start_dt,
-        "end_date": end_dt,    
+        "end_date": end_dt,     
         "content": data.get("content", ""),
         "type": data["type"],
         "status": data["status"],
@@ -335,7 +329,8 @@ def update_schedule():
     )
             
     if result.modified_count > 0:
-        return jsonify({"success": True, "message": "일정이 성공적으로 업데이트되었습니다."})
+        # 수정 성공 시, 수정된 일정의 ID를 반환하여 프론트엔드에서 유지할 수 있도록 함
+        return jsonify({"success": True, "message": "일정이 성공적으로 업데이트되었습니다.", "updated_schedule_id": str(schedule_oid)})
     return jsonify({"success": False, "message": "일정 업데이트에 실패했거나 변경된 내용이 없습니다."})
 
 @app.route('/timeline/delete_schedule', methods=['POST'])

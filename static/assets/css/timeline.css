@@ -3,7 +3,7 @@
 /* 메인 컨테이너 패딩 조정 */
 .main-container {
     padding: 20px; /* nav 바와 겹치지 않도록 적절한 패딩 유지 */
-    padding-top: 60px; /* 네비게이션 바 높이 (약 60px 가정) 고려하여 상단 패딩 조절, 제목을 더 위로 올림 */
+    padding-top: 10px; /* 네비게이션 바 높이 (약 60px 가정) 고려하여 상단 패딩 조절, 제목을 더 위로 올림 */
     background-color: #f8f9fa; /* 전체 배경색을 약간 밝은 회색으로 유지 */
     min-height: calc(100vh - 60px); /* 푸터 높이 제외 (푸터 높이에 따라 조정) */
     display: flex;
@@ -28,7 +28,7 @@
     justify-content: center; /* 캘린더와 일정 패널을 중앙으로 정렬 */
     gap: 30px; /* 캘린더와 일정 패널 사이 간격 */
     width: 100%; /* 컨테이너 내에서 최대한 확장 */
-    max-width: 1400px; /* 최대 너비 설정 (이전 1300px에서 1400px로 더욱 확대) */
+    max-width: 1500px; /* 최대 너비를 1400px에서 1500px로 더 확대 */
     margin: 0 auto; /* 중앙 정렬 */
     align-items: flex-start; /* 상단 정렬 */
 }
@@ -44,15 +44,15 @@
 /* 캘린더 섹션 스타일 */
 .calendar-section {
     flex-shrink: 0; /* 캘린더가 줄어들지 않도록 고정 */
-    width: 600px; /* 캘린더 고정 너비 (이전 550px에서 600px로 더욱 확대) */
-    padding-bottom: 20px; /* 하단 패딩 */
+    width: 750px; /* 캘린더 고정 너비 (750px로 유지) */
+    padding-bottom: 15px; /* 하단 패딩 */
 }
 
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 25px; /* 헤더와 날짜 그리드 사이 간격 증가 */
     font-size: 1.6em;
     font-weight: bold;
     color: #333;
@@ -83,12 +83,12 @@
 .calendar-day-label {
     font-weight: bold;
     color: #555;
-    padding: 10px 0;
+    padding: 15px 0; /* 위아래 패딩 증가 */
     font-size: 0.95em;
 }
 
 .calendar-day {
-    padding: 12px 0;
+    padding: 18px 0; /* 위아래 패딩 증가 */
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
@@ -117,8 +117,8 @@
 /* 일정 패널 스타일 */
 .schedule-panel {
     flex-grow: 1; /* 남은 공간을 채우도록 확장 */
-    max-width: 750px; /* 일정 패널 최대 너비 설정 (이전 700px에서 750px로 확대) */
-    min-width: 500px; /* 최소 너비 (이전 450px에서 500px로 확대) */
+    max-width: 900px; /* 일정 패널 최대 너비를 900px로 확대 */
+    min-width: 600px; /* 최소 너비도 600px로 확대 */
 }
 
 .section-title {
@@ -153,6 +153,16 @@
     background-color: #eef;
     border-color: #cdd;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 선택된 일정 아이템 스타일 추가 */
+.daily-schedule-item.active {
+    background-color: #e0f7fa; /* 밝은 파란색 배경 */
+    border-color: #007bff; /* 파란색 테두리 */
+    border-left: 5px solid #007bff; /* 왼쪽 강조선 */
+    font-weight: bold;
+    color: #0056b3; /* 텍스트 색상 */
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2); /* 좀 더 명확한 그림자 */
 }
 
 /* 태그 색상 */

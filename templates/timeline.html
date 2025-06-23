@@ -12,7 +12,7 @@
     {% include 'components/nav.html' %}
 
     <div class="main-container">
-        <h1 class="page-title">업무 일정 (타임라인)</h1>
+        {# <h1 class="page-title">업무 일정 (타임라인)</h1> #}
 
         <div class="content-wrapper">
             <section class="calendar-section soft-shadow">
@@ -55,7 +55,9 @@
                 </ul>
 
                 <div class="schedule-add-btn-wrapper">
-                    <button id="addScheduleBtn" class="btn btn-primary add-schedule-small-btn">일정 추가</button>
+                    <button id="addScheduleBtn" class="btn btn-primary add-schedule-small-btn">
+                        <i class="fa-solid fa-plus"></i> 일정 추가
+                    </button>
                 </div>
 
                 <h2 class="section-title">선택된 업무 상세 정보</h2>
@@ -98,16 +100,16 @@
     {% include 'components/footer.html' %}
 
     <div id="selected-schedule-data" style="display: none;"
-         data-schedule-id="{{ selected_schedule_detail.schedule_id_param }}"
-         data-type="{{ selected_schedule_detail.type }}"
-         data-schedule-name="{{ selected_schedule_detail.schedule_name }}"
-         data-person-name="{{ selected_schedule_detail.person_name }}" {# 이름 데이터 추가 #}
-         data-status="{{ selected_schedule_detail.status }}"
-         data-start-date="{{ selected_schedule_detail.start_date_input }}"
-         data-end-date="{{ selected_schedule_detail.end_date_input }}"
-         data-content="{{ selected_schedule_detail.content if selected_schedule_detail.content is not none else '' }}"
-         {# data-tasks, data-member 는 UI에서 제거되었으므로 HTML에서 직접 전달하지 않음 #}
-         data-project-title="{{ selected_schedule_detail.schedule_title }}" {# 여기서도 schedule_title 전달 #}
+        data-schedule-id="{{ selected_schedule_detail.schedule_id_param }}"
+        data-type="{{ selected_schedule_detail.type }}"
+        data-schedule-name="{{ selected_schedule_detail.schedule_name }}"
+        data-person-name="{{ selected_schedule_detail.person_name }}" {# 이름 데이터 추가 #}
+        data-status="{{ selected_schedule_detail.status }}"
+        data-start-date="{{ selected_schedule_detail.start_date_input }}"
+        data-end-date="{{ selected_schedule_detail.end_date_input }}"
+        data-content="{{ selected_schedule_detail.content if selected_schedule_detail.content is not none else '' }}"
+        {# data-tasks, data-member 는 UI에서 제거되었으므로 HTML에서 직접 전달하지 않음 #}
+        data-project-title="{{ selected_schedule_detail.schedule_title }}" {# 여기서도 schedule_title 전달 #}
     ></div>
 
     <div id="scheduleFormModal" class="modal">
