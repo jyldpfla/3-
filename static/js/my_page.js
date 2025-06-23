@@ -1,3 +1,4 @@
+// 달력 날짜 오늘로 고정
 window.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -7,6 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('task-date').value = formatted;
 });
 
+// 프로젝트 상세보기 탭 메뉴 접기, 펼치기
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.project-tab-content');
 
@@ -39,27 +41,24 @@ document.querySelectorAll('.project-name').forEach(projectName => {
 });
 
 document.querySelector('.btn-edit').addEventListener('click', () => {
-    if(document.querySelector('.btn-edit').textContent == '편집') {
-        // 체크된 라디오 버튼 찾기
-        const checkedRadio = document.querySelector('input[name="taskSelect"]:checked');
-        if (!checkedRadio) {
-            alert('수정할 항목을 선택하세요.');
-            return;
-        }
+    // 체크된 라디오 버튼 찾기
+    const checkedRadio = document.querySelector('input[name="taskSelect"]:checked');
+    if (!checkedRadio) {
+        alert('수정할 항목을 선택하세요.');
+        return;
+    }
 
-        console.log(checkedRadio)
-        // 라디오 버튼이 포함된 tr 찾기
-        const row = checkedRadio.closest('tr');
-        console.log(row)
-
+    // 라디오 버튼이 포함된 tr 찾기
+    const row = checkedRadio.closest('tr');
+    if (document.querySelector('.btn-edit').textContent == '편집') {
         // 상태 영역 바꾸기
         const statusCell = row.querySelector('.status');
         const currentStatus = statusCell.textContent.trim();
         statusCell.innerHTML = `
             <select class="status-select">
-            <option value="done" ${currentStatus === 'Done' ? 'selected' : ''}>Done</option>
-            <option value="inprogress" ${currentStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
-            <option value="todo" ${currentStatus === 'To do' ? 'selected' : ''}>To do</option>
+            <option value="Done" ${currentStatus === 'Done' ? 'selected' : ''}>Done</option>
+            <option value="In Progress" ${currentStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
+            <option value="To do" ${currentStatus === 'To do' ? 'selected' : ''}>To do</option>
             </select>
         `;
 
@@ -71,8 +70,73 @@ document.querySelector('.btn-edit').addEventListener('click', () => {
         // 버튼 텍스트 변경 (선택)
         document.querySelector('.btn-edit').textContent = '저장';
         document.querySelector('.btn-del').textContent = "취소";
-    } else if(document.querySelector('.btn-edit').textContent == '저장') {
-        
+    } else if (document.querySelector('.btn-edit').textContent == '저장') {
+        status = row.querySelector('.status-select').value;
+        date = row.querySelector('.date-picker').value;
+
+        fetch('/mypage/update_task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                _id: row.querySelector('td[name="task_id"]').getAttribute('value'),
+                status: status,
+                date: date
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('수정 성공');
+                location.reload()
+            } else {
+                console.warn('서버 응답 오류:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('에러 발생:', error);
+        });
+    }
+});
+
+document.querySelector('.btn-del').addEventListener('click', () => {
+    if (document.querySelector('.btn-del').textContent == '삭제') {
+        // 체크된 라디오 버튼 찾기
+        const checkedRadio = document.querySelector('input[name="taskSelect"]:checked');
+        if (!checkedRadio) {
+            alert('수정할 항목을 선택하세요.');
+            return;
+        }
+
+        console.log(checkedRadio)
+        // 라디오 버튼이 포함된 tr 찾기
+        const row = checkedRadio.closest('tr');
+        console.log(row.querySelector('td[name="task_id"]').getAttribute('value'));
+
+
+        fetch('/mypage/del_task', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                _id: row.querySelector('td[name="task_id"]').getAttribute('value')
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('삭제 성공');
+                location.reload()
+            } else {
+                console.warn('서버 응답 오류:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('에러 발생:', error);
+        });
+    } else if (document.querySelector('.btn-edit').textContent == '취소') {
+        // 버튼 텍스트 변경 (선택)
+        location.reload();
     }
 });
 

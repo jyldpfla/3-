@@ -1,0 +1,151 @@
+h3 {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+/* 전체 대시보드 레이아웃 */
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: 600px;
+}
+
+.left-column {
+    grid-column: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.right-column {
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+/* 진행 프로젝트 */
+.project-progress {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+    /* 또는 원하는 높이 */
+}
+
+.project-progress table {
+    border-collapse: collapse;
+    width: 100%;
+    height: 100%;
+    table-layout: fixed;
+}
+
+.project-progress thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.project-progress tbody {
+    display: block;
+    overflow-y: auto;
+    height: 90%;
+    /* 또는 예: 200px */
+}
+
+.project-progress tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.project-progress th,
+.project-progress td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.9rem;
+    height: auto;
+}
+
+.progress-bar {
+    background: #e0e0e0;
+    height: 14px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    width: 80%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.progress-bar .fill {
+    background: #4285f4;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.progress-bar span {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* 공지사항 */
+.notice ul {
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.notice ul>li {
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* 일정 */
+.schedule {
+    padding: 1rem;
+    height: 100%;
+}
+
+.schedule-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    height: 100%;
+}
+
+.schedule-body h3 {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.schedule-divider {
+    width: 1px;
+    background-color: #D4D4D4;
+    height: 100%;
+}
+
+.schedule-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+
+.schedule-body ul li {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}

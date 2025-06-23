@@ -1,19 +1,293 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/index.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <title>3조 Main</title>
 </head>
+
 <body>
     {% include 'components/nav.html' %}
 
     <main>
+        <div class="dashboard">
+            <!-- 왼쪽 열: 현재 진행 프로젝트 -->
+            <div class="left-column">
+                <div class="card project-progress">
+                    <h3>현재 진행 프로젝트</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>기업</th>
+                                <th>프로젝트명</th>
+                                <th>참여 팀</th>
+                                <th>진행율</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>A프로젝트</td>
+                                <td>A팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#">A사</a>
+                                </td>
+                                <td>B프로젝트</td>
+                                <td>C팀</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: 60%"></div>
+                                        <span>60%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
+            <!-- 오른쪽 열: 공지사항 + 일정 -->
+            <div class="right-column">
+                <div class="card notice">
+                    <h3>공지사항</h3>
+                    <ul>
+                        <li>공지 1</li>
+                        <li>공지 2</li>
+                    </ul>
+                </div>
+
+                <div class="card schedule">
+                    <div class="schedule-body">
+                        <h3>6월 17일 (화)</h3>
+                        <div class="schedule-divider"></div>
+                        <ul>
+                            <li>
+                                <strong>17</strong> 각 팀 팀장 미팅 (8th)<br />B 고객사 미팅
+                            </li>
+                            <li>
+                                <strong>18</strong> 각 팀 팀장 미팅 (8th)<br />B 고객사 미팅
+                            </li>
+                            <li>
+                                <strong>19</strong> 각 팀 팀장 미팅 (8th)<br />B 고객사 미팅
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </main>
 
     {% include 'components/footer.html' %}
 </body>
+
 </html>

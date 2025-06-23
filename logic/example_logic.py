@@ -23,14 +23,18 @@ schedule_collection = db["schedules"]
 personal_todo_collection = db["personal_todo"]
 board_collection = db["board"]
 team_collection = db["team"]
+timeline_collection = db["timeline"]
+
 
 def example_add(collection, data):
     collection.insert_one(data)
     
 if __name__ == "__main__":
-    # example_add(project_collection, example.project_data)
+    example_add(project_collection, example.project_data)
     # example_add(user_collection, example.user_data)
     # example_add(schedule_collection, example.schedule_data)
     # example_add(personal_todo_collection, example.personal_todo_data)
     # example_add(board_collection, example.board_data)
-    example_add(team_collection, example.team_data)
+    # example_add(team_collection, example.team_data)
+    example_add(timeline_collection, example.timeline_data)
+    example_add(timeline_collection, example.timeline_data2)
