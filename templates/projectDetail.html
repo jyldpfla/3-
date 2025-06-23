@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/projectDetail.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>프로젝트 상세보기</title>
+</head>
+<body>
+  {% include 'components/nav.html' %}
+  <main class="container">
+    <h2>| 프로젝트 상세보기</h2>
+    <div class="btn-group">
+      <button class="btn">+ 팀원 관리</button>
+      <button class="btn" onclick="window.location.href='/projectUpdate/{{ project._id }}'">수정</button>
+      <button class="btn">프로젝트 제거</button>
+      <button class="btn" onclick="window.location.href='/project'">뒤로 가기</button>
+    </div>
+    <div class="detail-layout">
+      <div class="project-info">
+        <p><strong>프로젝트명</strong> {{ project.title }}</p>
+        <p><strong>클라이언트</strong> {{ project.client }}</p>
+        <p><strong>담당자</strong> {{ project.manager_name }}</p>
+        <p><strong>팀원</strong> {{ project.members | default('미정') }}</p>
+        <p><strong>시작일</strong> {{ project["schedule.start_date"] }}</p>
+        <p><strong>마감일</strong> {{ project["schedule.end_date"] }}</p>
+        <p><strong>진행 상태</strong>
+          <span class="status {% if project.status == '진행중' %}ongoing{% elif project.status == '완료' %}done{% else %}waiting{% endif %}">
+            {{ project.status }}
+          </span>
+        </p>
+      </div>
+      <div class="project-description">
+        <p>{{ project.description or '설명이 없습니다.' }}</p>
+      </div>
+    </div>
+  </main>
+  {% include 'components/footer.html' %}
+</body>
+</html>
