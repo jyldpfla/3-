@@ -37,7 +37,6 @@ def teamMemberAdd(project_id):
         status_list = request.form.getlist("status")    
         object_ids = [ObjectId(uid) for uid in user_ids]
 
-        # 기존 team 문서 가져오기
         team_doc = team_collection.find_one({"project_id": ObjectId(project_id)})
 
         if team_doc:
@@ -53,7 +52,6 @@ def teamMemberAdd(project_id):
                 members.append(uid)
                 statuses.append(status)
 
-            # 업데이트 반영
             team_collection.update_one(
                 {"project_id": ObjectId(project_id)},
                 {"$set": {
@@ -62,7 +60,6 @@ def teamMemberAdd(project_id):
                 }}
             )
             print("[업데이트] 기존 팀 문서에 중복 제거 후 새 멤버 추가 완료.")
-
         else:
             team_collection.insert_one({
                 "project_id": ObjectId(project_id),
@@ -73,11 +70,12 @@ def teamMemberAdd(project_id):
 
         return redirect(url_for("teamMemberManage", project_id=project_id))
 
-    users = list(user_collection.find({}))
+    users = list(user_collection.find({"position": {"$ne": "팀장"}}))
     for u in users:
         u["_id"] = str(u["_id"])
 
     return render_template("teamMembersAdd.html", users=users, project_id=project_id)
+
 
 # GET 요청:
 
@@ -139,13 +137,26 @@ def teamMemberAdd(project_id):
 
 @app.route('/teamMemberManage/<project_id>')
 def teamMemberManage(project_id):
-    team_members = list(team_collection.find({"project_id": ObjectId(project_id)}, {"_id": 0, "member": 1, "status": 1}))
+    project_obj_id = ObjectId(project_id)
 
-    member_ids = []
-    status_list = []
-    for member in team_members:
-        member_ids.extend(member['member'])  
-        status_list.extend(member['status'])  
+    project_doc = project_collection.find_one({"_id": project_obj_id})
+    if not project_doc:
+        return "해당 프로젝트를 찾을 수 없습니다.", 404
+
+    project_manager_position = project_doc.get("project_manager")
+    manager_user = user_collection.find_one({"_id": project_manager_position})
+    if not manager_user:
+        return "팀장 유저 정보를 찾을 수 없습니다.", 404
+
+    project_manager_id = manager_user["_id"]
+
+    team_doc = team_collection.find_one({"project_id": project_obj_id})
+    member_ids = team_doc.get("member", []) if team_doc else []
+    status_list = team_doc.get("status", []) if team_doc else []
+
+    if project_manager_id not in member_ids:
+        member_ids.insert(0, project_manager_id)
+        status_list.insert(0, "팀장")
 
     user_info_map = {
         str(user["_id"]): user
@@ -153,19 +164,22 @@ def teamMemberManage(project_id):
     }
 
     members = []
-    # member_info = list(user_collection.find({"_id": {"$in": member_ids}}, {"name": 1, "email":1, "role":1}))
-    
     for i, member_id in enumerate(member_ids):
-        member = user_info_map.get(str(member_id))
-        if member:
+        user = user_info_map.get(str(member_id))
+        if user:
             members.append({
-                "_id": str(member.get("_id")),
-                "name": member.get("name"),
-                "email": member.get("email"),
-                "role": member.get("role"),
-                "status": status_list[i]
+                "_id": str(member_id),
+                "name": user.get("name"),
+                "email": user.get("email"),
+                "role": user.get("role"),
+                "status": status_list[i],
+                "is_manager": member_id == project_manager_id
             })
+
     return render_template('teamMembersManage.html', project_id=project_id, team_members=members)
+
+
+
 
 # 프로젝트 ID에 해당하는 팀 문서에서 팀원 목록(member)과 상태(status)를 불러옵니다.
 
@@ -176,33 +190,33 @@ def teamMemberManage(project_id):
 @app.route('/teamMemberUpdate/<project_id>/<member_id>', methods=["POST"])
 def teamMemberUpdate(project_id, member_id):
     new_status = request.form.get("status")
-
+    
     team_doc = team_collection.find_one({"project_id": ObjectId(project_id)})
-
+    
     if not team_doc:
         print("팀 정보를 찾을 수 없습니다.")
         return redirect(url_for("teamMemberManage", project_id=project_id))
-
+    
     try:
         index = team_doc["member"].index(ObjectId(member_id))
     except ValueError:
         print("해당 멤버가 팀에 없습니다.")
         return redirect(url_for("teamMemberManage", project_id=project_id))
-
+    
     team_doc["status"][index] = new_status
-
+    
     team_collection.update_one(
         {"project_id": ObjectId(project_id)},
         {"$set": {"status": team_doc["status"]}}
     )
-
+    
     print(f"팀원 상태가 '{new_status}'로 업데이트 되었습니다.")
     print("넘어온 member_id:", member_id)
     print("변환된 ObjectId:", ObjectId(member_id))
     print("team_doc['member'] 리스트:")
     for i, m in enumerate(team_doc["member"]):
         print(f"  {i}: {m} (type: {type(m)})")
-
+    
     return redirect(url_for("teamMemberManage", project_id=project_id))
 
 # 폼에서 전달된 status 값을 받아 해당 프로젝트 팀 문서에서 해당 멤버의 상태를 수정하고 DB에 업데이트합니다.
