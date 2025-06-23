@@ -1,165 +1,188 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>업무일정 (타임라인) 페이지</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 일정 (타임라인) 페이지</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/timeline.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
     {% include 'components/nav.html' %}
 
-    <main class="schedule-page">
-        <div class="calendar-section">
-            <div class="calendar-header">
-                <span class="calendar-month-year">{{ current_year_month }}</span>
-                <div class="calendar-nav">
-                    <span class="nav-arrow">&lt;</span>
-                    <span class="nav-arrow">&gt;</span>
-                </div>
-            </div>
-            <div class="calendar-grid">
-                <div class="day-name">월</div>
-                <div class="day-name">화</div>
-                <div class="day-name">수</div>
-                <div class="day-name">목</div>
-                <div class="day-name">금</div>
-                <div class="day-name">토</div>
-                <div class="day-name">일</div>
-                {% for day_data in calendar_days %}
-                <div class="day {% if not day_data.is_current_month %}inactive{% endif %} {% if day_data.is_current_day %}current-day{% endif %}">
-                    {{ day_data.day }}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+    <div class="main-container">
+        <h1 class="page-title">업무 일정 (타임라인)</h1>
 
-        <div class="detail-section">
-            <div class="detail-header">
-                <h3>{{ current_year_month }}.{{ "%02d" | format((calendar_days | selectattr('is_current_day') | first).day | default(1)) }} 일정</h3>
-                <ul class="schedule-list">
-                    {% for schedule in daily_schedules %}
-                    <li><span class="project-tag {{ schedule.tag_class }}"></span> {{ schedule.name }}</li>
+        <div class="content-wrapper">
+            <section class="calendar-section soft-shadow">
+                <div class="calendar-header">
+                    <button class="nav-btn prev-month" data-year="{{ current_year }}" data-month="{{ current_month }}">&lt;</button>
+                    <span class="current-month" data-year="{{ current_year }}" data-month="{{ current_month }}">{{ current_year_month }}</span>
+                    <button class="nav-btn next-month" data-year="{{ current_year }}" data-month="{{ current_month }}">&gt;</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-label">월</div>
+                    <div class="calendar-day-label">화</div>
+                    <div class="calendar-day-label">수</div>
+                    <div class="calendar-day-label">목</div>
+                    <div class="calendar-day-label">금</div>
+                    <div class="calendar-day-label">토</div>
+                    <div class="calendar-day-label">일</div>
+                    {% for day in calendar_days %}
+                        <div class="calendar-day
+                            {% if not day.is_current_month %}other-month{% endif %}
+                            {% if day.is_current_day %}selected-day{% endif %}"
+                            data-date="{{ day.full_date }}">
+                            {{ day.day }}
+                        </div>
                     {% endfor %}
-                </ul>
-            </div>
-
-            <div class="add-schedule-btn-container">
-                <button class="add-schedule-btn">
-                    <i class="fas fa-plus"></i> 일정 추가
-                </button>
-            </div>
-
-            <div class="add-schedule-dropdown-container hidden">
-                <div class="schedule-type-select">
-                    <p>일정 타입</p>
-                    <select>
-                        <option value="personal">개인</option>
-                        <option value="project-a">프로젝트 A</option>
-                        <option value="project-b">프로젝트 B</option>
-                        <option value="project-c">프로젝트 C</option>
-                    </select>
                 </div>
-                </div>
+            </section>
 
-            {% if selected_schedule_detail %}
-            <div class="selected-schedule-detail">
-                <h4>선택한 업무 상세 정보
-                    {% if selected_schedule_detail.type == '프로젝트' %}
-                    <span class="project-tag {{ selected_schedule_detail.tag_class }}"></span>
-                    {% elif selected_schedule_detail.type == '개인' %}
-                    <span class="personal-tag"></span> 개인
+            <aside class="schedule-panel soft-shadow">
+                <h2 class="section-title" id="dailyScheduleHeader">이날의 일정 ({{ selected_date_display }})</h2>
+                <ul class="daily-schedule-list" id="dailyScheduleList">
+                    {% if daily_schedules %}
+                        {% for schedule in daily_schedules %}
+                        <li class="daily-schedule-item {{ schedule.tag_class }}" data-schedule-id="{{ schedule.schedule_id_param }}">
+                            {{ schedule.name }}
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="no-schedule-message">일정 없음</li>
                     {% endif %}
-                </h4>
-                
-                <div class="schedule-display-mode">
-                    <p><strong>일정:</strong> {{ selected_schedule_detail.schedule_name }}</p>
-                    <p><strong>이름:</strong> {{ selected_schedule_detail.person_name }}</p>
-                    <p><strong>상태:</strong>
-                        <span class="status-badge {{ selected_schedule_detail.status }}">
-                            {% if selected_schedule_detail.status == 'progress' %}진행중
-                            {% elif selected_schedule_detail.status == 'completed' %}완료
-                            {% elif selected_schedule_detail.status == 'pending' %}미완료
-                            {% elif selected_schedule_detail.status == 'holiday' %}휴가
-                            {% elif selected_schedule_detail.status == '출장' %}출장
-                            {% elif selected_schedule_detail.status == '지연' %}지연
-                            {% else %}{{ selected_schedule_detail.status }}
-                            {% endif %}
+                </ul>
+
+                <div class="schedule-add-btn-wrapper">
+                    <button id="addScheduleBtn" class="btn btn-primary add-schedule-small-btn">일정 추가</button>
+                </div>
+
+                <h2 class="section-title">선택된 업무 상세 정보</h2>
+                <div id="scheduleDetailCard">
+                    {% if selected_schedule_detail %}
+                    <div class="schedule-detail-card">
+                        <span class="detail-tag {{ selected_schedule_detail.tag_class }}">
+                            {{ selected_schedule_detail.schedule_title }} {# 여기서 직접 schedule_title 출력 #}
                         </span>
-                    </p>
-                    <p><strong>시작 날짜:</strong> {{ selected_schedule_detail.start_date }}</p>
-                    <p><strong>종료 날짜:</strong> {{ selected_schedule_detail.end_date }}</p>
-                    <div class="schedule-content">
-                        <p><strong>내용:</strong></p>
-                        {% if selected_schedule_detail.tasks %}
-                        <ul>
-                            {% for task in selected_schedule_detail.tasks %}
-                            <li><span class="status-icon {{ task.status }}"></span> {{ task.name }}</li>
-                            {% endfor %}
-                        </ul>
+                        <p class="detail-label">일정: <span class="detail-value">{{ selected_schedule_detail.schedule_name }}</span></p>
+                        <p class="detail-label">이름: <span class="detail-value">{{ selected_schedule_detail.person_name }}</span></p>
+                        <p class="detail-label">상태: 
+                            <span class="detail-value detail-status-tag {{ selected_schedule_detail.status }}">
+                                {{ selected_schedule_detail.status }}
+                            </span>
+                        </p>
+                        <p class="detail-label">시작 날짜: <span class="detail-value">{{ selected_schedule_detail.start_date }}</span></p>
+                        <p class="detail-label">종료 날짜: <span class="detail-value">{{ selected_schedule_detail.end_date }}</span></p>
+
+                        {# Tasks 필드는 UI에서 제거되었으므로 더 이상 표시하지 않음 #}
+                        {% if selected_schedule_detail.content %}
+                            <p class="detail-label">내용: <span class="detail-value">{{ selected_schedule_detail.content }}</span></p>
                         {% else %}
-                        <p>{{ selected_schedule_detail.content }}</p>
+                            <p class="detail-label">내용: <span class="detail-value">없음</span></p>
                         {% endif %}
                     </div>
+                    {% else %}
+                    <p class="no-schedule-selected">일정을 선택해주세요.</p>
+                    {% endif %}
                 </div>
 
-                <div class="schedule-edit-mode hidden">
-                    <div class="input-group">
-                        <label for="edit-schedule-name">일정:</label>
-                        <input type="text" id="edit-schedule-name" value="{{ selected_schedule_detail.schedule_name }}">
-                    </div>
-                    <div class="input-group">
-                        <label for="edit-person-name">이름:</label>
-                        <input type="text" id="edit-person-name" value="{{ selected_schedule_detail.person_name }}">
-                    </div>
-                    <div class="input-group">
-                        <label>상태:</label>
-                        <div class="status-radio-group">
-                            <label><input type="radio" name="edit-status" value="progress" {% if selected_schedule_detail.status == 'progress' %}checked{% endif %}>진행중</label>
-                            <label><input type="radio" name="edit-status" value="completed" {% if selected_schedule_detail.status == 'completed' %}checked{% endif %}>완료</label>
-                            <label><input type="radio" name="edit-status" value="pending" {% if selected_schedule_detail.status == 'pending' %}checked{% endif %}>지연</label>
-                            <label><input type="radio" name="edit-status" value="holiday" {% if selected_schedule_detail.status == 'holiday' %}checked{% endif %}>휴가</label>
-                            <label><input type="radio" name="edit-status" value="출장" {% if selected_schedule_detail.status == '출장' %}checked{% endif %}>출장</label>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="edit-start-date">시작 날짜:</label>
-                        <input type="datetime-local" id="edit-start-date" value="{{ selected_schedule_detail.start_date | replace(' ', 'T') | replace('AM', '') | replace('PM', '') | default('') }}">
-                    </div>
-                    <div class="input-group">
-                        <label for="edit-end-date">종료 날짜:</label>
-                        <input type="datetime-local" id="edit-end-date" value="{{ selected_schedule_detail.end_date | replace(' ', 'T') | replace('AM', '') | replace('PM', '') | default('') }}">
-                    </div>
-                    <div class="input-group">
-                        <label for="edit-content">내용:</label>
-                        <textarea id="edit-content">{{ selected_schedule_detail.content }}</textarea>
-                    </div>
+                <div class="action-buttons">
+                    <button id="editScheduleBtn" class="btn btn-secondary action-btn"><i class="fa-solid fa-pen-to-square"></i> 일정 수정</button>
+                    <button id="deleteScheduleBtn" class="btn btn-danger action-btn"><i class="fa-solid fa-trash-can"></i> 일정 삭제</button>
                 </div>
-
-                <div class="detail-actions">
-                    <button class="action-btn edit-btn"><i class="fas fa-pencil-alt"></i> 일정 수정</button>
-                    <button class="action-btn delete-btn"><i class="fas fa-trash-alt"></i> 일정 삭제</button>
-                    <button class="action-btn save-btn hidden"><i class="fas fa-save"></i> 저장</button>
-                    <button class="action-btn cancel-btn hidden"><i class="fas fa-times"></i> 취소</button>
-                </div>
-
-                <div class="delete-confirmation hidden">
-                    <p>정말 삭제하시겠습니까?</p>
-                    <div class="confirm-buttons">
-                        <button class="confirm-btn yes-btn">YES</button>
-                        <button class="confirm-btn no-btn">NO</button>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+            </aside>
         </div>
-    </main>
+    </div>
 
     {% include 'components/footer.html' %}
 
-    <script src="{{ url_for('static', filename='assets/js/timeline.js') }}"></script>
+    <div id="selected-schedule-data" style="display: none;"
+         data-schedule-id="{{ selected_schedule_detail.schedule_id_param }}"
+         data-type="{{ selected_schedule_detail.type }}"
+         data-schedule-name="{{ selected_schedule_detail.schedule_name }}"
+         data-person-name="{{ selected_schedule_detail.person_name }}" {# 이름 데이터 추가 #}
+         data-status="{{ selected_schedule_detail.status }}"
+         data-start-date="{{ selected_schedule_detail.start_date_input }}"
+         data-end-date="{{ selected_schedule_detail.end_date_input }}"
+         data-content="{{ selected_schedule_detail.content if selected_schedule_detail.content is not none else '' }}"
+         {# data-tasks, data-member 는 UI에서 제거되었으므로 HTML에서 직접 전달하지 않음 #}
+         data-project-title="{{ selected_schedule_detail.schedule_title }}" {# 여기서도 schedule_title 전달 #}
+    ></div>
+
+    <div id="scheduleFormModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">일정 추가/수정</h2>
+            <div class="form-group">
+                <label for="scheduleType">일정 타입</label>
+                <select id="scheduleType" class="form-select">
+                    <option value="">일정 타입 선택</option>
+                    <option value="개인">개인</option>
+                    <option value="프로젝트">프로젝트</option>
+                </select>
+            </div>
+
+            <div id="projectSelectionArea" class="form-group" style="display: none;">
+                <label for="scheduleProjectTitle">프로젝트</label>
+                <select id="scheduleProjectTitle" class="form-select">
+                    <option value="">프로젝트 선택</option>
+                    {% for project_title in project_titles %}
+                    <option value="{{ project_title }}">{{ project_title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="scheduleName">일정 이름 <span class="required">(필수)</span></label>
+                <input type="text" id="scheduleName" class="form-input" placeholder="일정 이름을 입력하세요.">
+            </div>
+
+            <div class="form-group">
+                <label for="schedulePersonName">이름 <span class="required">(필수)</span></label>
+                <input type="text" id="schedulePersonName" class="form-input" placeholder="이름을 입력하세요.">
+            </div>
+
+            <div class="form-group">
+                <label for="scheduleStartDate">시작일</label>
+                <input type="datetime-local" id="scheduleStartDate" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="scheduleEndDate">종료일</label>
+                <input type="datetime-local" id="scheduleEndDate" class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label for="scheduleContent">내용</label>
+                <textarea id="scheduleContent" class="form-textarea" placeholder="내용을 입력하세요." rows="4"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="scheduleStatus">상태</label>
+                <select id="scheduleStatus" class="form-select">
+                    </select>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="saveScheduleBtn" class="btn btn-primary">일정 추가</button>
+                <button id="cancelScheduleBtn" class="btn btn-secondary">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content alert-box danger">
+            <p class="alert-message">정말 삭제하시겠습니까?</p>
+            <div class="alert-actions">
+                <button id="deleteConfirmYesBtn" class="btn btn-danger">YES</button>
+                <button id="deleteConfirmNoBtn" class="btn btn-secondary">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Flask에서 전달된 상태 옵션 데이터를 JavaScript 변수로 저장
+        const STATUS_OPTIONS_BY_TYPE = {{ status_options_by_type | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='timeline.js') }}"></script>
 </body>
 </html>
