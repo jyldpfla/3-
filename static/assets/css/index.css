@@ -81,7 +81,7 @@ h3 {
 }
 
 .progress-text {
-    text-align: right;    
+    text-align: right;
 }
 
 .progress-bar {
@@ -104,7 +104,7 @@ h3 {
 .progress-bar span {
     margin-left: 0.5rem;
     font-size: 0.8rem;
-    
+
 }
 
 /* 공지사항 */
@@ -175,16 +175,18 @@ h3 {
 .timeline-date {
     font-weight: bold;
     font-size: 1.2em;
-    min-width: 40px; /* 숫자 공간 확보 */
+    min-width: 40px;
+    /* 숫자 공간 확보 */
 }
 
 .timeline-content::before {
-    content: ""; 
+    content: "";
     position: absolute;
     width: 1px;
     height: 100%;
     background-color: #D4D4D4;
-    display: block;  /* or inline-block */
+    display: block;
+    /* or inline-block */
 }
 
 .timeline-content {
@@ -196,5 +198,78 @@ h3 {
     margin-top: 2px;
     margin-bottom: 6px;
     margin-left: 3rem;
-    word-break: keep-all; /* 한글 줄바꿈 자연스럽게 */
+    word-break: keep-all;
+    /* 한글 줄바꿈 자연스럽게 */
+}
+
+@media (max-width: 1024px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+        /* 한 줄로 */
+    }
+
+    .right-column,
+    .left-column {
+        grid-column: 1 / -1;
+    }
+
+    .project-progress table,
+    .project-progress thead,
+    .project-progress tbody tr {
+        table-layout: auto;
+    }
+
+    .schedule-body {
+        flex-direction: column;
+    }
+
+    .schedule-divider {
+        display: none;
+    }
+
+    .schedule-body h3 {
+        margin-bottom: 1rem;
+    }
+
+    .schedule-body>ul {
+        padding-top: 0;
+    }
+
+    .timeline-title {
+        margin-left: 3rem
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .card {
+        padding: 0.8rem;
+    }
+
+    .project-progress th,
+    .project-progress td {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+    }
+
+    .progress-bar {
+        height: 10px;
+    }
+
+    .timeline-date {
+        font-size: 1rem;
+    }
+
+    .timeline-title {
+        margin-left: 3rem;
+        font-size: 0.85rem;
+    }
+
+    h3 {
+        font-size: 1rem;
+    }
 }

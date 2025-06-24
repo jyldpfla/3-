@@ -480,8 +480,11 @@ hr {
 }
 
 .task-date {
-    color: green;
     font-weight: 500;
+}
+
+.task-date-color {
+    color: green;
 }
 
 .btn-blue,
@@ -560,4 +563,17 @@ hr {
     .task-add {
         gap: 0.7rem;
     }
+}
+
+.alert-box {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff8e1;
+    border: 1px solid #f0c36d;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
 }

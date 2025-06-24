@@ -96,9 +96,9 @@
                                 </span>
                             </td>
                             {% if t["end_date"] == "오늘" %}
-                                <td><span class="task-date"> {{ t["end_date"] }} </span></td>
+                                <td><span class="task-date task-date-color"> {{ t["end_date"] }} </span></td>
                             {% else %}
-                                <td><span> {{ t["end_date"] }} </span></td>
+                                <td><span class="task-date"> {{ t["end_date"] }} </span></td>
                             {% endif %}
                             
                         </tr>
@@ -183,7 +183,13 @@
             </div>
         </div>
     </main>
-
+    <div class="alert-box warning" style="display: none;">
+        <div class="alert-message">수정/삭제할 항목을 선택해주세요.</div>
+        <div class="alert-actions">
+            <button class="btn cancel">취소</button>
+            <button class="btn confirm">확인</button>
+        </div>
+    </div>
     {% include 'components/footer.html' %}
 </body>
 
