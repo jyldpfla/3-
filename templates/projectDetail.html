@@ -13,7 +13,7 @@
   <main class="container">
     <h2>| 프로젝트 상세보기</h2>
     <div class="btn-group">
-      <button class="btn" onclick="window.location.href='/teamMemberManage'">+ 팀원 관리</button>
+      <button class="btn" onclick="window.location.href='/teamMemberManage/{{ project._id }}'">+ 팀원 관리</button>
       <button class="btn" onclick="window.location.href='/projectUpdate/{{ project._id }}'">수정</button>
       <form action="/projectDelete/{{ project._id }}" method="POST"
       onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display: inline;">

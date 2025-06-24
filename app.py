@@ -453,5 +453,87 @@ def teamMemberDelete(project_id, member_id):
     )
     return redirect(url_for("teamMemberManage", project_id=project_id))
 
+# ===== wonji_app.py에서 가져온 프로젝트 관리 라우트 및 함수 추가 =====
+def to_str(date):
+    if not date:
+        return ""
+    return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
+
+@app.route("/projectList")
+def projectList():
+    project_list = list(project_collection.find())
+    done = [t for t in project_list if t['status'] == '완료']
+    doing = [t for t in project_list if t['status'] == '진행중']
+    wait = [t for t in project_list if t['status'] == '진행 대기']
+    for project in project_list:
+        manager = user_collection.find_one({"_id": project["project_manager"]})
+        project["project_manager"] = manager["name"] if manager else "알 수 없음"
+        project["start_date"] = to_str(project.get("start_date"))
+        project["end_date"] = to_str(project.get("end_date"))
+    status_order = {"진행 대기": 0, "진행중": 1, "완료": 2}
+    project_list.sort(key=lambda x: status_order.get(x["status"], 99))
+    return render_template("/projectList.html", project_list=project_list, done=done, doing=doing, wait=wait)
+
+@app.route("/projectAdd", methods=["GET", "POST"])
+def projectAdd():
+    if request.method == "POST":
+        project = {
+            "title": request.form.get("name"),
+            "client": request.form.get("client"),
+            "project_manager": ObjectId(request.form.get("project_manager")),
+            "start_date": request.form.get("start"),
+            "end_date": request.form.get("end"),
+            "status": request.form.get("status"),
+            "description": request.form.get("description"),
+            "schedule_id": None
+        }
+        project_collection.insert_one(project)
+        return redirect(url_for('projectList'))
+    user_list = list(user_collection.find({"position": "팀장"}))
+    return render_template("/projectAdd.html", user_list=user_list)
+
+@app.route("/projectUpdate/<project_id>", methods=["GET", "POST"])
+def projectUpdate(project_id):
+    if request.method == "POST":
+        project_collection.update_one(
+            {"_id": ObjectId(project_id)},
+            {"$set": {
+                "title": request.form.get("name"),
+                "client": request.form.get("client"),
+                "start_date": request.form.get("start"),
+                "end_date": request.form.get("end"),
+                "status": request.form.get("status"),
+                "description": request.form.get("description"),
+                "schedule_id": None
+            }}
+        )
+        return redirect(url_for('projectDetail', project_id=project_id))
+    project = project_collection.find_one({"_id": ObjectId(project_id)})
+    manager = user_collection.find_one({"_id": project["project_manager"]})["name"]
+    project["manager_name"] = manager
+    user_list = list(user_collection.find({"position": "팀장"}))
+    return render_template("/projectUpdate.html", project=project, user_list=user_list)
+
+@app.route('/projectDetail/<project_id>')
+def projectDetail(project_id):
+    project = project_collection.find_one({"_id": ObjectId(project_id)})
+    manager = user_collection.find_one({"_id": project["project_manager"]})["name"]
+    project["manager_name"] = manager
+    project["start_date"] = to_str(project.get("start_date"))
+    project["end_date"] = to_str(project.get("end_date"))
+    team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
+    project["team"] = [
+        user["name"] for user in user_collection.find(
+            {"_id": {"$in": team_map.get(ObjectId(project_id), [])}},
+            {"_id": 0, "name": 1}
+        )
+    ]
+    return render_template("/projectDetail.html", project=project)
+
+@app.route("/projectDelete/<project_id>", methods=["POST"])
+def projectDelete(project_id):
+    project_collection.delete_one({"_id": ObjectId(project_id)})
+    return redirect(url_for('projectList'))
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
