@@ -27,17 +27,30 @@ team_collection = db["team"]
 timeline_collection = db["timeline"]
 
 @app.context_processor
-def inject_user():
+def inject_global_context():
     user_id = session.get("user_id")
     if user_id:
         user = user_collection.find_one({"_id": ObjectId(user_id)})
-        return dict(user_info=user)
-    else:
-        return redirect(url_for("/"))
+
+        # 안 읽은 알림 불러오기
+        unread_notes = list(db.notifications.find({
+            "user_id": ObjectId(user_id),
+            "read": False
+        }))
+        messages = [n["message"] for n in unread_notes]
+        has_notification = len(messages) > 0
+
+        return dict(
+            user_info=user,
+            notifications=messages,
+            has_notification=has_notification
+        )
+    return dict()
+
 
 @app.route("/")
 def home():
-    session["user_id"] = "6854be045d8c554194fe197b"
+    session["user_id"] = "6854d66be1c74b0479be255a"
     
     projects = list(project_collection.find({}))
     project_pipeline = [
@@ -319,14 +332,26 @@ def mark_notifications_as_read():
 
 @app.route('/teamMemberAdd/<project_id>', methods=["GET", "POST"])
 def teamMemberAdd(project_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    current_user_id = ObjectId(session["user_id"])
+    project_doc = project_collection.find_one({"_id": ObjectId(project_id)})
+
+    if not project_doc:
+        return "해당 프로젝트를 찾을 수 없습니다.", 404
+
+    if project_doc.get("project_manager") != current_user_id:
+        manage_url = url_for('teamMemberManage', project_id=project_id)
+        return f"<h1><a href='{manage_url}'>팀원 등록은 프로젝트 관리자만 가능합니다.</a></h1>", 403
+
+
     if request.method == "POST":
         user_ids = request.form.getlist("_id")
         status_list = request.form.getlist("status")
         object_ids = [ObjectId(uid) for uid in user_ids]
 
         team_doc = team_collection.find_one({"project_id": ObjectId(project_id)})
-        project_doc = project_collection.find_one({"_id": ObjectId(project_id)})
-        project_manager_id = ObjectId(session["user_id"])
 
         if team_doc:
             members = team_doc["member"]
@@ -348,25 +373,29 @@ def teamMemberAdd(project_id):
                 "member": object_ids,
                 "status": status_list
             })
+
         # 알림 생성
-        manager = user_collection.find_one({"_id": project_manager_id})
+        manager = user_collection.find_one({"_id": current_user_id})
         for uid in object_ids:
             user = user_collection.find_one({"_id": uid})
             message = f"{manager['name']}님이 프로젝트 '{project_doc['title']}'에 팀원으로 {user['name']}님을 추가했습니다."
             notification = {
                 "user_id": uid,
-                "sender_id": project_manager_id,
+                "sender_id": current_user_id,
                 "message": message,
                 "project_id": ObjectId(project_id),
                 "read": False,
                 "created_at": datetime.utcnow()
             }
             db.notifications.insert_one(notification)
+
         return redirect(url_for("teamMemberManage", project_id=project_id))
+
     users = list(user_collection.find({"position": {"$ne": "팀장"}}))
     for u in users:
         u["_id"] = str(u["_id"])
     return render_template("teamMemberAdd.html", users=users, project_id=project_id)
+
 
 @app.route('/teamMemberManage/<project_id>')
 def teamMemberManage(project_id):
@@ -374,16 +403,19 @@ def teamMemberManage(project_id):
         return redirect(url_for("login"))
     current_user_id = ObjectId(session["user_id"])
     project_obj_id = ObjectId(project_id)
+    
     project_doc = project_collection.find_one({"_id": project_obj_id})
     if not project_doc:
         return "해당 프로젝트를 찾을 수 없습니다.", 404
     project_manager_id = project_doc.get("project_manager")
     manager_user = user_collection.find_one({"_id": project_manager_id})
+    
     if not manager_user:
         return "팀장 유저 정보를 찾을 수 없습니다.", 404
     team_doc = team_collection.find_one({"project_id": project_obj_id})
     member_ids = team_doc.get("member", []) if team_doc else []
     status_list = team_doc.get("status", []) if team_doc else []
+    
     if project_manager_id not in member_ids:
         member_ids.insert(0, project_manager_id)
         status_list.insert(0, "팀장")
@@ -405,18 +437,10 @@ def teamMemberManage(project_id):
                 "status": status_list[i],
                 "is_manager": member_id == project_manager_id
             })
-    notification_docs = db.notifications.find({
-        "user_id": current_user_id,
-        "read": False
-    })
-    notifications = [doc["message"] for doc in notification_docs]
-    has_notification = len(notifications) > 0
     return render_template(
         'teamMemberManage.html',
         project_id=project_id,
-        team_members=members,
-        notifications=notifications,
-        has_notification=has_notification
+        team_members=members
     )
 
 @app.route('/teamMemberUpdate/<project_id>/<member_id>', methods=["POST"])
