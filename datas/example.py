@@ -64,28 +64,12 @@ team_data = {
     "status": ["참여중", "대기"]
 }
 
-timeline_data = {
-    "_project_id": None,
-    "user_id": ObjectId("6853aebf690a71fa9ad4b6e3"),
-    "title": "연차",
-    "start_date": "2025-06-23",
-    "end_date": "2025-07-02",
-    "member": None,
-    "content": "내용 작성",
-    "type": "개인",
-    "status": "연차",
-}
-
-timeline_data2 = {
-    "project_id": ObjectId("6858e855a4d53f19194ed3b2"),
-    "user_id": ObjectId("6853aebf690a71fa9ad4b6e3"),
-    "title": "회의",
-    "start_date": "2025-06-23",
-    "end_date": "2025-07-02",
-    "member": [ObjectId("6853aebf690a71fa9ad4b6e3"), ObjectId("6854be045d8c554194fe197b")],
-    "content": "내용 작성",
-    "type": "프로젝트",
-    "status": "진행중",
+bell_data = {
+    "user_id": None,
+    "message": "새로운 일정이 등록되었습니다.",
+    "read": "False",
+    "project_id":None,
+    "created_at": "2025-06-23T10:15:00"
 }
 
 timeline_data = {

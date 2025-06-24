@@ -23,6 +23,7 @@ schedule_collection = db["schedules"]
 personal_todo_collection = db["personal_todo"]
 board_collection = db["board"]
 team_collection = db["team"]
+bell_collection = db["bell"]
 timeline_collection = db["timeline"]
 
 
@@ -38,3 +39,5 @@ if __name__ == "__main__":
     # example_add(team_collection, example.team_data)
     example_add(timeline_collection, example.timeline_data)
     example_add(timeline_collection, example.timeline_data2)
+    # example_add(team_collection, example.team_data)
+    example_add(bell_collection, example.bell_data)

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="{{ url_for('static', filename='assets/img/favicon.ico') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+  <link rel="stylesheet" href="../static/assets/css/teamMembersManage.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>팀원 관리</title>
+</head>
+<body>
+  {% include 'components/nav.html' %}
+  <main class="container">
+    <h2>| 👥팀원 관리</h2>
+    <div class="btn-box">
+      <button class="btn btn-blue" onclick="location.href='{{ url_for('teamMemberAdd', project_id=project_id) }}'">+ 팀원 추가</button>
+      <button class="btn btn-blue" onclick="window.history.back()">뒤로 가기</button>
+    </div>
+
+    <table class="member-table">
+      <thead>
+        <tr>
+          <th>이름</th>
+          <th>이메일</th>
+          <th>역할</th>
+          <th>참여 상태</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in team_members %}
+<tr>
+  <td>{{ member.name }}</td>
+  <td>{{ member.email }}</td>
+  <td>{{ member.role }}</td>
+  <td>
+    {% if member.status == '대기' %}
+      <span class="status-dot red"></span>
+    {% else %}
+      <span class="status-dot green"></span>
+    {% endif %}
+
+    {% if not member.is_manager %}
+    <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}" style="display:inline;">
+      <select name="status">
+        <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
+        <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
+      </select>
+  </td>
+  <td>
+      <button type="submit" class="btn btn-gray">저장</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}" style="display:inline;">
+      <button type="submit" class="btn btn-gray">삭제</button>
+    </form>
+    {% else %}
+      </td>
+      <td><span style="color: gray;">-</span></td>
+    {% endif %}
+</tr>
+{% endfor %}
+
+      </tbody>
+    </table>
+  </main>
+  <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+</body>
+</html>
+
+{% include 'components/footer.html' %}
+
+{#
+팀원 목록을 표 형태로 보여줍니다.
+
+담당자의 행은 상태를 변경 할 수 없습니다. 담당자는 프로젝트를 생성할 때 담당자의 정보를 표의 최상단에 보여줍니다
+
+각 행마다 이름, 이메일, 역할, 참여 상태를 보여줍니다.
+
+참여 상태 옆에 상태를 변경할 수 있는 셀렉트 박스와 저장 버튼이 있습니다. 
+
+각 행별 삭제 버튼을 누르면 해당 팀원을 프로젝트에서 삭제합니다.
+
+담당자는 상태를 변경 하거나 삭제할 수 없습니다
+#}

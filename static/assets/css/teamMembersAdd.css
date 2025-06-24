@@ -83,21 +83,20 @@ select {
     height: 250px;
 }
 
-.member-info-box > p {
+.member-info-box>p {
     display: flex;
     justify-content: center;
 }
 
 .form-buttons {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-top: 30px;
 }
 
-.btn-submit,
-.btn-add,
-.btn-remove,
-.btn-cancel {
+.btn-blue {
     flex: 1;
     padding: 12px;
     font-size: 16px;

@@ -1,0 +1,27 @@
+.notification-list {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 10px;
+        }
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notification-item.unread {
+            background-color: #f8f9ff;
+            font-weight: bold;
+        }
+        .notification-time {
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .no-notifications {
+            text-align: center;
+            margin: 2rem;
+            color: #aaa;
+        }

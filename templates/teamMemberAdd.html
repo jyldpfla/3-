@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="{{ url_for('static', filename='assets/img/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}" />
     <link rel="stylesheet" href="../static/assets/css/teamMembersAdd.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -40,10 +41,10 @@
         </div>
 
         <div class="form-buttons">
-          <button type="submit" class="btn-submit">✅ 등록 완료</button>
-          <button type="button" class="btn-add" onclick="addMemberField()">+ 팀원 추가</button>
-          <button type="button" class="btn-remove" onclick="removeLastMemberField(this)">❌ 삭제</button>
-          <button type="button" class="btn-cancel" onclick="window.history.back()">↩ 뒤로가기</button>
+          <button type="submit" class="btn btn-blue">등록 완료</button>
+          <button type="button" class="btn btn-blue" onclick="addMemberField()">+ 팀원 추가</button>
+          <button type="button" class="btn btn-blue" onclick="removeLastMemberField(this)">삭제</button>
+          <button type="button" class="btn btn-blue" onclick="window.history.back()">뒤로가기</button>
         </div>
       </form>
     </main>
@@ -56,7 +57,9 @@
 </html>
 
 {#
-최초 한 명의 팀원 추가 입력 필드를 보여줍니다.
+팀장을 제외한 팀원들을 select 에서 보여줍니다
+
+팀원 추가 버튼을 누르면 팀원 추가 입력 필드를 보여줍니다.
 
 const users = {{ users | tojson | safe }}; flask 에서 list인 users를 js 리스트로 변환해주는 역할
 
