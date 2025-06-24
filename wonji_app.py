@@ -36,21 +36,28 @@ def to_str(date):
 
 @app.route("/projectList")
 def projectList():
+    def to_str(date):
+        if not date:
+            return ""
+        return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
+
     project_list = list(project_collection.find())
     done = [t for t in project_list if t['status'] == '완료']
     doing = [t for t in project_list if t['status'] == '진행중']
     wait = [t for t in project_list if t['status'] == '진행 대기']
 
     for project in project_list:
-        # 담당자 이름 처리
         manager = user_collection.find_one({"_id": project["project_manager"]})
         project["project_manager"] = manager["name"] if manager else "알 수 없음"
-
-        # ✅ 날짜 포맷 처리
         project["start_date"] = to_str(project.get("start_date"))
         project["end_date"] = to_str(project.get("end_date"))
 
+    # ✅ 상태 기준 정렬
+    status_order = {"진행 대기": 0, "진행중": 1, "완료": 2}
+    project_list.sort(key=lambda x: status_order.get(x["status"], 99))
+
     return render_template("/projectList.html", project_list=project_list, done=done, doing=doing, wait=wait)
+
 
 
 @app.route("/projectAdd", methods=["GET", "POST"])
