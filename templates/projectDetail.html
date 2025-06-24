@@ -13,10 +13,14 @@
   <main class="container">
     <h2>| 프로젝트 상세보기</h2>
     <div class="btn-group">
-      <button class="btn">+ 팀원 관리</button>
+      <button class="btn" onclick="window.location.href='/teamMemberManage'">+ 팀원 관리</button>
       <button class="btn" onclick="window.location.href='/projectUpdate/{{ project._id }}'">수정</button>
-      <button class="btn">프로젝트 제거</button>
-      <button class="btn" onclick="window.location.href='/project'">뒤로 가기</button>
+      <form action="/projectDelete/{{ project._id }}" method="POST"
+      onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display: inline;">
+    <button type="submit" class="btn danger">프로젝트 제거</button>
+</form>
+
+      <button class="btn" onclick="window.location.href='/projectList'">뒤로 가기</button>
     </div>
     <div class="detail-layout">
       <div class="project-info">

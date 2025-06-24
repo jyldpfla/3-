@@ -152,3 +152,8 @@ border-color: #2F2F71;
 outline: none;
 background-color: #ffffff;
 }
+
+.btn.danger {
+background-color: #f87171;
+color: white;
+}
