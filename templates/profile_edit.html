@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>개인정보 수정</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/profile_edit.css') }}">
+</head>
+<body>
+
+  {% include 'components/nav.html' %}
+
+  <!-- 제목 -->
+  <div class="signup-title-left">
+    <h2 class="signup-title">개인정보 수정</h2>
+  </div>
+
+  <main class="signup-center scroll-container">
+    <form method="POST" class="signup-form">
+      <input type="text" name="username" class="signup-input" placeholder="아이디" value="">
+      <input type="password" name="password" class="signup-input" placeholder="비밀번호를 입력하세요">
+      <input type="password" name="password_confirm" class="signup-input" placeholder="비밀번호 확인">
+
+      <!-- 이메일 -->
+      <div class="signup-email-wrap">
+        <input type="text" name="email_id" class="signup-input email-id-input" placeholder="이메일" value="">
+        <span class="at-symbol">@</span>
+        <div class="email-domain-container">
+          <select id="email_domain_select" class="signup-input half" onchange="toggleEmailInput(this)">
+            <option value="">선택하세요</option>
+            <option value="gmail.com">gmail.com</option>
+            <option value="naver.com">naver.com</option>
+            <option value="daum.net">daum.net</option>
+            <option value="hotmail.com">hotmail.com</option>
+            <option value="kakao.com">kakao.com</option>
+            <option value="직접입력">직접 입력</option>
+          </select>
+          <input type="text" name="email_domain" id="email_domain_input" class="signup-input half hidden" placeholder="직접 입력">
+        </div>
+      </div>
+
+      <input type="text" name="name" class="signup-input" placeholder="사용자 이름" value="">
+      <input type="text" name="phone" class="signup-input" placeholder="전화번호" value="">
+      <input type="text" name="position" class="signup-input" placeholder="직책" value="">
+      <input type="text" name="department" class="signup-input" placeholder="부서명" value="">
+
+      <!-- 버튼 영역 -->
+      <div class="profile-btn-group">
+        <button type="submit" class="btn-fixed complete-btn">완료</button>
+        <a href="#" class="btn-fixed delete-btn">회원탈퇴</a>
+      </div>
+    </form>
+  </main>
+
+  {% include 'components/footer.html' %}
+
+  <script>
+    function toggleEmailInput(selectEl) {
+      const inputEl = document.getElementById("email_domain_input");
+      const selectBox = document.getElementById("email_domain_select");
+
+      if (selectEl.value === "직접입력") {
+        selectBox.classList.add("hidden");
+        inputEl.classList.remove("hidden");
+        inputEl.required = true;
+        inputEl.value = "";
+        inputEl.focus();
+      } else {
+        inputEl.classList.add("hidden");
+        selectBox.classList.remove("hidden");
+        inputEl.required = false;
+        inputEl.value = selectEl.value;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const inputEl = document.getElementById("email_domain_input");
+      const selectBox = document.getElementById("email_domain_select");
+
+      inputEl.addEventListener("blur", function () {
+        if (inputEl.value.trim() === "") {
+          inputEl.classList.add("hidden");
+          selectBox.classList.remove("hidden");
+          selectBox.value = "";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
