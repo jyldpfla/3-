@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 from bson import ObjectId
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # env 파일 로드
 load_dotenv()
@@ -111,11 +111,12 @@ def home():
         ]
     
     # 일정 가져오기
-    target_date = datetime.strptime("2025-06-24", "%Y-%m-%d")
+    target_date = datetime.now(timezone.utc)  # 또는 특정 날짜: datetime(2025, 7, 1, tzinfo=timezone.utc)
 
-    # 날짜 범위 설정
     start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
     end = start + timedelta(days=2)
+    print(f"Start: {start}, End: {end}")
+    print(timeline_collection.find_one({"project_id": { "$ne": None }})["end_date"], type(timeline_collection.find_one({"project_id": { "$ne": None }})["end_date"]))
     timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}))
     grouped_timeline = defaultdict(list) # defaultdict: key값 없을 때도 바로 append 가능하도록 설정
     
@@ -228,6 +229,7 @@ def mypage():
         t["end_date"] = datetime.strftime(t["end_date"], "%Y-%m-%d")
     personal_timeline = [t for t in timeline if t['project_id'] == None] # 개인 일정
     project_timeline = [t for t in timeline if t['project_id'] in project_id_list]# 프로젝트 내 일정
+    
     for p in project_timeline:
         if p["status"] in ["미완료", "지연", "중단"]:
             p["status"] = "To do"

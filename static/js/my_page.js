@@ -44,7 +44,7 @@ document.querySelector('.btn-edit').addEventListener('click', () => {
     // 체크된 라디오 버튼 찾기
     const checkedRadio = document.querySelector('input[name="taskSelect"]:checked');
     if (!checkedRadio) {
-        alert('수정할 항목을 선택하세요.');
+        document.querySelector('.alert-box.warning').style.display = 'block';
         return;
     }
 
@@ -85,17 +85,17 @@ document.querySelector('.btn-edit').addEventListener('click', () => {
                 date: date
             })
         })
-        .then(response => {
-            if (response.ok) {
-                console.log('수정 성공');
-                location.reload()
-            } else {
-                console.warn('서버 응답 오류:', response.status);
-            }
-        })
-        .catch(error => {
-            console.error('에러 발생:', error);
-        });
+            .then(response => {
+                if (response.ok) {
+                    console.log('수정 성공');
+                    location.reload()
+                } else {
+                    console.warn('서버 응답 오류:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('에러 발생:', error);
+            });
     }
 });
 
@@ -104,7 +104,7 @@ document.querySelector('.btn-del').addEventListener('click', () => {
         // 체크된 라디오 버튼 찾기
         const checkedRadio = document.querySelector('input[name="taskSelect"]:checked');
         if (!checkedRadio) {
-            alert('수정할 항목을 선택하세요.');
+            document.querySelector('.alert-box.warning').style.display = 'block';
             return;
         }
 
@@ -123,23 +123,30 @@ document.querySelector('.btn-del').addEventListener('click', () => {
                 _id: row.querySelector('td[name="task_id"]').getAttribute('value')
             })
         })
-        .then(response => {
-            if (response.ok) {
-                console.log('삭제 성공');
-                location.reload()
-            } else {
-                console.warn('서버 응답 오류:', response.status);
-            }
-        })
-        .catch(error => {
-            console.error('에러 발생:', error);
-        });
-    } else if (document.querySelector('.btn-edit').textContent == '취소') {
+            .then(response => {
+                if (response.ok) {
+                    console.log('삭제 성공');
+                    location.reload()
+                } else {
+                    console.warn('서버 응답 오류:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('에러 발생:', error);
+            });
+    } else if (document.querySelector('.btn-del').textContent == '취소') {
         // 버튼 텍스트 변경 (선택)
         location.reload();
     }
 });
 
+// 취소/확인 버튼 누르면 alert-box 닫기
+document.querySelector('.alert-box .cancel').addEventListener('click', () => {
+    document.querySelector('.alert-box.warning').style.display = 'none';
+});
 
+document.querySelector('.alert-box .confirm').addEventListener('click', () => {
+    document.querySelector('.alert-box.warning').style.display = 'none';
+});
 
 
