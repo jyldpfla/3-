@@ -24,232 +24,26 @@
                             <tr>
                                 <th>기업</th>
                                 <th>프로젝트명</th>
-                                <th>참여 팀</th>
+                                <th>담당자</th>
                                 <th>진행율</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for project in projects %}
                             <tr>
                                 <td>
-                                    <a href="#">A사</a>
+                                    <a href="/projectDetail/{{project["_id"]}}">{{ project["client"] }}</a>
                                 </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
+                                <td>{{ project["title"] }}</td>
+                                <td>{{ project["manager_name"] }}</td>
                                 <td>
+                                    <div class="progress-text"> {{ project["percentage"] }}% </div>
                                     <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
+                                        <div class="fill" style="width: {{project["percentage"]}}%"></div>
                                     </div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>A프로젝트</td>
-                                <td>A팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="#">A사</a>
-                                </td>
-                                <td>B프로젝트</td>
-                                <td>C팀</td>
-                                <td>
-                                    <div class="progress-bar">
-                                        <div class="fill" style="width: 60%"></div>
-                                        <span>60%</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -267,18 +61,22 @@
 
                 <div class="card schedule">
                     <div class="schedule-body">
-                        <h3>6월 17일 (화)</h3>
+                        <h3>{{ today }}</h3>
                         <div class="schedule-divider"></div>
+                        <button class="schedule-btn btn btn-blue" onclick="location.href='/timeline'">일정 관리</button>
                         <ul>
-                            <li>
-                                <strong>17</strong> 각 팀 팀장 미팅 (8th)<br />B 고객사 미팅
+                            {% for key, value in timeline.items() %}
+                            <li class="timeline-item">
+                                <strong class="timeline-date">{{ key.split(" ")[1].split("일")[0] }}</strong>
+                                <div class="timeline-content">
+                                    <ul>
+                                    {% for v in value %}
+                                        <li class="timeline-title">{{ v["title"] }}</li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
                             </li>
-                            <li>
-                                <strong>18</strong> 각 팀 팀장 미팅 (8th)<br />B 고객사 미팅
-                            </li>
-                            <li>
-                                <strong>19</strong> 각 팀 팀장 미팅 (8th)<br />B 고객사 미팅
-                            </li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>

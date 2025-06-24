@@ -23,6 +23,7 @@
                         <h2>{{ user_info.name }}</h2>
                         <p>{{ user_info.department }} / {{user_info.role }}</p>
                     </div>
+                    <a class="modify_btn">개인정보 수정</a>
                 </div>
                 <hr />
                 <div class="user-bottom">
@@ -51,11 +52,11 @@
                     {% for p_time in personal_timeline %}
                         <li>
                             {% if p_time["start_date"] == p_time["end_date"] %}
-                            <span class="date {{'purple' if p_time["type"] == '개인' else 'red'}}"> {{ p_time["end_date"] }} <span class="text">{{ p_time.title }}</span></span>
+                            <span class="date {{'purple' if p_time["type"] == '개인' else 'red'}}"> {{p_time["start_date"]}}<span class="text">{{ p_time.title }}</span></span>
                             {% else %}
                             <span class="date {{'purple' if p_time["type"] == '개인' else 'red'}}"> {{p_time["start_date"]}} ~ {{ p_time["end_date"] }} <span class="text">{{ p_time.title }}</span></span>
                             {% endif %}
-                            <button class="btn btn-gray">일정 보기</button>
+                            <button class="btn btn-gray" onclick="location.href='/timeline?year={{p_time["end_date"].split("-")[0]}}&month={{p_time["end_date"].split("-")[1]}}&date={{p_time["end_date"]}}&schedule_id={{p_time["_id"]}}'">일정 보기</button>
                         </li>
                     {% endfor %}
                 </ul>
@@ -129,7 +130,7 @@
                             <div class="project-container">
                                 <div class="project-header-group">
                                     <div class="project-name"> {{ do.title }} </div>
-                                    <button class="btn btn-blue">상세보기</button>
+                                    <button class="btn btn-blue" onclick="location.href='/projectDetail/{{do["_id"]}}'">상세보기</button>
                                 </div>
                                 <div class="project-body" style="display: none;">
                                     <ul class="project-list">
@@ -138,9 +139,9 @@
                                         <li>
                                             <span class="task-id" value={{ p_time["_id"] }}>{{ loop.index }}</span>
                                             <span class="task-title">{{ p_time["title"] }}</span>
-                                            <span class="status done"><span class="dot"></span> {{p_time["status"]}} </span>
-                                            <span> {{p_time["status"]}} </span>
-                                            <button class="btn btn-gray">일정 보기</button>
+                                            <span class="status {{ p_time["status"].lower().replace(' ', '') }}"><span class="dot"></span> {{p_time["status"]}} </span>
+                                            <span> {{p_time["end_date"]}} </span>
+                                            <button class="btn btn-gray" onclick="location.href='/timeline?year={{p_time["end_date"].split("-")[0]}}&month={{p_time["end_date"].split("-")[1]}}&date={{p_time["end_date"]}}&schedule_id={{p_time["_id"]}}'">일정 보기</button>
                                         </li>
                                         {% endif %}
                                         {% endfor %}
@@ -152,22 +153,22 @@
 
                         <!-- 완료 콘텐츠 -->
                         <div class="project-tab-content" id="complete">
-                            {% for d in done %}
+                            {% for do in done %}
                             <div class="project-container">
                                 <div class="project-header-group">
-                                    <div class="project-name"> {{ d.title }} </div>
-                                    <button class="btn btn-blue">상세보기</button>
+                                    <div class="project-name"> {{ do.title }} </div>
+                                    <button class="btn btn-blue" onclick="location.href='/projectDetail/{{do["_id"]}}'">상세보기</button>
                                 </div>
                                 <div class="project-body" style="display: none;">
                                     <ul class="project-list">
                                         {% for p_time in project_timeline %}
-                                        {% if p_time["project_id"] == d["_id"] %}
+                                        {% if p_time["project_id"] == do["_id"] %}
                                         <li>
-                                            <span class="task-id">{{ p_time["_id"] }}</span>
+                                            <span class="task-id" value={{ p_time["_id"] }}>{{ loop.index }}</span>
                                             <span class="task-title">{{ p_time["title"] }}</span>
-                                            <span class="status done"><span class="dot"></span> {{p_time["status"]}} </span>
-                                            <span> {{p_time["status"]}} </span>
-                                            <button class="btn btn-gray">일정 보기</button>
+                                            <span class="status {{ p_time["status"].lower().replace(' ', '') }}"><span class="dot"></span> {{p_time["status"]}} </span>
+                                            <span> {{p_time["end_date"]}} </span>
+                                            <button class="btn btn-gray" onclick="location.href='/timeline?year={{p_time["end_date"].split("-")[0]}}&month={{p_time["end_date"].split("-")[1]}}&date={{p_time["end_date"]}}&schedule_id={{p_time["_id"]}}'">일정 보기</button>
                                         </li>
                                         {% endif %}
                                         {% endfor %}

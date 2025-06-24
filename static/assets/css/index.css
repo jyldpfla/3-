@@ -80,13 +80,17 @@ h3 {
     height: auto;
 }
 
+.progress-text {
+    text-align: right;    
+}
+
 .progress-bar {
     background: #e0e0e0;
     height: 14px;
     border-radius: 10px;
     position: relative;
     overflow: hidden;
-    width: 80%;
+    width: 100%;
     display: inline-block;
     vertical-align: middle;
 }
@@ -100,6 +104,7 @@ h3 {
 .progress-bar span {
     margin-left: 0.5rem;
     font-size: 0.8rem;
+    
 }
 
 /* 공지사항 */
@@ -120,10 +125,12 @@ h3 {
 }
 
 .schedule-body {
+    width: 100%;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
     height: 100%;
+    position: relative;
 }
 
 .schedule-body h3 {
@@ -137,15 +144,57 @@ h3 {
     height: 100%;
 }
 
+.schedule-body .schedule-btn {
+    position: absolute;
+    right: 0;
+}
+
 .schedule-body ul {
-    list-style: none;
     padding: 0;
     margin: 0;
     flex: 1;
+}
+
+.schedule-body>ul {
+    padding-top: 36px;
 }
 
 .schedule-body ul li {
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
     line-height: 1.4;
+}
+
+.timeline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.timeline-date {
+    font-weight: bold;
+    font-size: 1.2em;
+    min-width: 40px; /* 숫자 공간 확보 */
+}
+
+.timeline-content::before {
+    content: ""; 
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background-color: #D4D4D4;
+    display: block;  /* or inline-block */
+}
+
+.timeline-content {
+    position: relative;
+    flex: 1;
+}
+
+.timeline-title {
+    margin-top: 2px;
+    margin-bottom: 6px;
+    margin-left: 3rem;
+    word-break: keep-all; /* 한글 줄바꿈 자연스럽게 */
 }

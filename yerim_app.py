@@ -1,9 +1,10 @@
+from collections import defaultdict
 from flask import *
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # env 파일 로드
 load_dotenv()
@@ -28,12 +29,22 @@ timeline_collection = db["timeline"]
 def home():
     session["user_id"] = "6853aebf690a71fa9ad4b6e3"
     user_id = ObjectId(session.get("user_id"))
+    user = user_collection.find_one({"_id": user_id})
     
-    project = list(project_collection.find({}))
+    projects = list(project_collection.find({}))
     project_pipeline = [
         {
             "$match": {
-                "project_id": { "$ne": None } 
+                "project_id": { "$ne": None }
+            }
+        },
+        {
+            "$project": {
+                "project_id": 1,
+                "status": 1,
+                "is_done": {
+                    "$cond": [{ "$eq": ["$status", "완료"] }, 1, 0]
+                }
             }
         },
         {
@@ -42,7 +53,8 @@ def home():
                     "project_id": "$project_id",
                     "status": "$status"
                 },
-                "count": { "$sum": 1 }
+                "count": { "$sum": 1 },
+                "done_count": { "$sum": "$is_done" }  
             }
         },
         {
@@ -53,6 +65,19 @@ def home():
                         "status": "$_id.status",
                         "count": "$count"
                     }
+                },
+                "total": { "$sum": "$count" },
+                "done": { "$sum": "$done_count" } 
+            }
+        },
+        {
+            "$addFields": {
+                "percentage": {
+                    "$cond": [
+                        { "$eq": ["$total", 0] },
+                        0,
+                        { "$multiply": [ { "$divide": ["$done", "$total"] }, 100 ] }
+                    ]
                 }
             }
         },
@@ -60,13 +85,47 @@ def home():
             "$project": {
                 "_id": 0,
                 "project_id": "$_id",
-                "statuses": 1
+                "percentage": 1,
+                "total": "$total"
             }
         }
     ]
-    project_status = list(timeline_collection.aggregate(project_pipeline))
     
-    return render_template("/index.html")
+    project_statuses = list(timeline_collection.aggregate(project_pipeline))
+    # 딕셔너리로 변환
+    status_map = {s["project_id"]: round(s["percentage"], 1) for s in project_statuses}
+    team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
+
+    # percent 붙이기
+    for p in projects:
+        if p["status"] == "완료":
+            p["percentage"] = 100
+        else:
+            p["percentage"] = 0 if status_map.get(p["_id"], 0) == 0.0 else status_map.get(p["_id"], 0)
+        p["manager_name"] = user_collection.find_one({"_id": p["project_manager"]})["name"]
+        p["team"] = [
+            user["name"] for user in user_collection.find(
+                { "_id": { "$in": team_map.get(p["_id"], []) } },
+                {"_id": 0, "name": 1}
+            )
+        ]
+    
+    # 일정 가져오기
+    target_date = datetime.strptime("2025-06-24", "%Y-%m-%d")
+
+    # 날짜 범위 설정
+    start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    end = start + timedelta(days=2)
+    timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}))
+    grouped_timeline = defaultdict(list) # defaultdict: key값 없을 때도 바로 append 가능하도록 설정
+    
+    for t in timeline:
+        t["start_date"] = datetime.strftime(t["start_date"], "%m월 %d일 (%a)")
+        t["end_date"] = datetime.strftime(t["end_date"], "%m월 %d일 (%a)")
+        
+        grouped_timeline[t["end_date"]].append(t)
+    
+    return render_template("/index.html", user_info=user, projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"))
 
 @app.route("/example")
 def example():
@@ -131,7 +190,7 @@ def mypage():
     doing = [t for t in project_list if t['status'] in ['진행중', '진행 대기']]
     
     # user별 할 일 데이터
-    todo = list(personal_todo_collection.find({"user_id": ObjectId("6853aebf690a71fa9ad4b6e3")}).sort("end_date", 1))  
+    todo = list(personal_todo_collection.find({"user_id": user["_id"]}).sort("end_date", 1))  
     today_str = datetime.today().strftime("%Y-%m-%d")
     for t in todo:
         t["end_date"] = "오늘" if t["end_date"] == today_str else t["end_date"]
@@ -164,9 +223,18 @@ def mypage():
         { "$sort": { "end_date": 1 } }
     ]
     timeline = list(timeline_collection.aggregate(timeline_pipeline))
+    for t in timeline:
+        t["start_date"] = datetime.strftime(t["start_date"], "%Y-%m-%d")
+        t["end_date"] = datetime.strftime(t["end_date"], "%Y-%m-%d")
     personal_timeline = [t for t in timeline if t['project_id'] == None] # 개인 일정
     project_timeline = [t for t in timeline if t['project_id'] in project_id_list]# 프로젝트 내 일정
-    print(personal_timeline)
+    for p in project_timeline:
+        if p["status"] in ["미완료", "지연", "중단"]:
+            p["status"] = "To do"
+        elif p["status"] == "진행중":
+            p["status"] = "In Progress"
+        else:
+            p["status"] = "Done"
     
     return render_template("/my_page.html", user_info=user, todo=todo, done=done, doing=doing, personal_timeline=personal_timeline, project_timeline=project_timeline)
 
@@ -186,7 +254,6 @@ def add_task():
 
 @app.route("/mypage/update_task", methods=['POST'])
 def update_task():
-    print(request.data)
     id = request.get_json()["_id"]
     status = request.get_json()["status"]
     date = request.get_json()["date"]
