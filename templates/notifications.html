@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="{{ url_for('static', filename='assets/img/favicon.ico') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}" />
+        <link rel="stylesheet" href="../static/assets/css/notifications.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <title>알림 전체 보기</title>
+    </head>
+    <body>
+        {% include 'components/nav.html' %}
+
+        <main class="notification-list">
+        <h2>📬 알림 전체 보기</h2>
+
+        {% if notifications %}
+            {% for note in notifications %}
+            <div class="notification-item {% if not note.read %}unread{% endif %}">
+                <div>
+                {{ note.message }}
+                <div class="notification-time">{{ note.created_at_kst.strftime('%Y-%m-%d %H:%M') }}</div>
+                </div>
+                {% if not note.read %}
+                <form method="POST" action="{{ url_for('mark_single_notification_read', notification_id=note._id) }}">
+                    <button class="btn btn-gray">읽음 처리</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-notifications">알림이 없습니다.</div>
+        {% endif %}
+        </main>
+
+        {% include 'components/footer.html' %}
+    </body>
+</html>

@@ -78,3 +78,11 @@ team_data = {
     "member": ["장예림", "백인호"],
     "status": ["참여중", "대기"]
 }
+
+bell_data = {
+    "user_id": None,
+    "message": "새로운 일정이 등록되었습니다.",
+    "read": "False",
+    "project_id":None,
+    "created_at": "2025-06-23T10:15:00"
+}

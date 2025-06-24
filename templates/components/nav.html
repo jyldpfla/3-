@@ -10,10 +10,34 @@
     <div class="nav-item"><i class="fa-solid fa-user-tie"></i><br>마이 페이지</div>
     <div class="user-info">
         <span><i class="fa-solid fa-user"></i> Yerim</span>
+    {% if current_page != 'notifications' %}        
+    <div class="nav-item notification-wrapper">
+      <div class="notification-icon" onclick="toggleNotification()">
+        <i class="fa-regular fa-bell"></i>
+        {% if has_notification %}
+          <span class="red-dot"></span>
+        {% endif %}
+        <br>알림
+      </div>
+      <div id="notification-box" class="notification-box hidden">
+        {% if notifications %}
+          <ul>
+            {% for note in notifications %}
+              <li>{{ note }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>새로운 알림이 없습니다.</p>
+        {% endif %}
+        <a href="{{ url_for('show_notifications') }}" style="font-size: 0.9rem;">전체보기</a>
+      </div>
+    </div>
+    {% endif %}
         <div class="btn-group-vertical">
             <button class="join-btn">로그아웃</button>
             <button class="join-btn">회원 가입</button>
         </div>
     </div>
     </div>
+      
 </header>
