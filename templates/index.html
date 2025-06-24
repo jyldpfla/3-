@@ -1,19 +1,91 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/index.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <title>3조 Main</title>
 </head>
+
 <body>
     {% include 'components/nav.html' %}
 
     <main>
+        <div class="dashboard">
+            <!-- 왼쪽 열: 현재 진행 프로젝트 -->
+            <div class="left-column">
+                <div class="card project-progress">
+                    <h3>현재 진행 프로젝트</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>기업</th>
+                                <th>프로젝트명</th>
+                                <th>담당자</th>
+                                <th>진행율</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in projects %}
+                            <tr>
+                                <td>
+                                    <a href="/projectDetail/{{project["_id"]}}">{{ project["client"] }}</a>
+                                </td>
+                                <td>{{ project["title"] }}</td>
+                                <td>{{ project["manager_name"] }}</td>
+                                <td>
+                                    <div class="progress-text"> {{ project["percentage"] }}% </div>
+                                    <div class="progress-bar">
+                                        <div class="fill" style="width: {{project["percentage"]}}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
+            <!-- 오른쪽 열: 공지사항 + 일정 -->
+            <div class="right-column">
+                <div class="card notice">
+                    <h3>공지사항</h3>
+                    <ul>
+                        <li>공지 1</li>
+                        <li>공지 2</li>
+                    </ul>
+                </div>
+
+                <div class="card schedule">
+                    <div class="schedule-body">
+                        <h3>{{ today }}</h3>
+                        <div class="schedule-divider"></div>
+                        <button class="schedule-btn btn btn-blue" onclick="location.href='/timeline'">일정 관리</button>
+                        <ul>
+                            {% for key, value in timeline.items() %}
+                            <li class="timeline-item">
+                                <strong class="timeline-date">{{ key.split(" ")[1].split("일")[0] }}</strong>
+                                <div class="timeline-content">
+                                    <ul>
+                                    {% for v in value %}
+                                        <li class="timeline-title">{{ v["title"] }}</li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </main>
 
     {% include 'components/footer.html' %}
 </body>
+
 </html>

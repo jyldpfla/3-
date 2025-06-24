@@ -23,22 +23,23 @@
                         <h2>{{ user_info.name }}</h2>
                         <p>{{ user_info.department }} / {{user_info.role }}</p>
                     </div>
+                    <a class="modify_btn">개인정보 수정</a>
                 </div>
                 <hr />
                 <div class="user-bottom">
                     <div class="stat-left">
                         <span>예정 업무</span>
-                        <strong>8</strong>
+                        <strong> {{ todo|length }} </strong>
                     </div>
                     <div class="stat-center">
                         <span>담당 프로젝트</span>
                     </div>
                     <div class="stat-right">
                         <div>
-                            <span>진행중</span><strong>2</strong>
+                            <span>진행중/예정</span><strong>{{ doing|length }}</strong>
                         </div>
                         <div>
-                            <span>완료</span><strong>2</strong>
+                            <span>완료</span><strong>{{ done|length }}</strong>
                         </div>
                     </div>
                 </div>
@@ -48,26 +49,16 @@
             <div class="card schedule">
                 <h3>근무 일정</h3>
                 <ul>
-                    <li>
-                        <span class="date purple">2025.06.20 (금) <span class="text">연차</span></span><button
-                            class="btn btn-gray">일정 보기</button>
-                    </li>
-                    <li>
-                        <span class="date red">2025.06.25 (수) <span class="text">회사 창립 기념일</span></span> <button
-                            class="btn btn-gray">일정 보기</button>
-                    </li>
-                    <li>
-                        <span class="date red">2025.06.25 (수) <span class="text">회사 창립 기념일</span></span> <button
-                            class="btn btn-gray">일정 보기</button>
-                    </li>
-                    <li>
-                        <span class="date red">2025.06.25 (수) <span class="text">회사 창립 기념일</span></span> <button
-                            class="btn btn-gray">일정 보기</button>
-                    </li>
-                    <li>
-                        <span class="date red">2025.06.25 (수) <span class="text">회사 창립 기념일</span></span> <button
-                            class="btn btn-gray">일정 보기</button>
-                    </li>
+                    {% for p_time in personal_timeline %}
+                        <li>
+                            {% if p_time["start_date"] == p_time["end_date"] %}
+                            <span class="date {{'purple' if p_time["type"] == '개인' else 'red'}}"> {{p_time["start_date"]}}<span class="text">{{ p_time.title }}</span></span>
+                            {% else %}
+                            <span class="date {{'purple' if p_time["type"] == '개인' else 'red'}}"> {{p_time["start_date"]}} ~ {{ p_time["end_date"] }} <span class="text">{{ p_time.title }}</span></span>
+                            {% endif %}
+                            <button class="btn btn-gray" onclick="location.href='/timeline?year={{p_time["end_date"].split("-")[0]}}&month={{p_time["end_date"].split("-")[1]}}&date={{p_time["end_date"]}}&schedule_id={{p_time["_id"]}}'">일정 보기</button>
+                        </li>
+                    {% endfor %}
                 </ul>
             </div>
 
@@ -91,98 +82,36 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        {% for t in todo %}
+                            <tr>
                             <td>
                                 <input type="radio" name="taskSelect" />
                             </td>
-                            <td>#A101-156863</td>
-                            <td>유지보수</td>
+                            <td name="task_id" value={{t["_id"]}}> {{ loop.index }}</td>
+                            <td>{{ t["content"] }} </td>
                             <td>
-                                <span class="status done">
+                                <span class="status {{ t.status.lower().replace(' ', '') }}">
                                     <span class="dot"></span>
-                                    Done
+                                    {{ t.status }}
                                 </span>
                             </td>
-                            <td><span class="task-date">오늘</span></td>
+                            {% if t["end_date"] == "오늘" %}
+                                <td><span class="task-date"> {{ t["end_date"] }} </span></td>
+                            {% else %}
+                                <td><span> {{ t["end_date"] }} </span></td>
+                            {% endif %}
+                            
                         </tr>
-                        <tr>
-                            <td>
-                                <input type="radio" name="taskSelect" />
-                            </td>
-                            <td>#A101-156873</td>
-                            <td>유지보수</td>
-                            <td>
-                                <span class="status done">
-                                    <span class="dot"></span>
-                                    Done
-                                </span>
-                            </td>
-                            <td><span class="task-date">오늘</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="radio" name="taskSelect" />
-                            </td>
-                            <td>#A101-156873</td>
-                            <td>유지보수</td>
-                            <td>
-                                <span class="status done">
-                                    <span class="dot"></span>
-                                    Done
-                                </span>
-                            </td>
-                            <td><span class="task-date">오늘</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="radio" name="taskSelect" />
-                            </td>
-                            <td>#A101-156873</td>
-                            <td>유지보수</td>
-                            <td>
-                                <span class="status done">
-                                    <span class="dot"></span>
-                                    Done
-                                </span>
-                            </td>
-                            <td><span class="task-date"><span class="task-date">오늘</span></span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="radio" name="taskSelect" />
-                            </td>
-                            <td>#A101-156875</td>
-                            <td>미팅</td>
-                            <td>
-                                <span class="status inprogress">
-                                    <span class="dot"></span>
-                                    In Progress
-                                </span>
-                            </td>
-                            <td>2025.07.15</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="radio" name="taskSelect" />
-                            </td>
-                            <td>#A101-156877</td>
-                            <td>내부 회의</td>
-                            <td>
-                                <span class="status todo">
-                                    <span class="dot"></span>
-                                    To do
-                                </span>
-                            </td>
-                            <td>2025.07.15</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
 
-                <div class="task-add">
-                    <input id="task-date" type="date" />
-                    <input type="text" placeholder="할 일 내용" />
-                    <button class="btn btn-blue">추가</button>
-                </div>
+                <form class="task-add" action="/mypage/add_task" method="post">
+                    <input type="hidden" name="user_id" value={{user_info["_id"]}} />
+                    <input name="date" id="task-date" type="date" />
+                    <input name="content" type="text" placeholder="할 일 내용" />
+                    <button type="submit" class="btn btn-blue">추가</button>
+                </form>
             </div>
 
             <!-- 프로젝트 -->
@@ -197,82 +126,56 @@
                     <div class="project-wrapper">
                         <!-- 진행중 콘텐츠 -->
                         <div class="project-tab-content active" id="progress">
+                            {% for do in doing %}
                             <div class="project-container">
                                 <div class="project-header-group">
-                                    <div class="project-name">B 프로젝트</div>
-                                    <button class="btn btn-blue">상세보기</button>
+                                    <div class="project-name"> {{ do.title }} </div>
+                                    <button class="btn btn-blue" onclick="location.href='/projectDetail/{{do["_id"]}}'">상세보기</button>
                                 </div>
                                 <div class="project-body" style="display: none;">
                                     <ul class="project-list">
+                                        {% for p_time in project_timeline %}
+                                        {% if p_time["project_id"] == do["_id"] %}
                                         <li>
-                                            <span class="task-id">#A101-156873</span>
-                                            <span class="task-title">유지보수</span>
-                                            <span class="status done"><span class="dot"></span>Done</span>
-                                            <span class="task-date">오늘</span>
-                                            <button class="btn btn-gray">일정 보기</button>
+                                            <span class="task-id" value={{ p_time["_id"] }}>{{ loop.index }}</span>
+                                            <span class="task-title">{{ p_time["title"] }}</span>
+                                            <span class="status {{ p_time["status"].lower().replace(' ', '') }}"><span class="dot"></span> {{p_time["status"]}} </span>
+                                            <span> {{p_time["end_date"]}} </span>
+                                            <button class="btn btn-gray" onclick="location.href='/timeline?year={{p_time["end_date"].split("-")[0]}}&month={{p_time["end_date"].split("-")[1]}}&date={{p_time["end_date"]}}&schedule_id={{p_time["_id"]}}'">일정 보기</button>
                                         </li>
-                                        <li>
-                                            <span class="task-id">#A101-156876</span>
-                                            <span class="task-title">UI 제작 발표</span>
-                                            <span class="status inprogress"><span class="dot"></span>In Progress</span>
-                                            <span class="task-date">오늘</span>
-                                            <button class="btn btn-gray">일정 보기</button>
-                                        </li>
+                                        {% endif %}
+                                        {% endfor %}
                                     </ul>
                                 </div>
                             </div>
-                            <div class="project-container">
-                                <div class="project-header-group">
-                                    <div class="project-name">C 프로젝트</div>
-                                    <button class="btn btn-blue">상세보기</button>
-                                </div>
-                                <div class="project-body" style="display: none;">
-                                    <ul class="project-list">
-                                        <li>
-                                            <span class="task-id">#A101-156873</span>
-                                            <span class="task-title">유지보수</span>
-                                            <span class="status done"><span class="dot"></span>Done</span>
-                                            <span class="task-date">오늘</span>
-                                            <button class="btn btn-gray">일정 보기</button>
-                                        </li>
-                                        <li>
-                                            <span class="task-id">#A101-156876</span>
-                                            <span class="task-title">UI 제작 발표</span>
-                                            <span class="status inprogress"><span class="dot"></span>In Progress</span>
-                                            <span class="task-date">오늘</span>
-                                            <button class="btn btn-gray">일정 보기</button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
 
                         <!-- 완료 콘텐츠 -->
                         <div class="project-tab-content" id="complete">
+                            {% for do in done %}
                             <div class="project-container">
                                 <div class="project-header-group">
-                                    <div class="project-name">C 프로젝트</div>
-                                    <button class="btn btn-blue">상세보기</button>
+                                    <div class="project-name"> {{ do.title }} </div>
+                                    <button class="btn btn-blue" onclick="location.href='/projectDetail/{{do["_id"]}}'">상세보기</button>
                                 </div>
                                 <div class="project-body" style="display: none;">
                                     <ul class="project-list">
+                                        {% for p_time in project_timeline %}
+                                        {% if p_time["project_id"] == do["_id"] %}
                                         <li>
-                                            <span class="task-id">#A101-156873</span>
-                                            <span class="task-title">유지보수</span>
-                                            <span class="status done"><span class="dot"></span>Done</span>
-                                            <span class="task-date">오늘</span>
-                                            <button class="btn btn-gray">일정 보기</button>
+                                            <span class="task-id" value={{ p_time["_id"] }}>{{ loop.index }}</span>
+                                            <span class="task-title">{{ p_time["title"] }}</span>
+                                            <span class="status {{ p_time["status"].lower().replace(' ', '') }}"><span class="dot"></span> {{p_time["status"]}} </span>
+                                            <span> {{p_time["end_date"]}} </span>
+                                            <button class="btn btn-gray" onclick="location.href='/timeline?year={{p_time["end_date"].split("-")[0]}}&month={{p_time["end_date"].split("-")[1]}}&date={{p_time["end_date"]}}&schedule_id={{p_time["_id"]}}'">일정 보기</button>
                                         </li>
-                                        <li>
-                                            <span class="task-id">#A101-156876</span>
-                                            <span class="task-title">UI 제작 발표</span>
-                                            <span class="status inprogress"><span class="dot"></span>In Progress</span>
-                                            <span class="task-date">오늘</span>
-                                            <button class="btn btn-gray">일정 보기</button>
-                                        </li>
+                                        {% endif %}
+                                        {% endfor %}
                                     </ul>
                                 </div>
                             </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
