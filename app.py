@@ -140,7 +140,6 @@ def example():
 
 @app.route("/mypage")
 def mypage():
-    session["user_id"] = "6853aebf690a71fa9ad4b6e3"
     user_id = ObjectId(session.get("user_id"))
     # user 개인 정보 구성
     user = user_collection.find_one({"_id": user_id})
