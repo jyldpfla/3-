@@ -28,6 +28,7 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
+    session["user_id"] = "6854be045d8c554194fe197b"
     user_id = session.get("user_id")
     if user_id:
         user = user_collection.find_one({"_id": ObjectId(user_id)})
@@ -37,8 +38,6 @@ def inject_user():
 
 @app.route("/")
 def home():
-    session["user_id"] = "6854be045d8c554194fe197b"
-    
     projects = list(project_collection.find({}))
     project_pipeline = [
         {
