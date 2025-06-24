@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>프로젝트 상세보기 수정</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/page.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  {% include 'components/nav.html' %}
+
+  <main>
+    <h2><span class="bar"></span> 프로젝트 상세보기 수정</h2>
+    <div class="container">
+      <div class="header">
+        <div class="buttons">
+          <button type="submit" form="editForm">수정 완료</button>
+          <button type="button" onclick="window.location.href='/projectDatil'">뒤로 가기</button>
+        </div>
+      </div>
+
+      <div class="main">
+        <form class="left-form" id="editForm" method="POST" action="/projectUpdate/{{ project._id }}">
+          <label>프로젝트명 <input type="text" name="name" value="{{ project.title }}"></label>
+          <label>클라이언트 <input type="text" name="client" value="{{ project.client }}"></label>
+          <label>담당자
+            <select name="project_manager" required>
+            {% for user in user_list %}
+              <option value="{{ user['_id'] }}" {{"selected" if project.manager_name == user['name']}}>{{ user['name'] }}</option>
+            {% endfor %}
+          </select></label>
+          <label>시작일 
+    <input type="date" name="start" value="{{ project.start_date[:10] if project.start_date }}">
+    </label>
+    <label>마감일 
+    <input type="date" name="end" value="{{ project.end_date[:10] if project.end_date }}">
+    </label>
+
+          <label>진행 상태
+            <select name="status">
+              <option value="진행중" {% if project.status == '진행중' %}selected{% endif %}>진행중</option>
+              <option value="진행 대기" {% if project.status == '진행 대기' %}selected{% endif %}>진행 대기</option>
+              <option value="완료" {% if project.status == '완료' %}selected{% endif %}>완료</option>
+            </select>
+          </label>
+        </form>
+
+        <div class="right-box">
+          <label>프로젝트 설명</label>
+          <textarea name="description" form="editForm">{{ project.description or '' }}</textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  {% include 'components/footer.html' %}
+</body>
+</html>

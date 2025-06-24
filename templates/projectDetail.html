@@ -4,42 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
-    <link rel="stylesheet" href="../static/assets/css/projectDetail.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/projectDetail.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>프로잭트 상세페이지</title>
+    <title>프로젝트 상세보기</title>
 </head>
 <body>
   {% include 'components/nav.html' %}
   <main class="container">
     <h2>| 프로젝트 상세보기</h2>
-
     <div class="btn-group">
-      <button class="btn">+ 팀원 관리</button>
-      <button class="btn">✏️ 수정</button>
-      <button class="btn">🗑️ 프로젝트 제거</button>
-      <button class="btn">뒤로 가기</button>
-    </div>
+      <button class="btn" onclick="window.location.href='/teamMemberManage'">+ 팀원 관리</button>
+      <button class="btn" onclick="window.location.href='/projectUpdate/{{ project._id }}'">수정</button>
+      <form action="/projectDelete/{{ project._id }}" method="POST"
+      onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display: inline;">
+    <button type="submit" class="btn danger">프로젝트 제거</button>
+</form>
 
+      <button class="btn" onclick="window.location.href='/projectList'">뒤로 가기</button>
+    </div>
     <div class="detail-layout">
       <div class="project-info">
-        <p><strong>프로젝트명</strong> UI 디자인</p>
-        <p><strong>클라이언트</strong> UK Holdings</p>
-        <p><strong>담당자</strong> 홍길동</p>
-        <p><strong>팀원</strong> 김길동, 이길동, 박길동</p>
-        <p><strong>시작일</strong> 2025-06-05</p>
-        <p><strong>마감일</strong> 2025-06-24</p>
-        <p><strong>진행 상태</strong> <span class="status ongoing">진행 중</span></p>
-      </div>
-
-      <div class="project-description">
-        <p>
-          사용자 경험을 극대화하기 위해 직관적이고 일관된 UI(User Interface) 설계를 진행하였습니다.
-          정보의 위계와 사용자의 행동 흐름을 고려하여, 화면 구성과 인터페이션 요소(버튼, 아이콘, 폰트, 색상 등)를 체계적으로 배치하였으며,
-          접근성과 가독성 또한 함께 고려하였습니다.
+        <p><strong>프로젝트명</strong> {{ project.title }}</p>
+        <p><strong>클라이언트</strong> {{ project.client }}</p>
+        <p><strong>담당자</strong> {{ project.manager_name }}</p>
+        <p><strong>팀원</strong> {{ project.team | join(', ') | default('미정') }}</p>
+        <p><strong>시작일</strong> {{ project.start_date }}</p>
+        <p><strong>마감일</strong> {{ project.end_date }}</p>
+        <p><strong>진행 상태</strong>
+          <span class="status {% if project.status == '진행중' %}ongoing{% elif project.status == '완료' %}done{% else %}waiting{% endif %}">
+            {{ project.status }}
+          </span>
         </p>
+      </div>
+      <div class="project-description">
+        <p>{{ project.description or '설명이 없습니다.' }}</p>
       </div>
     </div>
   </main>
+  {% include 'components/footer.html' %}
 </body>
-{% include 'components/footer.html' %}
 </html>

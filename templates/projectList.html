@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/list.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>3조 Main</title>
+</head>
+<body>
+    {% include 'components/nav.html' %}
+
+    <main>
+    <section class="status-cards">
+    <div class="card">
+      <p>진행 완료</p>
+      <h2>{{ done|length}}</h2> 
+    </div>
+    <div class="card active">
+      <p>진행중</p>
+      <h2>{{ doing|length}}</h2>
+    </div>
+    <div class="card">
+      <p>진행 대기</p>
+    <h2>{{ wait|length}}</h2>
+    </div>
+</section>
+<button class="add-btn" onclick="window.location.href='{{ url_for('projectAdd') }}'">＋ 프로젝트 추가</button>
+
+
+  <section class="project-table">
+    <table>
+      <thead>
+        <tr>
+          <th>프로젝트명</th>
+          <th>클라이언트</th>
+          <th>담당자명</th>
+          <th>시작일</th>
+          <th>마감일</th>
+          <th>진행 상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in project_list %}
+          <tr>
+            <td>
+  <a href="/projectDetail/{{ project['_id'] }}">{{ project["title"] }}</a>
+</td>
+            <td>{{ project["client"] }}</td>
+            <td>{{ project["project_manager"] }}</td>
+            <td>{{ project["start_date"] or '미정' }}</td>
+            <td>{{ project["end_date"] or '미정' }}</td>
+
+            <td>{{ project["status"] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+    </main>
+
+    {% include 'components/footer.html' %}
+</body>
+</html>
