@@ -25,10 +25,19 @@
         <form class="left-form" id="editForm" method="POST" action="/projectUpdate/{{ project._id }}">
           <label>프로젝트명 <input type="text" name="name" value="{{ project.title }}"></label>
           <label>클라이언트 <input type="text" name="client" value="{{ project.client }}"></label>
-          <label>담당자 <input type="text" value="{{ project.manager_name }}" disabled></label>
-          <label>팀원 <input type="text" name="members" value="{{ project.members or '' }}"></label>
-          <label>시작일 <input type="date" name="start" value="{{ project['schedule.start_date'] }}"></label>
-          <label>마감일 <input type="date" name="end" value="{{ project['schedule.end_date'] }}"></label>
+          <label>담당자
+            <select name="project_manager" required>
+            {% for user in user_list %}
+              <option value="{{ user['_id'] }}" {{"selected" if project.manager_name == user['name']}}>{{ user['name'] }}</option>
+            {% endfor %}
+          </select></label>
+          <label>시작일 
+    <input type="date" name="start" value="{{ project.start_date[:10] if project.start_date }}">
+    </label>
+    <label>마감일 
+    <input type="date" name="end" value="{{ project.end_date[:10] if project.end_date }}">
+    </label>
+
           <label>진행 상태
             <select name="status">
               <option value="진행중" {% if project.status == '진행중' %}selected{% endif %}>진행중</option>

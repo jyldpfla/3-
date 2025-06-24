@@ -49,8 +49,9 @@
 </td>
             <td>{{ project["client"] }}</td>
             <td>{{ project["project_manager"] }}</td>
-            <td>{{ project["schedule.start_date"] }}</td>
-            <td>{{ project["schedule.end_date"] }}</td>
+            <td>{{ project["start_date"] or '미정' }}</td>
+            <td>{{ project["end_date"] or '미정' }}</td>
+
             <td>{{ project["status"] }}</td>
           </tr>
         {% endfor %}

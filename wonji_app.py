@@ -29,15 +29,29 @@ def home():
 def example():
     return render_template("/example.html")
 
+def to_str(date):
+    if not date:
+        return ""
+    return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
+
 @app.route("/projectList")
 def projectList():
     project_list = list(project_collection.find())
     done = [t for t in project_list if t['status'] == '완료']
     doing = [t for t in project_list if t['status'] == '진행중']
     wait = [t for t in project_list if t['status'] == '진행 대기']
+
     for project in project_list:
-        project["project_manager"] = user_collection.find_one({"_id": project["project_manager"]})["name"]
+        # 담당자 이름 처리
+        manager = user_collection.find_one({"_id": project["project_manager"]})
+        project["project_manager"] = manager["name"] if manager else "알 수 없음"
+
+        # ✅ 날짜 포맷 처리
+        project["start_date"] = to_str(project.get("start_date"))
+        project["end_date"] = to_str(project.get("end_date"))
+
     return render_template("/projectList.html", project_list=project_list, done=done, doing=doing, wait=wait)
+
 
 @app.route("/projectAdd", methods=["GET", "POST"])
 def projectAdd():
@@ -46,10 +60,11 @@ def projectAdd():
             "title": request.form.get("name"), 
             "client": request.form.get("client"),  
             "project_manager": ObjectId(request.form.get("project_manager")), 
-            "schedule.start_date": request.form.get("start"), 
-            "schedule.end_date": request.form.get("end"), 
+            "start_date": request.form.get("start"), 
+            "end_date": request.form.get("end"), 
             "status": request.form.get("status"),  
-            "description": request.form.get("description")  
+            "description": request.form.get("description"),
+            "schedule_id": None
         }
         project_collection.insert_one(project)  
         return redirect(url_for('projectList')) 
@@ -66,26 +81,48 @@ def projectUpdate(project_id):
             {"$set": {
                 "title": request.form.get("name"),
                 "client": request.form.get("client"),
-                "schedule.start_date": request.form.get("start"),
-                "schedule.end_date": request.form.get("end"),
+                "start_date": request.form.get("start"),
+                "end_date": request.form.get("end"),
                 "status": request.form.get("status"),
-                "description": request.form.get("description")
+                "description": request.form.get("description"),
+                "schedule_id": None
             }}
         )
         return redirect(url_for('projectDetail', project_id=project_id))
     project = project_collection.find_one({"_id": ObjectId(project_id)})
     manager = user_collection.find_one({"_id": project["project_manager"]})["name"]
     project["manager_name"] = manager
+    user_list = list(user_collection.find({"position": "팀장"}))
 
-    return render_template("/projectUpdate.html", project=project)
+    return render_template("/projectUpdate.html", project=project, user_list=user_list)
 
 
-@app.route('/projectDetail/<project_id>') # 원지님 코드
+@app.route('/projectDetail/<project_id>')
 def projectDetail(project_id):
     project = project_collection.find_one({"_id": ObjectId(project_id)})
-    print(project)
+
+    # 🔧 담당자 이름
     manager = user_collection.find_one({"_id": project["project_manager"]})["name"]
-    project["manager_name"] =  manager
+    project["manager_name"] = manager
+
+    # ✅ 날짜 포맷 처리
+    def to_str(date):
+        if not date:
+            return ""
+        return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
+
+    project["start_date"] = to_str(project.get("start_date"))
+    project["end_date"] = to_str(project.get("end_date"))
+
+    # 🔧 팀원 처리
+    team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
+    project["team"] = [
+        user["name"] for user in user_collection.find(
+            {"_id": {"$in": team_map.get(ObjectId(project_id), [])}},
+            {"_id": 0, "name": 1}
+        )
+    ]
+
     return render_template("/projectDetail.html", project=project)
 
 @app.route("/projectDelete/<project_id>", methods=["POST"])
@@ -96,3 +133,4 @@ def projectDelete(project_id):
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
+    
