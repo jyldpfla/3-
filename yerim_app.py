@@ -25,11 +25,18 @@ board_collection = db["board"]
 team_collection = db["team"]
 timeline_collection = db["timeline"]
 
+@app.context_processor
+def inject_user():
+    user_id = session.get("user_id")
+    if user_id:
+        user = user_collection.find_one({"_id": ObjectId(user_id)})
+        return dict(user_info=user)
+    else:
+        return redirect(url_for("/"))
+
 @app.route("/")
 def home():
-    session["user_id"] = "6853aebf690a71fa9ad4b6e3"
-    user_id = ObjectId(session.get("user_id"))
-    user = user_collection.find_one({"_id": user_id})
+    session["user_id"] = "6854be045d8c554194fe197b"
     
     projects = list(project_collection.find({}))
     project_pipeline = [
@@ -111,12 +118,11 @@ def home():
         ]
     
     # 일정 가져오기
-    target_date = datetime.now(timezone.utc)  # 또는 특정 날짜: datetime(2025, 7, 1, tzinfo=timezone.utc)
+    target_date = datetime.strptime("2025-06-24", "%Y-%m-%d")
 
+    # 날짜 범위 설정
     start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
     end = start + timedelta(days=2)
-    print(f"Start: {start}, End: {end}")
-    print(timeline_collection.find_one({"project_id": { "$ne": None }})["end_date"], type(timeline_collection.find_one({"project_id": { "$ne": None }})["end_date"]))
     timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}))
     grouped_timeline = defaultdict(list) # defaultdict: key값 없을 때도 바로 append 가능하도록 설정
     
@@ -126,7 +132,7 @@ def home():
         
         grouped_timeline[t["end_date"]].append(t)
     
-    return render_template("/index.html", user_info=user, projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"))
+    return render_template("/index.html", projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"))
 
 @app.route("/example")
 def example():
@@ -229,7 +235,6 @@ def mypage():
         t["end_date"] = datetime.strftime(t["end_date"], "%Y-%m-%d")
     personal_timeline = [t for t in timeline if t['project_id'] == None] # 개인 일정
     project_timeline = [t for t in timeline if t['project_id'] in project_id_list]# 프로젝트 내 일정
-    
     for p in project_timeline:
         if p["status"] in ["미완료", "지연", "중단"]:
             p["status"] = "To do"
@@ -238,7 +243,7 @@ def mypage():
         else:
             p["status"] = "Done"
     
-    return render_template("/my_page.html", user_info=user, todo=todo, done=done, doing=doing, personal_timeline=personal_timeline, project_timeline=project_timeline)
+    return render_template("/my_page.html", todo=todo, done=done, doing=doing, personal_timeline=personal_timeline, project_timeline=project_timeline)
 
 @app.route("/mypage/add_task", methods=["POST"])
 def add_task():
