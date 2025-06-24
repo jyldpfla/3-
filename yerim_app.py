@@ -27,6 +27,7 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
+    session["user_id"] = "6854be045d8c554194fe197b"
     user_id = session.get("user_id")
     if user_id:
         user = user_collection.find_one({"_id": ObjectId(user_id)})
@@ -36,8 +37,6 @@ def inject_user():
 
 @app.route("/")
 def home():
-    session["user_id"] = "6854be045d8c554194fe197b"
-    
     projects = list(project_collection.find({}))
     project_pipeline = [
         {
@@ -140,7 +139,6 @@ def example():
 
 @app.route("/mypage")
 def mypage():
-    session["user_id"] = "6853aebf690a71fa9ad4b6e3"
     user_id = ObjectId(session.get("user_id"))
     # user 개인 정보 구성
     user = user_collection.find_one({"_id": user_id})
