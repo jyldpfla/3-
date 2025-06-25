@@ -93,22 +93,6 @@ def projectAdd():
             "schedule_id": None
         }
         result = project_collection.insert_one(project)
-        new_project_id = result.inserted_id
-
-        # ✅ timeline 일정 자동 생성
-        timeline_doc = {
-            "title": f"[{title}] 프로젝트 일정",
-            "user_id": ObjectId(manager_id),
-            "start_date": start_date,
-            "end_date": end_date,
-            "type": "프로젝트",
-            "status": status,
-            "content": description,
-            "project_id": new_project_id,
-            "member": [],
-            "updated_at": datetime.utcnow()
-        }
-        timeline_collection.insert_one(timeline_doc)
 
         return redirect(url_for('projectList'))
 
@@ -143,15 +127,6 @@ def projectUpdate(project_id):
                 "status": status,
                 "description": description,
                 "schedule_id": None
-            }}
-        )
-
-        # 🔁 타임라인 일정도 함께 수정
-        timeline_collection.update_many(
-            {"project_id": ObjectId(project_id)},
-            {"$set": {
-                "start_date": start_date,
-                "end_date": end_date
             }}
         )
 
