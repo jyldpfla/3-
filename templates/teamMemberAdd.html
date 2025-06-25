@@ -52,6 +52,7 @@
       const users = {{ users | tojson | safe }};
     </script>
     <script src="{{ url_for('static', filename='js/teamMemberAdd.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
     {% include 'components/footer.html' %}
   </body>
 </html>
