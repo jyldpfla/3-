@@ -154,7 +154,7 @@ def example():
 
 @app.route("/mypage")
 def mypage():
-    session["user_id"] = "6853aebf690a71fa9ad4b6e3"
+    session["user_id"] = "6854d66be1c74b0479be255a"
     user_id = ObjectId(session.get("user_id"))
     # user 개인 정보 구성
     user = user_collection.find_one({"_id": user_id})
@@ -425,10 +425,16 @@ def teamMemberManage(project_id):
             {"_id": {"$in": member_ids}}, {"name": 1, "email": 1, "role": 1}
         )
     }
+    
+    query = request.args.get("q", "").lower()
+    
     members = []
     for i, member_id in enumerate(member_ids):
         user = user_info_map.get(str(member_id))
         if user:
+            if query and query not in user.get("name", "").lower() and query not in user.get("email", "").lower():
+                continue
+            
             members.append({
                 "_id": str(member_id),
                 "name": user.get("name"),

@@ -13,6 +13,10 @@
   {% include 'components/nav.html' %}
   <main class="container">
     <h2>| 👥팀원 관리</h2>
+        <form method="GET" action="{{ url_for('teamMemberManage', project_id=project_id) }}">
+      <input type="text" class="q" name="q" placeholder="이름 또는 이메일로 검색" value="{{ request.args.get('q', '') }}">
+      <button type="submit" class="btn btn-gray">검색</button>
+        </form>
     <div class="btn-box">
       <button class="btn btn-blue" onclick="location.href='{{ url_for('teamMemberAdd', project_id=project_id) }}'">+ 팀원 추가</button>
       <button class="btn btn-blue" onclick="window.history.back()">뒤로 가기</button>

@@ -35,12 +35,13 @@ h2 {
 
 .member-table {
     text-align: center;
-    width: 100%;
+    width: 1200px;
     border-collapse: collapse;
     font-size: 16px;
 }
 
 .member-table thead {
+    width: 1200px;
     background: #f0f6fc;
     text-align: left;
 }
@@ -48,6 +49,7 @@ h2 {
 .member-table th,
 .member-table td {
     text-align: center;
+    width: 1200px;
     padding: 15px;
     border-bottom: 1px solid #ddd;
     vertical-align: middle;
@@ -96,4 +98,30 @@ h2 {
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    /* 반응형 대응 */
+    gap: 10px;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.q {
+    width: 240px;
+    height: 38px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
