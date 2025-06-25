@@ -125,3 +125,25 @@ h2 {
     border-radius: 8px;
     box-sizing: border-box;
 }
+
+.member-action-box {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.member-action-box form {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.status-select {
+    min-width: 80px;
+    margin-right: 4px;
+}
+
+.btn.btn-gray {
+    /* 기존 버튼 스타일이 있다면 여기에 추가 */
+    vertical-align: middle;
+}

@@ -6,6 +6,7 @@ import os
 from bson import ObjectId
 from datetime import datetime, timedelta
 from pytz import timezone
+from math import ceil
 
 # env 파일 로드
 load_dotenv()
@@ -28,7 +29,7 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    session["user_id"] = "6854be045d8c554194fe197b"
+    session["user_id"] = "6853aebf690a71fa9ad4b6e3"
     user_id = session.get("user_id")
     if user_id:
         user = user_collection.find_one({"_id": ObjectId(user_id)})
@@ -323,7 +324,24 @@ def show_notifications():
         else:
             note["created_at_kst"] = "시간 없음"
 
-    return render_template("notifications.html", notifications=notifications, current_page="notifications")
+    # 페이지네이션을 위한 코드 추가
+    per_page = 10  # 한 페이지에 보여줄 알림 수
+    page = int(request.args.get("page", 1))
+    total_notifications = len(notifications)
+    total_pages = ceil(total_notifications / per_page)
+
+    # 현재 페이지에 해당하는 알림만 추출
+    start = (page - 1) * per_page
+    end = start + per_page
+    notifications = notifications[start:end]
+
+    return render_template(
+        'notifications.html',
+        notifications=notifications,
+        page=page,
+        total_pages=total_pages,
+        current_page='notifications'
+    )
 
 @app.route("/notifications/read/<notification_id>", methods=["POST"])
 def mark_single_notification_read(notification_id):
@@ -483,6 +501,23 @@ def teamMemberUpdate(project_id, member_id):
         {"project_id": ObjectId(project_id)},
         {"$set": {"status": team_doc["status"]}}
     )
+
+    # --- 알림 생성 코드 추가 ---
+    project_doc = project_collection.find_one({"_id": ObjectId(project_id)})
+    manager_id = project_doc.get("project_manager")
+    manager = user_collection.find_one({"_id": manager_id})
+    member = user_collection.find_one({"_id": ObjectId(member_id)})
+    message = f"{manager['name']}님이 프로젝트 '{project_doc['title']}'에서 {member['name']}님의 상태를 '{new_status}'(으)로 변경했습니다."
+    notification = {
+        "user_id": ObjectId(member_id),
+        "sender_id": manager_id,
+        "message": message,
+        "project_id": ObjectId(project_id),
+        "read": False,
+        "created_at": datetime.utcnow()
+    }
+    db.notifications.insert_one(notification)
+
     return redirect(url_for("teamMemberManage", project_id=project_id))
 
 @app.route('/teamMemberDelete/<project_id>/<member_id>', methods=["POST"])

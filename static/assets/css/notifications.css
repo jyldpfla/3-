@@ -9,7 +9,7 @@
             padding: 1rem;
             border-bottom: 1px solid #eee;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
         }
         .notification-item.unread {
@@ -24,4 +24,12 @@
             text-align: center;
             margin: 2rem;
             color: #aaa;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+                }
+        .pagination > * {
+            margin: 0 5px; /* 좌우 5px씩 = 버튼 사이 10px */
         }
