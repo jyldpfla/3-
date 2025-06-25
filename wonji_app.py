@@ -104,7 +104,7 @@ def projectAdd():
             "type": "프로젝트",
             "status": status,
             "content": description,
-            "project_Id": new_project_id,
+            "project_id": new_project_id,
             "member": [],
             "updated_at": datetime.utcnow()
         }
@@ -148,7 +148,7 @@ def projectUpdate(project_id):
 
         # 🔁 타임라인 일정도 함께 수정
         timeline_collection.update_many(
-            {"project_Id": ObjectId(project_id)},
+            {"project_id": ObjectId(project_id)},
             {"$set": {
                 "start_date": start_date,
                 "end_date": end_date
