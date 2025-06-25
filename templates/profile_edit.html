@@ -46,12 +46,13 @@
       <input type="text" name="position" class="signup-input" placeholder="직책" value="">
       <input type="text" name="department" class="signup-input" placeholder="부서명" value="">
 
-      <!-- 버튼 영역 -->
+     <!-- 버튼 영역 -->
       <div class="profile-btn-group">
-        <button type="submit" class="btn-fixed complete-btn">완료</button>
-        <a href="#" class="btn-fixed delete-btn">회원탈퇴</a>
-      </div>
+      <button type="submit" class="btn-fixed complete-btn">완료</button>
     </form>
+    <!-- ✅ 탈퇴 버튼 링크 연결 -->
+     <a href="{{ url_for('delete_account') }}" class="btn-fixed delete-btn">회원탈퇴</a>
+     </div>
   </main>
 
   {% include 'components/footer.html' %}

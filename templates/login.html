@@ -28,11 +28,11 @@
     <form method="POST" class="login-form">
       <input type="text" name="username" class="login-input" placeholder="아이디" required>
       <input type="password" name="password" class="login-input" placeholder="비밀번호" required>
-      <button type="submit" class="login-btn">다음</button>
+      <button type="submit" class="login-btn">로그인</button>
     </form>
 
-    <div class="login-footer">
-      <a href="#">회원가입</a> | <a href="#">회원탈퇴</a>
+    <div class="login-footer-left">
+      <a href="{{ url_for('signup') }}">회원가입</a>
     </div>
   </main>
 

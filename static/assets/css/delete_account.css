@@ -1,0 +1,54 @@
+.delete-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.delete-box {
+  background-color: #ffffff;
+  padding: 60px 40px;
+  border-radius: 16px;
+  text-align: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.delete-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 48px;
+  line-height: 1.7;
+}
+
+.delete-text {
+  font-size: 20px;
+  color: #374151;
+  line-height: 2;
+  margin-bottom: 80px;
+  word-break: keep-all;
+}
+
+.no-wrap {
+  white-space: nowrap;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.delete-btn {
+  background-color: #2563eb;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 16px 0;
+  border: none;
+  border-radius: 12px;
+  width: 400px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.delete-btn:hover {
+  opacity: 0.8;
+}

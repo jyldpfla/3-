@@ -1,18 +1,11 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Noto Sans KR', sans-serif;
-  background-color: #ffffff;
-}
-
 /* 왼쪽 상단 고정 로그인 문구 */
 .login-title-left {
   margin-left: 40px;
-  margin-top: 20px;
+  margin-top: 8px;
 }
 
 .login-title {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 700;
   color: #111827;
   padding-left: 12px;
@@ -28,7 +21,7 @@ body {
   justify-content: center;
   min-height: 60vh;
   gap: 24px;
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 /* 폼 정렬 */
@@ -40,30 +33,36 @@ body {
 
 /* 입력창 */
 .login-input {
-  width: 400px;
-  padding: 14px 16px;
-  font-size: 16px;
+  width: 480px;
+  padding: 20px 20px;
+  font-size: 20px;
   border: 2px solid #2563EB;
   border-radius: 16px;
   outline: none;
   box-sizing: border-box;
 }
 
+/* ✅ placeholder 크기 통일 */
+.login-input::placeholder {
+  font-size: 15px;
+  color: #888;
+}
+
 /* 버튼 */
 .login-btn {
-  width: 400px;
+  width: 480px;
   background-color: #2563EB;
   color: #ffffff;
-  font-size: 16px;
+  font-size: 15px;   
   font-weight: 600;
-  padding: 14px;
+  padding: 20px;
   border: none;
   border-radius: 16px;
   cursor: pointer;
 }
 
 .login-btn:hover {
-  background-color: #1D4ED8;
+  opacity: 0.8;
 }
 
 /* 에러 메시지 */
@@ -76,14 +75,16 @@ body {
   border-radius: 10px;
 }
 
-/* 하단 링크 */
-.login-footer {
-  text-align: center;
-  font-size: 14px;
+/* 회원가입 링크 왼쪽 정렬 */
+.login-footer-left {
+  width: 480px;
+  text-align: left;
+  font-size: 16px;  
+  margin-top: -8px;
 }
 
-.login-footer a {
+.login-footer-left a {
   color: #111;
   text-decoration: none;
-  margin: 0 8px;
+  font-weight: 500;
 }

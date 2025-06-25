@@ -78,7 +78,7 @@ def signup():
         return redirect(url_for("login"))
     return render_template("signup.html")
 
-# ✅ 개인정보 수정 (✔ 중복 없이 하나만)
+# ✅ 개인정보 수정
 @app.route("/profile_edit", methods=["GET", "POST"])
 @login_required
 def profile_edit():
@@ -120,6 +120,17 @@ def profile_edit():
 
     return render_template("profile_edit.html", user=user)
 
+# ✅ 회원탈퇴
+@app.route("/delete_account", methods=["GET", "POST"])
+@login_required
+def delete_account():
+    username = session.get("username")
+    if request.method == "POST":
+        user_collection.delete_one({"username": username})
+        session.clear()
+        return redirect(url_for("login"))
+    return render_template("delete_account.html", username=username)
+
 # ✅ 개발용 테스트 로그인
 @app.route("/dev_login")
 def dev_login():
@@ -128,4 +139,4 @@ def dev_login():
 
 # ✅ 실행
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True)
