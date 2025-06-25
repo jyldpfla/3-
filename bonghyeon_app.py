@@ -1,23 +1,25 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from pymongo import MongoClient
+from bson import ObjectId
 from dotenv import load_dotenv
 from functools import wraps
+from collections import OrderedDict
+from datetime import date
 import os
+import re
 
-# ✅ .env 파일 로드 및 MongoDB 연결
+# ✅ 환경변수 로드 및 MongoDB 연결
 load_dotenv()
 user_env = os.getenv("MONGO_USER").strip('"')
-
 if not user_env or ":" not in user_env:
     raise ValueError("❌ MONGO_USER 환경변수가 없거나 '아이디:비밀번호' 형식이 아님")
 
 username, password = user_env.split(":")
-uri = f"mongodb+srv://{username}:{password}@team3.fxbwcnh.mongodb.net/?retryWrites=true&w=majority"
+uri = f"mongodb+srv://{username}:{password}@team3.fxbwcnh.mongodb.net/team3?retryWrites=true&w=majority"
 client = MongoClient(uri)
 db = client["team3"]
 user_collection = db["users"]
 
-# ✅ Flask 앱 설정
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
@@ -25,7 +27,7 @@ app.secret_key = 'your_secret_key'
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if "username" not in session:
+        if "user_id" not in session:
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated_function
@@ -34,17 +36,26 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-    return render_template("index.html", username=session["username"])
+    user = user_collection.find_one({"_id": ObjectId(session["user_id"])})
+    return render_template("index.html", user=user)
 
 # ✅ 로그인
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        user_id = request.form["username"]
-        pw = request.form["password"]
-        user = user_collection.find_one({"username": user_id, "password": pw})
+        user_id_str = request.form.get("user_id")
+        pw = request.form.get("password")
+
+        try:
+            user = user_collection.find_one({
+                "_id": ObjectId(user_id_str),
+                "userPassword": pw
+            })
+        except Exception:
+            user = None
+
         if user:
-            session["username"] = user_id
+            session["user_id"] = str(user["_id"])
             return redirect(url_for("index"))
         else:
             return render_template("login.html", error="아이디 또는 비밀번호가 틀렸습니다.")
@@ -53,89 +64,115 @@ def login():
 # ✅ 로그아웃
 @app.route("/logout")
 def logout():
-    session.pop("username", None)
+    session.clear()
     return redirect(url_for("login"))
 
-# ✅ 마이페이지
+# ✅ 마이페이지 (현재는 로그인으로 리다이렉트)
 @app.route("/mypage")
 @login_required
 def mypage():
-    return render_template("mypage.html", username=session["username"])
+    return redirect(url_for("login"))
 
 # ✅ 회원가입
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        new_user = {
-            "username": request.form["username"],
-            "password": request.form["password"],
-            "name": request.form["name"],
-            "email": f"{request.form['email_id']}@{request.form['email_domain']}",
-            "phone": request.form["phone"],
-            "department": request.form["department"]
-        }
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+
+        if password != confirm_password:
+            error = "비밀번호와 비밀번호 확인이 일치하지 않습니다."
+            return render_template("signup.html", error=error)
+
+        email_id = request.form["email_id"]
+        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
+
+        if not email_domain:
+            error = "이메일 도메인을 선택하거나 입력해주세요."
+            return render_template("signup.html", error=error)
+
+        if "@" in email_domain or not re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email_domain):
+            error = "올바른 이메일 도메인 형식이 아닙니다. 예: example.com"
+            return render_template("signup.html", error=error)
+
+        full_email = f"{email_id}@{email_domain}"
+
+        if not re.match(r"^[^@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", full_email):
+            error = "올바른 이메일 형식이 아닙니다. 예: example@gmail.com"
+            return render_template("signup.html", error=error)
+
+        if user_collection.find_one({"email": full_email}):
+            error = "이미 등록된 이메일입니다."
+            return render_template("signup.html", error=error)
+
+        new_user = OrderedDict([
+            ("email", full_email),
+            ("name", request.form["name"]),
+            ("userPassword", password),
+            ("role", request.form.get("role", "직원")),
+            ("profile", request.form.get("profile", "")),
+            ("department", request.form["department"]),
+            ("position", request.form["position"]),
+            ("createAt", str(date.today())),
+            ("phone_num", request.form["phone"]),
+            ("Personal_todoId", None),
+            ("BoardId", None)
+        ])
+
         user_collection.insert_one(new_user)
         return redirect(url_for("login"))
+
     return render_template("signup.html")
 
 # ✅ 개인정보 수정
 @app.route("/profile_edit", methods=["GET", "POST"])
 @login_required
 def profile_edit():
-    if request.method == "POST":
-        name = request.form.get("name")
-        password = request.form.get("password")
-        email_id = request.form.get("email_id")
-        email_domain = request.form.get("email_domain")
-        phone = request.form.get("phone")
-        department = request.form.get("department")
-        email = f"{email_id}@{email_domain}"
+    user_id = ObjectId(session["user_id"])
 
+    if request.method == "POST":
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        if password != confirm_password:
+            user = user_collection.find_one({"_id": user_id})
+            error = "비밀번호가 일치하지 않습니다."
+            return render_template("profile_edit.html", user=user, error=error)
+
+        # 이메일 조합
+        email_id = request.form.get("email_id")
+        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
+        email = f"{email_id}@{email_domain}" if email_id and email_domain else ""
+
+        # 업데이트 실행
         user_collection.update_one(
-            {"username": session["username"]},
+            {"_id": user_id},
             {"$set": {
-                "name": name,
-                "password": password,
-                "email": email,
-                "phone": phone,
-                "department": department
+                "name": request.form.get("name"),
+                "userPassword": password,
+                "phone_num": request.form.get("phone"),
+                "department": request.form.get("department"),
+                "position": request.form.get("position"),
+                "role": request.form.get("role"),
+                "profile": request.form.get("profile"),
+                "email": email
             }}
         )
         return redirect(url_for("mypage"))
 
-    user = user_collection.find_one({"username": session["username"]})
-
-    if not user:
-        user = {
-            "username": session["username"],
-            "name": "개발용 유저",
-            "email": "dev@example.com",
-            "phone": "010-1234-5678",
-            "department": "개발팀"
-        }
-        user_collection.insert_one(user)
-
-    if "email" in user and "@" in user["email"]:
-        user["email_id"], user["email_domain"] = user["email"].split("@")
-
+    user = user_collection.find_one({"_id": user_id})
     return render_template("profile_edit.html", user=user)
 
 # ✅ 회원탈퇴
 @app.route("/delete_account", methods=["GET", "POST"])
 @login_required
 def delete_account():
-    username = session.get("username")
+    user_id = ObjectId(session["user_id"])
     if request.method == "POST":
-        user_collection.delete_one({"username": username})
+        user_collection.delete_one({"_id": user_id})
         session.clear()
         return redirect(url_for("login"))
-    return render_template("delete_account.html", username=username)
-
-# ✅ 개발용 테스트 로그인
-@app.route("/dev_login")
-def dev_login():
-    session["username"] = "testuser"
-    return redirect(url_for("profile_edit"))
+    return render_template("delete_account.html")
 
 # ✅ 실행
 if __name__ == "__main__":

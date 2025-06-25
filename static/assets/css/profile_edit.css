@@ -14,22 +14,14 @@
 }
 
 /* 메인 */
-.signup-center.scroll-container {
+.signup-center {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 30px;
   padding-bottom: 100px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.signup-center::-webkit-scrollbar {
-  width: 6px;
-}
-.signup-center::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 4px;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 /* 폼 */
@@ -38,9 +30,18 @@
   flex-direction: column;
   gap: 16px;
   width: 500px;
+  max-width: 90%;
 }
 
-/* 입력 필드 */
+/* 에러 메시지 */
+.signup-error {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* 입력 필드 스타일 */
 .signup-input,
 .signup-input.half,
 select.signup-input {
@@ -52,6 +53,7 @@ select.signup-input {
   outline: none;
   box-sizing: border-box;
   background-color: white;
+  transition: border 0.3s ease;
 }
 
 .signup-input::placeholder,
@@ -60,26 +62,26 @@ select.signup-input {
   color: #888;
 }
 
-/* 이메일 입력 레이아웃 */
+/* 반쪽 입력창 */
+.signup-input.half {
+  width: 300px;
+  max-width: 100%;
+}
+
+/* 이메일 도메인 select와 input 동일 크기 */
+select.signup-input.half,
+#email_domain_input {
+  width: 160px;
+  max-width: 100%;
+}
+
+/* 이메일 영역 */
 .signup-email-wrap {
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: space-between;
-}
-
-/* 이메일 아이디 입력 필드 */
-.email-id-input {
-  width: 300px;
-}
-
-/* 도메인 필드 너비 고정 */
-.signup-input.half {
-  width: 160px;
-}
-
-select.signup-input.half {
-  width: 160px;
+  flex-wrap: wrap;
 }
 
 /* @ 기호 */
@@ -89,18 +91,7 @@ select.signup-input.half {
   color: #333;
 }
 
-/* 이메일 도메인 영역 (select + 직접입력 input) */
-.email-domain-container {
-  display: flex;
-  gap: 8px;
-}
-
-/* 숨김 클래스 */
-.hidden {
-  display: none;
-}
-
-/* select 화살표 제거 + 커스텀 아이콘 */
+/* select 모양 커스터마이징 */
 select.signup-input {
   appearance: none;
   -webkit-appearance: none;
@@ -117,13 +108,13 @@ select::-ms-expand {
   display: none;
 }
 
-/* 완료/탈퇴 버튼 영역 */
+/* 버튼 그룹 */
 .profile-btn-group {
   display: flex;
-  justify-content: space-between;
   gap: 16px;
-  width: 500px;
-  margin-top: 8px;
+  margin-top: 24px;
+  width: 100%;
+  max-width: 500px;
 }
 
 /* 완료 버튼 */
@@ -164,4 +155,30 @@ select::-ms-expand {
 
 .btn-fixed.delete-btn:hover {
   opacity: 0.8;
+}
+
+/* 숨김/표시 상태 */
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: inline-block !important;
+}
+
+/* 반응형 개선 */
+@media (max-width: 600px) {
+  .signup-input.half {
+    width: 100%;
+  }
+
+  .signup-email-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .signup-form {
+    width: 100%;
+    padding: 0 20px;
+  }
 }

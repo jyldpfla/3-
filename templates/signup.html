@@ -7,82 +7,168 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/signup.css') }}">
+  <style>
+    #email_domain_input { display: none; }
+    .hidden { display: none !important; }
+    .visible { display: inline-block !important; }
+  </style>
 </head>
 <body>
 
-  {% include 'components/nav.html' %}
+{% include 'components/nav.html' %}
 
-  <div class="signup-title-left">
-    <h2 class="signup-title">회원가입</h2>
-  </div>
+<div class="signup-title-left">
+  <h2 class="signup-title">회원가입</h2>
+</div>
 
-  <main class="signup-center scroll-container">
-    <form method="POST" class="signup-form">
-      <input type="text" name="username" class="signup-input" placeholder="아이디" required>
-      <input type="password" name="password" class="signup-input" placeholder="비밀번호를 입력하세요" required>
-      <input type="password" name="confirm_password" class="signup-input" placeholder="비밀번호 확인" required>
+<main class="signup-center">
+  <form method="POST" class="signup-form" onsubmit="return validateForm()">
+    {% if error %}
+      <div class="signup-error">{{ error }}</div>
+    {% endif %}
 
-      <!-- 이메일 -->
-      <div class="signup-email-wrap">
-        <input type="text" name="email_id" class="signup-input half" placeholder="이메일" required>
-        <span class="at-symbol">@</span>
-        <div class="email-domain-container">
-          <select id="email_domain_select" class="signup-input half" onchange="toggleEmailInput(this)">
-            <option value="">선택하세요</option>
-            <option value="gmail.com">gmail.com</option>
-            <option value="naver.com">naver.com</option>
-            <option value="daum.net">daum.net</option>
-            <option value="hotmail.com">hotmail.com</option>
-            <option value="kakao.com">kakao.com</option>
-            <option value="직접입력">직접 입력</option>
-          </select>
-          <input type="text" name="email_domain" id="email_domain_input" class="signup-input half hidden" placeholder="직접 입력">
-        </div>
-      </div>
+    <input type="text" name="username" class="signup-input" placeholder="아이디" required>
+    <input type="password" name="password" class="signup-input" placeholder="비밀번호를 입력하세요" required>
+    <input type="password" name="confirm_password" class="signup-input" placeholder="비밀번호 확인" required>
 
-      <input type="text" name="name" class="signup-input" placeholder="사용자 이름" required>
-      <input type="text" name="phone" class="signup-input" placeholder="전화번호" required>
-      <input type="text" name="position" class="signup-input" placeholder="직책" required>
-      <input type="text" name="department" class="signup-input" placeholder="부서명" required>
+    <!-- 이메일 입력 -->
+    <div class="signup-email-wrap">
+      <input type="text" name="email_id" class="signup-input half" placeholder="이메일" required>
+      <span class="at-symbol">@</span>
 
-      <button type="submit" class="signup-btn">완료</button>
-    </form>
-  </main>
+      <select id="email_domain_select" name="email_domain" class="signup-input half" onchange="toggleEmailInput(this)" required>
+        <option value="">선택하세요</option>
+        <option value="gmail.com">gmail.com</option>
+        <option value="naver.com">naver.com</option>
+        <option value="daum.net">daum.net</option>
+        <option value="hotmail.com">hotmail.com</option>
+        <option value="kakao.com">kakao.com</option>
+        <option value="직접입력">직접 입력</option>
+      </select>
 
-  {% include 'components/footer.html' %}
+      <input type="text" id="email_domain_input" name="email_domain_input" class="signup-input half" placeholder="직접 입력">
+    </div>
 
-  <script>
-    function toggleEmailInput(selectEl) {
-      const inputEl = document.getElementById("email_domain_input");
-      const selectBox = document.getElementById("email_domain_select");
+    <input type="text" name="name" class="signup-input" placeholder="사용자 이름" required>
+    <input type="text" name="phone" id="phone" class="signup-input"
+           placeholder="전화번호 (010-1234-5678)"
+           pattern="^010-\d{4}-\d{4}$"
+           maxlength="13"
+           title="010-1234-5678 형식으로 입력해주세요" required>
+    <input type="text" name="position" class="signup-input" placeholder="직책" required>
+    <input type="text" name="department" class="signup-input" placeholder="부서명" required>
+    <input type="text" name="role" class="signup-input" placeholder="예: 마케팅 직원" required>
+    <input type="text" name="profile" class="signup-input" placeholder="예: 영업사원" required>
 
-      if (selectEl.value === "직접입력") {
-        selectBox.classList.add("hidden");
-        inputEl.classList.remove("hidden");
-        inputEl.required = true;
-        inputEl.value = "";
-        inputEl.focus();
+    <button type="submit" class="signup-btn">완료</button>
+  </form>
+</main>
+
+{% include 'components/footer.html' %}
+
+<script>
+  function toggleEmailInput(selectEl) {
+    const inputEl = document.getElementById("email_domain_input");
+
+    if (selectEl.value === "직접입력") {
+      selectEl.classList.add("hidden");
+      inputEl.classList.add("visible");
+      inputEl.setAttribute("name", "email_domain");
+      selectEl.removeAttribute("name");
+      inputEl.required = true;
+      inputEl.value = "";
+      inputEl.focus();
+    } else {
+      inputEl.classList.remove("visible");
+      inputEl.classList.add("hidden");
+      selectEl.classList.remove("hidden");
+      selectEl.setAttribute("name", "email_domain");
+      inputEl.setAttribute("name", "email_domain_input");
+      inputEl.required = false;
+      inputEl.value = selectEl.value;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const phoneInput = document.getElementById("phone");
+    const emailInput = document.getElementById("email_domain_input");
+    const emailSelect = document.getElementById("email_domain_select");
+
+    // 전화번호 자동 하이픈
+    phoneInput.addEventListener("input", function (e) {
+      let number = e.target.value.replace(/[^0-9]/g, "");
+      let formatted = "";
+
+      if (number.length < 4) {
+        formatted = number;
+      } else if (number.length < 8) {
+        formatted = number.slice(0, 3) + "-" + number.slice(3);
       } else {
-        inputEl.classList.add("hidden");
-        selectBox.classList.remove("hidden");
-        inputEl.required = false;
-        inputEl.value = selectEl.value;
+        formatted = number.slice(0, 3) + "-" + number.slice(3, 7) + "-" + number.slice(7, 11);
+      }
+
+      e.target.value = formatted;
+    });
+
+    // 바탕화면 클릭 시 처리
+    document.addEventListener("click", function (e) {
+      const isInputVisible = emailInput.classList.contains("visible");
+      const isClickInsideInput = emailInput.contains(e.target);
+      const isClickInsideSelect = emailSelect.contains(e.target);
+
+      if (isInputVisible && !isClickInsideInput && !isClickInsideSelect) {
+        const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const domainVal = emailInput.value.trim();
+
+        if (!domainPattern.test(domainVal)) {
+          alert("이메일 형식으로 다시 입력하세요 (예: example.com)");
+          emailInput.classList.remove("visible");
+          emailInput.classList.add("hidden");
+          emailInput.value = "";
+
+          emailSelect.classList.remove("hidden");
+          emailSelect.value = "";
+          emailSelect.setAttribute("name", "email_domain");
+          emailInput.setAttribute("name", "email_domain_input");
+        }
+      }
+    });
+  });
+
+  function validateForm() {
+    const pw = document.querySelector('input[name="password"]');
+    const pwConfirm = document.querySelector('input[name="confirm_password"]');
+    const domainInput = document.getElementById("email_domain_input");
+    const domainSelect = document.getElementById("email_domain_select");
+
+    if (pw.value !== pwConfirm.value) {
+      alert("비밀번호가 일치하지 않습니다.");
+      pw.value = "";
+      pwConfirm.value = "";
+      pw.focus();
+      return false;
+    }
+
+    // 직접입력 도메인 형식 검사
+    if (domainInput.classList.contains("visible")) {
+      const domainVal = domainInput.value.trim();
+      const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      if (!domainPattern.test(domainVal)) {
+        alert("유효한 이메일 도메인 형식을 입력해주세요.\n예: example.com");
+        domainInput.focus();
+        return false;
       }
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const inputEl = document.getElementById("email_domain_input");
-      const selectBox = document.getElementById("email_domain_select");
+    if (domainSelect.value === "" && domainInput.classList.contains("hidden")) {
+      alert("이메일 도메인을 선택하거나 입력해주세요.");
+      return false;
+    }
 
-      inputEl.addEventListener("blur", function () {
-        if (inputEl.value.trim() === "") {
-          inputEl.classList.add("hidden");
-          selectBox.classList.remove("hidden");
-          selectBox.value = "";
-        }
-      });
-    });
-  </script>
+    return true;
+  }
+</script>
 
 </body>
 </html>

@@ -4,30 +4,30 @@
   <meta charset="UTF-8" />
   <title>로그인</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Font Awesome + CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/login.css') }}">
 </head>
 <body>
 
-  <!-- 네비게이션 -->
   {% include 'components/nav.html' %}
 
-  <!-- 로그인 문구 (왼쪽 상단 고정) -->
   <div class="login-title-left">
     <h2 class="login-title">로그인</h2>
   </div>
 
-  <!-- 로그인 폼 (중앙 정렬) -->
   <main class="login-center">
-    {% if error %}
-      <div class="login-error">{{ error }}</div>
-    {% endif %}
-
     <form method="POST" class="login-form">
-      <input type="text" name="username" class="login-input" placeholder="아이디" required>
+      <!-- ✅ _id 입력 필드 -->
+      <input type="text" name="user_id" class="login-input" placeholder="아이디" required>
+
+      <!-- ✅ 비밀번호 입력 -->
       <input type="password" name="password" class="login-input" placeholder="비밀번호" required>
+
+      {% if error %}
+        <div class="login-error">{{ error }}</div>
+      {% endif %}
+
       <button type="submit" class="login-btn">로그인</button>
     </form>
 
@@ -37,6 +37,5 @@
   </main>
 
   {% include 'components/footer.html' %}
-
 </body>
 </html>
