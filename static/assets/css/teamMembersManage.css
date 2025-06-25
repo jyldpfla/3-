@@ -34,25 +34,51 @@ h2 {
 }
 
 .member-table {
-    text-align: center;
-    width: 1200px;
+    width: 100%;
+    max-width: 1200px;
+    min-width: 1200px;
     border-collapse: collapse;
     font-size: 16px;
+    table-layout: fixed; /* 열 너비 고정 */
+    text-align: center;
 }
 
+/* 헤더 스타일 */
 .member-table thead {
-    width: 1200px;
     background: #f0f6fc;
-    text-align: left;
 }
 
+/* 테이블 셀 (헤더 + 바디 공통) */
 .member-table th,
 .member-table td {
-    text-align: center;
-    width: 1200px;
     padding: 15px;
     border-bottom: 1px solid #ddd;
     vertical-align: middle;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    height: 30px;
+}
+
+/* 열 별 고정 너비 */
+.member-table th:nth-child(1),
+.member-table td:nth-child(1) {
+    width: 150px;
+}
+
+.member-table th:nth-child(2),
+.member-table td:nth-child(2) {
+    width: 150px;
+}
+
+.member-table th:nth-child(3),
+.member-table td:nth-child(3) {
+    width: 250px;
+}
+
+.member-table th:nth-child(4),
+.member-table td:nth-child(4) {
+    width: 250px;
 }
 
 .member-table select {
