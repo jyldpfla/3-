@@ -56,7 +56,6 @@
                     {% for schedule in daily_schedules %}
                         <li class="schedule-item" data-schedule-id="{{ schedule.schedule_id_param }}">
                             <span class="schedule-name">{{ schedule.name }}</span>
-                            {# personal, project 태그를 한글로 변경 #}
                             <span class="schedule-tag {{ schedule.tag_class }}">
                                 {% if schedule.tag_class == 'personal-tag' %}개인
                                 {% elif schedule.tag_class == 'project-tag' %}프로젝트
@@ -89,16 +88,16 @@
                 data-type="{{ selected_schedule_detail.get('type', '') }}"
                 data-status="{{ selected_schedule_detail.get('status', '') }}"
                 data-project-title="{{ selected_schedule_detail.get('projectTitle', '') }}"
-                data-member-names="{{ selected_schedule_detail.get('memberNames', []) | tojson | safe }}" {# 이 부분 수정: tojson 필터 사용 #}
-                data-start-time="{{ selected_schedule_detail.get('startTime', '') }}" {# 시작 시간 데이터 추가 #}
-                data-end-time="{{ selected_schedule_detail.get('endTime', '') }}"   {# 종료 시간 데이터 추가 #}
+                data-member-names="{{ selected_schedule_detail.get('memberNames', []) | tojson | safe }}"
+                data-member-ids="{{ selected_schedule_detail.get('memberIds', []) | tojson | safe }}" {# 이 줄 추가 #}
+                data-start-time="{{ selected_schedule_detail.get('startTime', '') }}" 
+                data-end-time="{{ selected_schedule_detail.get('endTime', '') }}" 
             ></div>
 
             <div class="section-title">선택된 일정 상세 정보</div>
             <div class="schedule-detail-card" id="scheduleDetailCard">
                 {% if selected_schedule_detail %}
                     <div class="detail-tag {{ selected_schedule_detail.get('type', '') | lower }}-tag">
-                        {# 상세 정보의 타입 태그도 한글로 변경 #}
                         {% if selected_schedule_detail.get('type') == '개인' %}개인
                         {% elif selected_schedule_detail.get('type') == '회사' %}회사
                         {% elif selected_schedule_detail.get('type') == '프로젝트' %}프로젝트
@@ -107,8 +106,6 @@
                     </div>
                     <p><span class="detail-label">제목:</span> <span class="detail-value">{{ selected_schedule_detail.get('scheduleName', '') }}</span></p>
                     <p><span class="detail-label">작성자:</span> <span class="detail-value">{{ selected_schedule_detail.get('personName', '') }}</span></p> 
-                    
-                    {# 시작일과 종료일을 각각 분리하여 표시 #}
                     <p><span class="detail-label">시작일:</span> <span class="detail-value">{{ selected_schedule_detail.get('startDate', '') }} {{ selected_schedule_detail.get('startTime', '') }}</span></p>
                     <p><span class="detail-label">종료일:</span> <span class="detail-value">{{ selected_schedule_detail.get('endDate', '') }} {{ selected_schedule_detail.get('endTime', '') }}</span></p>
 
@@ -164,10 +161,9 @@
                 <input type="text" id="scheduleName" class="form-input" placeholder="일정 이름을 입력하세요.">
             </div>
             <div class="form-group">
-                <label for="schedulePersonName">이름 <span class="required">*</span></label> {# 이 부분을 select로 변경 #}
+                <label for="schedulePersonName">이름 <span class="required">*</span></label>
                 <select id="schedulePersonName" class="form-input">
                     <option value="">-- 작성자 선택 --</option>
-                    {# Flask에서 전달된 user_names를 여기에 렌더링 #}
                     {% for user_name in user_names %}
                         <option value="{{ user_name["name"] }}">{{ user_name["name"] }}</option>
                     {% endfor %}
@@ -177,9 +173,8 @@
                 <label for="scheduleMembers">참여자</label>
                 <select id="scheduleMembers" name="scheduleMembers" class="form-input">
                     <option value="">-- 참여자 선택 --</option>
-                    {# Flask에서 전달된 user_names를 여기에 렌더링 #}
                     {% for user_name in user_names %}
-                        <option value="{{ user_name["_id"] }}">{{ user_name["name"] }}</option>
+                        <option value="{{ user_name['_id'] }}" data-name="{{ user_name['name'] }}">{{ user_name['name'] }}</option>
                     {% endfor %}
                 </select>
                 <ul id="memberList"></ul>
@@ -231,8 +226,8 @@
     </div>
 
     <script>
-        // 백엔드에서 전달받은 상태 옵션을 JavaScript 변수로 사용
         const STATUS_OPTIONS_BY_TYPE = {{ status_options_by_type | tojson }};
+        window.user_names = {{ user_names | tojson }};
     </script>
     <script src="{{ url_for('static', filename='timeline.js') }}"></script>
 </body>

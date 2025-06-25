@@ -30,13 +30,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
-    // 일정 내 참여 member 저장을 위한 set
     const selectedMembers = new Set();
-    const memberList = document.getElementById('memberList'); // memberList 요소 추가
+    const memberList = document.getElementById('memberList');
 
-    // 참여자 선택 드롭다운
-    const scheduleMembersSelect = document.getElementById("scheduleMembers"); // scheduleMembers select 요소
+    const scheduleMembersSelect = document.getElementById("scheduleMembers");
+    if (scheduleMembersSelect) {
+        scheduleMembersSelect.addEventListener("change", function () {
+            const selectedValue = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            const selectedName = selectedOption.dataset.name;
 
+            if (selectedValue && selectedName) {
+                const memberObj = { id: selectedValue, name: selectedName };
+
+                const alreadyExists = Array.from(selectedMembers).some(
+                    m => m.id === memberObj.id
+                );
+                if (!alreadyExists) {
+                    selectedMembers.add(memberObj);
+                    updateMemberListUI();
+                }
+            }
+            this.value = "";
+        });
+    }
     let currentScheduleId = null;
     let isEditMode = false;
 
@@ -64,25 +81,23 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.style.display = 'none';
     }
 
-    // 선택된 참여자 목록 UI를 업데이트하는 함수
     function updateMemberListUI() {
-        memberList.innerHTML = ''; // 기존 목록 비우기
-        selectedMembers.forEach(name => {
+        memberList.innerHTML = '';
+        selectedMembers.forEach(member => {
             const li = document.createElement("li");
-            li.textContent = name;
+            li.textContent = member.name;
             const removeBtn = document.createElement("button");
             removeBtn.textContent = "❌";
             removeBtn.style.marginLeft = "10px";
             removeBtn.style.backgroundColor = "transparent";
             removeBtn.style.border = "none";
             removeBtn.style.cursor = "pointer";
-            removeBtn.style.color = "#dc3545"; 
+            removeBtn.style.color = "#dc3545";
             removeBtn.style.fontSize = "1.1em";
 
             removeBtn.addEventListener("click", function () {
-                selectedMembers.delete(name);
+                selectedMembers.delete(member);
                 li.remove();
-                // 드롭다운에 다시 해당 옵션을 추가해야 할 경우 여기에 로직 추가 (필요시)
             });
 
             li.appendChild(removeBtn);
@@ -180,12 +195,12 @@ document.addEventListener('DOMContentLoaded', function() {
         isEditMode = false;
         currentScheduleId = null;
 
-        selectedMembers.clear(); // 새 일정 추가 시 참여자 목록 초기화
-        updateMemberListUI(); // UI 업데이트
+        selectedMembers.clear();
+        updateMemberListUI();
 
         openModal(scheduleFormModal);
     });
-
+if (editScheduleBtn) {
     editScheduleBtn.addEventListener('click', function() {
         const scheduleDataElement = document.getElementById('selected-schedule-data');
         const detailScheduleId = scheduleDataElement.dataset.scheduleId;
@@ -223,36 +238,34 @@ document.addEventListener('DOMContentLoaded', function() {
             scheduleProjectTitleSelect.required = false;
         }
 
-        // 기존 참여자 정보 로드
-        selectedMembers.clear(); 
-        const memberNamesString = scheduleDataElement.dataset.memberNames;
-        if (memberNamesString) {
+        selectedMembers.clear();
+        const memberNamesString = scheduleDataElement.dataset.memberIds;
+        if (memberNamesString) { 
             try {
-                // Flask에서 tojson 필터로 넘겨준 JSON 문자열을 정확히 파싱
-                const names = JSON.parse(memberNamesString); 
-                if (Array.isArray(names)) {
-                    names.forEach(name => {
-                        if (name && name.trim() !== "") {
-                            selectedMembers.add(name.trim());
+                const ids = JSON.parse(memberNamesString);
+                if (Array.isArray(ids) && window.user_names) {
+                    ids.forEach(memberId => {
+                        const userObj = window.user_names.find(u => 
+                            (u._id && u._id['$oid'] === memberId) || u._id === memberId
+                        );
+                        if (userObj) {
+                            const actualId = (userObj._id && userObj._id['$oid']) ? userObj._id['$oid'] : userObj._id;
+                            selectedMembers.add({ id: actualId, name: userObj.name });
                         }
                     });
                 }
             } catch (e) {
-                console.error("Failed to parse memberNames as JSON:", e);
-                // JSON 파싱 실패 시에 대비하여 비상 로직 (필요 시)
-                // 예: memberNamesString을 쉼표로 분리하는 방식 (이전 방식)
-                // memberNamesString.split(',').forEach(name => {
-                //     if (name.trim() !== "") {
-                //         selectedMembers.add(name.trim());
-                //     }
-                // });
+                console.error("Failed to parse memberIds as JSON:", e);
             }
         }
-        updateMemberListUI(); // UI 업데이트
+
+        updateMemberListUI();
 
         openModal(scheduleFormModal);
     });
-
+} else {
+    console.warn('editScheduleBtn 요소를 찾을 수 없습니다.');
+}
     saveScheduleBtn.addEventListener('click', function() {
         const scheduleName = scheduleNameInput.value.trim();
         const schedulePersonName = schedulePersonNameSelect.value;
@@ -275,14 +288,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // selectedMembers Set의 값을 배열로 변환 후 JSON 문자열로 직렬화
-        const selectedArray = Array.from(selectedMembers);
+        const selectedArray = Array.from(selectedMembers).map(m => m.name);
         const jsonString = JSON.stringify(selectedArray);
 
         const data = {
             schedule_name: scheduleName,
             person_name: schedulePersonName,
-            member_names: jsonString, // JSON 배열 문자열
+            member_names: jsonString,
             start_date: `${scheduleStartDate}T${scheduleStartTime}:00`,
             end_date: `${scheduleEndDate}T${scheduleEndTime}:00`,
             content: scheduleContent,
@@ -304,46 +316,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error('서버 오류: ' + text);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            closeModal(scheduleFormModal);
+            const refreshUrl = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}` + 
+                            (currentScheduleId ? `&schedule_id=${currentScheduleId}` : '');
+            window.location.href = refreshUrl;
+        } else {
+            alert('오류: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('서버 통신 중 오류가 발생했습니다. 서버 상태를 확인해주세요.');
+    });
+
+    });
+
+        if (cancelScheduleBtn) {
+            cancelScheduleBtn.addEventListener('click', function() {
                 closeModal(scheduleFormModal);
-                const refreshUrl = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}` + 
-                                   (currentScheduleId ? `&schedule_id=${currentScheduleId}` : '');
-                window.location.href = refreshUrl;
-            } else {
-                alert('오류: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('서버 통신 중 오류가 발생했습니다.');
-        });
-    });
-
-    cancelScheduleBtn.addEventListener('click', function() {
-        closeModal(scheduleFormModal);
-    });
-
-    deleteScheduleBtn.addEventListener('click', function() {
-        const scheduleDataElement = document.getElementById('selected-schedule-data');
-        const detailScheduleId = scheduleDataElement.dataset.scheduleId;
-
-        if (detailScheduleId === 'None' || !detailScheduleId) {
-            alert('삭제할 일정을 선택해주세요.');
-            return;
+            });
+        } else {
+            console.warn('cancelScheduleBtn 요소를 찾을 수 없습니다.');
         }
 
-        currentScheduleId = detailScheduleId;
-        openModal(deleteConfirmModal);
-    });
+        if (deleteScheduleBtn) {
+            deleteScheduleBtn.addEventListener('click', function() {
+                const scheduleDataElement = document.getElementById('selected-schedule-data');
+                const detailScheduleId = scheduleDataElement.dataset.scheduleId;
+
+                if (detailScheduleId === 'None' || !detailScheduleId) {
+                    alert('삭제할 일정을 선택해주세요.');
+                    return;
+                }
+
+                currentScheduleId = detailScheduleId;
+                openModal(deleteConfirmModal);
+            });
+        } else {
+            console.warn('deleteScheduleBtn 요소를 찾을 수 없습니다.');
+        }
 
     cancelDeleteBtn.addEventListener('click', function() {
         closeModal(deleteConfirmModal);
@@ -390,20 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 참여자 선택 드롭다운 이벤트 리스너를 DOMContentLoaded 내부로 이동
-    scheduleMembersSelect.addEventListener("change", function () {
-        const selectedValue = this.value;
-        
-        if (selectedValue && !selectedMembers.has(selectedValue)) {
-            selectedMembers.add(selectedValue);
-            updateMemberListUI(); // UI 업데이트
-        }
-        // 선택 초기화
-        this.value = "";
-    });
-
     const initialScheduleId = urlParams.schedule_id;
     if (initialScheduleId && initialScheduleId !== 'None') {
-        // 초기 로드 시 schedule_id가 있다면 상세 정보를 자동으로 불러오기 위한 로직 필요 (현재 HTML에서 dataset으로 처리)
     }
 });
