@@ -16,7 +16,7 @@ db = client['team3']
 
 project_collection = db["projects"]
 user_collection = db["users"]
-schedule_collection = db["schedules"]
+timeline_collection = db["timeline"]
 personal_todo_collection = db["personal_todo"]
 board_collection = db["board"]
 team_collection = db["team"]
@@ -32,7 +32,10 @@ def example():
 def to_str(date):
     if not date:
         return ""
-    return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
+    if isinstance(date, str):
+        return date  # 이미 문자열이면 그대로 반환
+    return date.strftime("%Y-%m-%d")  # datetime → 문자열
+
 
 @app.route("/projectList")
 def projectList():
@@ -60,22 +63,56 @@ def projectList():
 
 
 
+from datetime import datetime
+
 @app.route("/projectAdd", methods=["GET", "POST"])
 def projectAdd():
     if request.method == "POST":
+        # 📥 값 수집
+        title = request.form.get("name")
+        client = request.form.get("client")
+        manager_id = request.form.get("project_manager")
+        start_str = request.form.get("start")
+        end_str = request.form.get("end")
+        status = request.form.get("status")
+        description = request.form.get("description")
+
+        # 📅 날짜 변환
+        start_date = datetime.strptime(start_str, "%Y-%m-%d")
+        end_date = datetime.strptime(end_str, "%Y-%m-%d")
+
+        # 📌 프로젝트 문서 저장
         project = {
-            "title": request.form.get("name"), 
-            "client": request.form.get("client"),  
-            "project_manager": ObjectId(request.form.get("project_manager")), 
-            "start_date": request.form.get("start"), 
-            "end_date": request.form.get("end"), 
-            "status": request.form.get("status"),  
-            "description": request.form.get("description"),
+            "title": title,
+            "client": client,
+            "project_manager": ObjectId(manager_id),
+            "start_date": start_date,
+            "end_date": end_date,
+            "status": status,
+            "description": description,
             "schedule_id": None
         }
-        project_collection.insert_one(project)  
-        return redirect(url_for('projectList')) 
+        result = project_collection.insert_one(project)
+        new_project_id = result.inserted_id
 
+        # ✅ timeline 일정 자동 생성
+        timeline_doc = {
+            "title": f"[{title}] 프로젝트 일정",
+            "user_id": ObjectId(manager_id),
+            "start_date": start_date,
+            "end_date": end_date,
+            "type": "프로젝트",
+            "status": status,
+            "content": description,
+            "project_id": new_project_id,
+            "member": [],
+            "updated_at": datetime.utcnow()
+        }
+        timeline_collection.insert_one(timeline_doc)
+
+        return redirect(url_for('projectList'))
+
+    # GET 요청 - 폼 렌더링
     user_list = list(user_collection.find({"position": "팀장"}))
     return render_template("/projectAdd.html", user_list=user_list)
 
@@ -83,25 +120,66 @@ def projectAdd():
 @app.route("/projectUpdate/<project_id>", methods=["GET", "POST"])
 def projectUpdate(project_id):
     if request.method == "POST":
+        # 📥 값 받아오기
+        name = request.form.get("name")
+        client = request.form.get("client")
+        start_date_str = request.form.get("start")
+        end_date_str = request.form.get("end")
+        status = request.form.get("status")
+        description = request.form.get("description")
+
+        # 📅 문자열 → 날짜 변환
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+        # 📌 프로젝트 DB 업데이트
         project_collection.update_one(
             {"_id": ObjectId(project_id)},
             {"$set": {
-                "title": request.form.get("name"),
-                "client": request.form.get("client"),
-                "start_date": request.form.get("start"),
-                "end_date": request.form.get("end"),
-                "status": request.form.get("status"),
-                "description": request.form.get("description"),
+                "title": name,
+                "client": client,
+                "start_date": start_date,
+                "end_date": end_date,
+                "status": status,
+                "description": description,
                 "schedule_id": None
             }}
         )
+
+        # 🔁 타임라인 일정도 함께 수정
+        timeline_collection.update_many(
+            {"project_id": ObjectId(project_id)},
+            {"$set": {
+                "start_date": start_date,
+                "end_date": end_date
+            }}
+        )
+
         return redirect(url_for('projectDetail', project_id=project_id))
+
+    # ✅ 여기가 GET 요청 처리 — 여기부터 붙여넣기
     project = project_collection.find_one({"_id": ObjectId(project_id)})
-    manager = user_collection.find_one({"_id": project["project_manager"]})["name"]
+
+    # 🔒 담당자 안전하게 가져오기
+    manager_doc = user_collection.find_one({"_id": project.get("project_manager")})
+    manager = manager_doc["name"] if manager_doc else "알 수 없음"
     project["manager_name"] = manager
+
     user_list = list(user_collection.find({"position": "팀장"}))
 
+    # 📅 날짜 포맷 처리
+    def to_str(date):
+        if not date:
+            return ""
+        if isinstance(date, str):
+            return date  # 문자열이면 그대로 반환
+        return date.strftime("%Y-%m-%d")  # datetime 객체면 포맷팅
+
+    project["start_date"] = to_str(project.get("start_date"))
+    project["end_date"] = to_str(project.get("end_date"))
+
     return render_template("/projectUpdate.html", project=project, user_list=user_list)
+
 
 
 @app.route('/projectDetail/<project_id>')

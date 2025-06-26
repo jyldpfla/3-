@@ -34,6 +34,7 @@
       </thead>
       <tbody>
         {% for member in team_members %}
+<<<<<<< HEAD
   <tr>
     <td>
       {% if member.is_manager and not member.name %}
@@ -61,6 +62,39 @@
     <td>
         <button type="submit" class="btn btn-gray">저장</button>
       </form>
+=======
+<tr>
+  <td>{{ member.name }}</td>
+  <td>{{ member.email }}</td>
+  <td>{{ member.role }}</td>
+  <td>
+    {% if member.status == '대기' %}
+      <span class="status-dot red"></span>
+    {% else %}
+      <span class="status-dot green"></span>
+    {% endif %}
+  </td>
+  <td>
+  {% if not member.is_manager %}
+    <div class="member-action-box">
+      <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}">
+        <select name="status" class="status-select" data-current="{{ member.status }}">
+          <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
+          <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
+        </select>
+        <button type="submit" class="btn btn-gray" onclick="return confirmStatusChange(this)">저장</button>
+      </form>
+      <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}">
+        <button type="submit" class="btn btn-gray" onclick="return confirm('정말로 이 팀원을 삭제하시겠습니까?')">삭제</button>
+      </form>
+    </div>
+  {% else %}
+    <span style="color: gray;">-</span>
+  {% endif %}
+  </td>
+</tr>
+{% endfor %}
+>>>>>>> 78ae1d308ab716509db9458118aa3ccb43510458
 
       <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}" style="display:inline;">
         <button type="submit" class="btn btn-gray">삭제</button>
@@ -74,6 +108,7 @@
       </tbody>
     </table>
   </main>
+  <script src="{{ url_for('static', filename='js/teamMemberManage.js') }}"></script>
   <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
 </body>
 </html>

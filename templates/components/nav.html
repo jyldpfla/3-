@@ -17,6 +17,7 @@
       <i class="fa-solid fa-user-tie"></i><br />마이 페이지
     </div>
     <div class="user-info">
+<<<<<<< HEAD
       {% if user_info %}
         <span><i class="fa-solid fa-user" style="margin-right: 5px"></i>{{ user_info.name }}</span>
         {% if current_page != 'notifications' %}
@@ -46,6 +47,42 @@
         <button class="join-btn" onclick="location.href='/login'">로그인</button>
         <button class="join-btn" onclick="location.href='/signup'">회원 가입</button>
       {% endif %}
+=======
+    {% if user_info %}
+    <span><i class="fa-solid fa-user" style="margin-right: 5px"></i>{{ user_info.name }}</span>
+    {% if current_page != 'notifications' %}
+        <div class="nav-item notification-wrapper">
+            <div class="notification-icon" onclick="toggleNotification()">
+                <i class="fa-regular fa-bell"></i>
+                {% if has_notification %}
+                    <span class="red-dot"></span>
+                {% endif %}
+            </div>
+            <div id="notification-box" class="notification-box hidden">
+                {% if notifications and notifications|length > 0 %}
+                    <ul>
+                        {% for note in notifications[:5] %}
+                            <li>{{ note }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% if notifications|length > 5 %}
+                        <a href="{{ url_for('show_notifications') }}" class="more-btn" style="font-size: 0.9rem;">더보기</a>
+                    {% else %}
+                        <a href="{{ url_for('show_notifications') }}" style="font-size: 0.9rem;">전체보기</a>
+                    {% endif %}
+                {% else %}
+                    <p>새로운 알림이 없습니다.</p>
+                    <a href="{{ url_for('show_notifications') }}" style="font-size: 0.9rem;">전체보기</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    <button class="join-btn">로그아웃</button>
+    {% else %}
+        <button class="join-btn" onclick="location.href='/login'">로그인</button>
+        <button class="join-btn" onclick="location.href='/signup'">회원 가입</button>
+    {% endif %}
+>>>>>>> 78ae1d308ab716509db9458118aa3ccb43510458
     </div>
   </div>
 </header>
