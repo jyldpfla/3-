@@ -43,29 +43,22 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        user_id_str = request.form.get("user_id")
+        email = request.form.get("email")
         pw = request.form.get("password")
 
-        try:
-            user = user_collection.find_one({
-                "_id": ObjectId(user_id_str),
-                "userPassword": pw
-            })
-        except Exception:
-            user = None
-
+        user = user_collection.find_one({"email": email, "userPassword": pw})
         if user:
             session["user_id"] = str(user["_id"])
             return redirect(url_for("index"))
         else:
-            return render_template("login.html", error="아이디 또는 비밀번호가 틀렸습니다.")
+            return render_template("login.html", error="이메일 또는 비밀번호가 틀렸습니다.")
     return render_template("login.html")
 
 # ✅ 로그아웃
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 # ✅ 마이페이지
 @app.route("/mypage")
@@ -78,36 +71,25 @@ def mypage():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
+        email_id = request.form.get("email_id")
+        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
+        email = f"{email_id}@{email_domain}".strip()
+
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
+        phone = re.sub(r'\D', '', request.form["phone"])  # 숫자만 저장
 
         if password != confirm_password:
-            error = "비밀번호와 비밀번호 확인이 일치하지 않습니다."
-            return render_template("signup.html", error=error)
+            return render_template("signup.html", error="비밀번호가 일치하지 않습니다.")
 
-        email_id = request.form["email_id"]
-        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
+        if not re.match(r"^[^@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+            return render_template("signup.html", error="올바른 이메일 형식이 아닙니다.")
 
-        if not email_domain:
-            error = "이메일 도메인을 선택하거나 입력해주세요."
-            return render_template("signup.html", error=error)
-
-        if "@" in email_domain or not re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email_domain):
-            error = "올바른 이메일 도메인 형식이 아닙니다. 예: example.com"
-            return render_template("signup.html", error=error)
-
-        full_email = f"{email_id}@{email_domain}"
-
-        if not re.match(r"^[^@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", full_email):
-            error = "올바른 이메일 형식이 아닙니다. 예: example@gmail.com"
-            return render_template("signup.html", error=error)
-
-        if user_collection.find_one({"email": full_email}):
-            error = "이미 등록된 이메일입니다."
-            return render_template("signup.html", error=error)
+        if user_collection.find_one({"email": email}):
+            return render_template("signup.html", error="이미 존재하는 이메일입니다.")
 
         new_user = OrderedDict([
-            ("email", full_email),
+            ("email", email),
             ("name", request.form["name"]),
             ("userPassword", password),
             ("role", request.form.get("role", "직원")),
@@ -115,7 +97,7 @@ def signup():
             ("department", request.form["department"]),
             ("position", request.form["position"]),
             ("createAt", str(date.today())),
-            ("phone_num", request.form["phone"]),
+            ("phone_num", phone),
         ])
 
         user_collection.insert_one(new_user)
@@ -130,33 +112,30 @@ def profile_edit():
     user_id = ObjectId(session["user_id"])
 
     if request.method == "POST":
+        email_id = request.form.get("email_id")
+        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
+        email = f"{email_id}@{email_domain}".strip()
+
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
+        phone = re.sub(r'\D', '', request.form.get("phone", ""))
 
         if password != confirm_password:
             user = user_collection.find_one({"_id": user_id})
-            error = "비밀번호가 일치하지 않습니다."
-            return render_template("profile_edit.html", user=user, error=error)
+            return render_template("profile_edit.html", user=user, error="비밀번호가 일치하지 않습니다.")
 
-        # 이메일 조합
-        email_id = request.form.get("email_id")
-        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
-        email = f"{email_id}@{email_domain}" if email_id and email_domain else ""
+        update_data = {
+            "name": request.form.get("name"),
+            "userPassword": password,
+            "phone_num": phone,
+            "department": request.form.get("department"),
+            "position": request.form.get("position"),
+            "role": request.form.get("role"),
+            "profile": request.form.get("profile"),
+            "email": email
+        }
 
-        # 업데이트 실행
-        user_collection.update_one(
-            {"_id": user_id},
-            {"$set": {
-                "name": request.form.get("name"),
-                "userPassword": password,
-                "phone_num": request.form.get("phone"),
-                "department": request.form.get("department"),
-                "position": request.form.get("position"),
-                "role": request.form.get("role"),
-                "profile": request.form.get("profile"),
-                "email": email
-            }}
-        )
+        user_collection.update_one({"_id": user_id}, {"$set": update_data})
         return redirect(url_for("mypage"))
 
     user = user_collection.find_one({"_id": user_id})
@@ -170,7 +149,7 @@ def delete_account():
     if request.method == "POST":
         user_collection.delete_one({"_id": user_id})
         session.clear()
-        return redirect(url_for("login"))
+        return "<script>alert('탈퇴가 완료되었습니다.'); window.location.href='/'</script>"
     return render_template("delete_account.html")
 
 # ✅ 실행

@@ -1,4 +1,4 @@
-/* 제목 */
+/* 제목 영역 */
 .signup-title-left {
   margin-left: 40px;
   margin-top: 12px;
@@ -13,7 +13,7 @@
   margin-bottom: 0;
 }
 
-/* 메인 */
+/* 메인 영역 */
 .signup-center {
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
   box-sizing: border-box;
 }
 
-/* 폼 */
+/* 폼 전체 */
 .signup-form {
   display: flex;
   flex-direction: column;
@@ -41,7 +41,7 @@
   margin-bottom: 10px;
 }
 
-/* 입력 필드 */
+/* 입력 필드 공통 */
 .signup-input,
 .signup-input.half,
 select.signup-input {
@@ -49,33 +49,34 @@ select.signup-input {
   padding: 14px 16px;
   font-size: 16px;
   border: 2px solid #2563EB;
-  border-radius: 30px;
+  border-radius: 10px;
   outline: none;
   box-sizing: border-box;
   background-color: white;
   transition: border 0.3s ease;
 }
 
+/* 플레이스홀더 */
 .signup-input::placeholder,
 .signup-input.half::placeholder {
   font-size: 15px;
   color: #888;
 }
 
-/* 반쪽 입력창 */
+/* 반쪽 필드 */
 .signup-input.half {
   width: 300px;
   max-width: 100%;
 }
 
-/* 이메일 도메인 select와 input 동일 크기 */
+/* select, 직접입력 input 크기 동일 */
 select.signup-input.half,
 #email_domain_input {
   width: 160px;
   max-width: 100%;
 }
 
-/* 이메일 영역 */
+/* 이메일 입력 영역 */
 .signup-email-wrap {
   display: flex;
   gap: 8px;
@@ -91,12 +92,7 @@ select.signup-input.half,
   color: #333;
 }
 
-/* 이메일 도메인 컨테이너 */
-.email-domain-wrapper {
-  position: relative;
-}
-
-/* select 커스터마이징 */
+/* select 모양 커스터마이징 */
 select.signup-input {
   appearance: none;
   -webkit-appearance: none;
@@ -113,16 +109,7 @@ select::-ms-expand {
   display: none;
 }
 
-/* 상태 전환 클래스 */
-.hidden {
-  display: none !important;
-}
-
-.visible {
-  display: inline-block !important;
-}
-
-/* 버튼 */
+/* 버튼 스타일 */
 .signup-btn {
   width: 100%;
   background-color: #2563EB;
@@ -131,28 +118,28 @@ select::-ms-expand {
   font-weight: bold;
   padding: 16px;
   border: none;
-  border-radius: 30px;
+  border-radius: 10px;
   cursor: pointer;
   margin-top: 8px;
 }
 
 .signup-btn:hover {
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
-/* 반응형 개선 */
-@media (max-width: 600px) {
-  .signup-input.half {
-    width: 100%;
-  }
+/* 숨김 / 표시 클래스 */
+.hidden {
+  display: none !important;
+}
 
-  .signup-email-wrap {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.visible {
+  display: inline-block !important;
+}
 
-  .signup-form {
-    width: 100%;
-    padding: 0 20px;
-  }
+/* 비밀번호 불일치 메시지 */
+.pw-mismatch {
+  color: red;
+  font-size: 14px;
+  text-align: left;
+  padding-left: 10px;
 }

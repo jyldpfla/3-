@@ -1,58 +1,95 @@
-.delete-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; 
-  min-height: 100vh;
-  padding-top: 12px; 
-}
-
-.delete-box {
-  background-color: #f9f9f9;
-  padding: 60px 40px;
-  border-radius: 0;
-  text-align: center;
-  width: 100%;
-  max-width: 1000px;
-  box-shadow: none;
-  border: none;
-}
-
-.delete-title {
-  font-size: 24px;
-  font-weight: 700;
+.withdraw-page {
+  max-width: 800px;
+  margin: 80px auto;
+  padding: 0 24px;
+  font-size: 18px;
   color: #111827;
-  margin-bottom: 60px; 
-  line-height: 1.2; 
-  background-color: #f9f9f9;
+  line-height: 1.8;
+  text-align: center;
+  background-color: #f9f9f9; 
 }
 
-.delete-text {
-  font-size: 18px; 
-  color: #374151;
-  line-height: 1.6;
-  margin-bottom: 80px;
-  word-break: keep-all;
-}
-
-.no-wrap {
-  white-space: nowrap;
-  display: block;
+.withdraw-page h2 {
+  font-size: 28px;
+  font-weight: 700;
   margin-bottom: 40px;
 }
 
-.delete-btn {
+.withdraw-page p {
+  margin-bottom: 24px;
+}
+
+.withdraw-page form {
+  margin-top: 50px;
+}
+
+.withdraw-page button {
+  background-color: #2563eb; 
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 18px;
+  border: none;
+.withdraw-page {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 40px 24px;
+  font-size: 18px;
+  color: #111827;
+  line-height: 1.8;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+/* 제목 */
+.withdraw-page h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+/* 본문 문구 */
+.withdraw-page p {
+  margin-bottom: 24px;
+  white-space: normal;
+}
+
+/* 버튼 영역 */
+.withdraw-page form {
+  margin-top: 40px;
+}
+
+/* 버튼 스타일 */
+.withdraw-page button {
   background-color: #2563eb;
   color: white;
-  font-size: 20px;
-  font-weight: 600;
-  padding: 16px 0;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 16px 32px;
   border: none;
-  border-radius: 12px;
-  width: 400px;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 220px;
+}
+
+.withdraw-page button:hover {
+  opacity: 0.8;
+}
+
+/* 페이지 전체 배경 */
+body {
+  background-color: #f9fafb;  
+}
+
+  border-radius: 10px;
+  width: 280px; 
+  max-width: 90%;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.delete-btn:hover {
+.withdraw-page button:hover {
   opacity: 0.8;
 }
