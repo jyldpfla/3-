@@ -1,5 +1,3 @@
-/* timeline.css */
-
 .main-container {
     background-color: #ffffff;
     border-radius: 8px;
@@ -252,47 +250,66 @@
     white-space: nowrap;
 }
 
-.personal-tag {
-    background-color: #6c757d;
+
+/* 타입 태그: schedule-tag 및 detail-tag 공통 */
+.personal-tag, .detail-tag.개인 {background-color: #213e57;}
+
+.company-tag, .detail-tag.회사 {background-color: #6610f2;}
+
+.project-tag, .detail-tag.프로젝트 {background-color: #007bff;}
+
+/* 상태 태그 */
+/* 개인 일정 상태 */
+.vacation-tag, .sick-leave-tag, .detail-tag.연차, .detail-tag.월차, .detail-tag.병가 {background-color: #28a745;}
+
+.travel-tag, .detail-tag.출장 {background-color: #ffc107; color: #212529;}
+
+.company-event-tag, .detail-status-tag.사내일정 {background-color: #17a2b8;}
+
+
+/* 프로젝트 상태 */
+/* 진행중, 진행대기 (일반 태그) */
+.status-inprogress-tag, .status-wait-tag {background-color: #20c997;}
+
+.status-delayed-tag, .detail-status-tag.지연 {background-color: #fd7e14;}
+
+.status-stopped-tag, .detail-status-tag.중단 {background-color: #dc3545;}
+
+/* 완료 (일반 태그) */
+.status-completed-tag {background-color: #343a40;}
+
+/* .detail-tag 기본 스타일 (색상은 위에서 각 타입별로 오버라이드) */
+.detail-tag {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: rgb(2, 2, 51); /* 기존 색상 유지 */
+    margin-bottom: 15px;
 }
 
-.project-tag {
-    background-color: #007bff;
+/* .detail-status-tag 기본 스타일 (색상은 아래 상태별로 오버라이드) */
+.detail-status-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 600;
+    color: white;
+    margin-left: 5px;
 }
 
-.company-tag {
-    background-color: #6610f2;
-}
+/* detail-status-tag: 기존과 다른 색상이었던 것들 통일 */
+/* 개인 일정 상태 (detail-status-tag) */
+.detail-status-tag.연차,.detail-status-tag.월차,.detail-status-tag.병가 {background-color: #6f42c1;}
+.detail-status-tag.출장 {background-color: #17a2b8;}
 
-.vacation-tag,
-.sick-leave-tag {
-    background-color: #28a745;
-}
+/* 프로젝트 상태 (detail-status-tag) */
+.detail-status-tag.진행중,.detail-status-tag.진행대기 {background-color: #007bff;}
+.detail-status-tag.완료 {background-color: #28a745;}
 
-.travel-tag {
-    background-color: #ffc107;
-    color: #212529;
-}
-
-.company-event-tag {
-    background-color: #17a2b8;
-}
-
-.status-inprogress-tag {
-    background-color: #20c997;
-}
-
-.status-delayed-tag {
-    background-color: #fd7e14;
-}
-
-.status-stopped-tag {
-    background-color: #dc3545;
-}
-
-.status-completed-tag {
-    background-color: #343a40;
-}
+/* --- 태그 및 상태별 배경색 정의 끝 --- */
 
 .no-schedule {
     text-align: center;
@@ -329,41 +346,6 @@
 .detail-value {
     color: #333;
 }
-
-.detail-tag {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 1.2em;
-    font-weight: 600;
-    color: rgb(2, 2, 51);
-    margin-bottom: 15px;
-}
-
-.detail-tag.프로젝트 { background-color: #007bff; }
-.detail-tag.개인 { background-color: #6c757d; }
-.detail-tag.연차, .detail-tag.월차, .detail-tag.병가 { background-color: #28a745; }
-.detail-tag.출장 { background-color: #ffc107; color: #333; }
-.detail-tag.회사 { background-color:#ff7f50; }
-
-.detail-status-tag {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 15px;
-    font-size: 0.8em;
-    font-weight: 600;
-    color: white;
-    margin-left: 5px;
-}
-
-.detail-status-tag.진행중 { background-color: #007bff; }
-.detail-status-tag.완료 { background-color: #28a745; }
-.detail-status-tag.미완료 { background-color: #ffc107; color: #333; }
-.detail-status-tag.중단 { background-color: #dc3545; }
-.detail-status-tag.지연 { background-color: #fd7e14; }
-.detail-status-tag.연차, .detail-status-tag.월차, .detail-status-tag.병가 { background-color: #6f42c1; }
-.detail-status-tag.출장 { background-color: #17a2b8; }
-.detail-status-tag.사내일정 { background-color: #17a3b8; }
 
 .no-schedule-selected {
     text-align: center;

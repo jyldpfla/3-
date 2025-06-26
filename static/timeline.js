@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // 필요한 DOM 요소들 가져오기
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
     const currentMonthYear = document.getElementById('currentMonthYear');
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectSelectionArea = document.getElementById('projectSelectionArea');
     const scheduleProjectTitleSelect = document.getElementById('scheduleProjectTitle');
     const scheduleNameInput = document.getElementById('scheduleName');
-    const schedulePersonNameSelect = document.getElementById('schedulePersonName');
+    const schedulePersonNameSelect = document.getElementById('schedulePersonName'); // 작성자 이름 select 박스
     const scheduleStartDateInput = document.getElementById('scheduleStartDate');
     const scheduleStartTimeInput = document.getElementById('scheduleStartTime');
     const scheduleEndDateInput = document.getElementById('scheduleEndDate');
@@ -30,33 +31,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
-    const selectedMembers = new Set();
-    const memberList = document.getElementById('memberList');
+    const selectedMembers = new Set(); // 참여자 관리를 위한 Set
+    const memberList = document.getElementById('memberList'); // 참여자 목록 UI
+    const scheduleMembersSelect = document.getElementById("scheduleMembers"); // 참여자 선택 드롭다운
 
-    const scheduleMembersSelect = document.getElementById("scheduleMembers");
+    // 로그인된 사용자 이름 (timeline.html에서 data-logged-in-user-name으로 전달)
+    const scheduleDataElement = document.getElementById('selected-schedule-data');
+    const loggedInUserName = scheduleDataElement.dataset.loggedInUserName;
+
+    // 참여자 선택 드롭다운 변경 이벤트 리스너
     if (scheduleMembersSelect) {
         scheduleMembersSelect.addEventListener("change", function () {
-            const selectedValue = this.value;
+            const selectedValue = this.value; // 선택된 참여자의 _id (ObjectId)
             const selectedOption = this.options[this.selectedIndex];
-            const selectedName = selectedOption.dataset.name;
+            const selectedName = selectedOption.dataset.name; // 선택된 참여자의 이름
 
             if (selectedValue && selectedName) {
                 const memberObj = { id: selectedValue, name: selectedName };
 
+                // 이미 추가된 참여자인지 확인
                 const alreadyExists = Array.from(selectedMembers).some(
                     m => m.id === memberObj.id
                 );
                 if (!alreadyExists) {
-                    selectedMembers.add(memberObj);
-                    updateMemberListUI();
+                    selectedMembers.add(memberObj); // Set에 추가
+                    updateMemberListUI(); // UI 업데이트
                 }
             }
-            this.value = "";
+            this.value = ""; // 드롭다운 초기화
         });
     }
-    let currentScheduleId = null;
-    let isEditMode = false;
 
+    let currentScheduleId = null; // 현재 선택되거나 수정/삭제될 일정의 ID
+    let isEditMode = false; // 수정 모드 여부
+
+    // URL 파라미터를 가져오는 함수
     function getUrlParams() {
         const params = new URLSearchParams(window.location.search);
         return {
@@ -71,23 +80,27 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentYear = urlParams.year;
     let currentMonth = urlParams.month;
     let selectedDate = urlParams.date;
-    currentScheduleId = urlParams.schedule_id;
+    currentScheduleId = urlParams.schedule_id; // 초기 일정 ID 설정
 
+    // 모달 열기 함수
     function openModal(modal) {
-        modal.style.display = 'block';
+        modal.style.display = 'flex'; // flex로 변경하여 중앙 정렬 유지
     }
 
+    // 모달 닫기 함수
     function closeModal(modal) {
         modal.style.display = 'none';
     }
 
+    // 참여자 목록 UI 업데이트 함수
     function updateMemberListUI() {
-        memberList.innerHTML = '';
+        memberList.innerHTML = ''; // 기존 목록 초기화
         selectedMembers.forEach(member => {
             const li = document.createElement("li");
-            li.textContent = member.name;
+            li.textContent = member.name; // 참여자 이름
+            
             const removeBtn = document.createElement("button");
-            removeBtn.textContent = "❌";
+            removeBtn.textContent = "❌"; // 삭제 아이콘
             removeBtn.style.marginLeft = "10px";
             removeBtn.style.backgroundColor = "transparent";
             removeBtn.style.border = "none";
@@ -95,9 +108,10 @@ document.addEventListener('DOMContentLoaded', function() {
             removeBtn.style.color = "#dc3545";
             removeBtn.style.fontSize = "1.1em";
 
+            // 삭제 버튼 클릭 이벤트
             removeBtn.addEventListener("click", function () {
-                selectedMembers.delete(member);
-                li.remove();
+                selectedMembers.delete(member); // Set에서 제거
+                li.remove(); // UI에서 제거
             });
 
             li.appendChild(removeBtn);
@@ -105,8 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // 일정 타입에 따른 상태 옵션 로드 함수
     function loadStatusOptions(selectedType, currentStatus = null) {
-        scheduleStatusSelect.innerHTML = '<option value="">-- 타입 선택 후 선택 --</option>';
+        scheduleStatusSelect.innerHTML = '<option value="">-- 타입 선택 후 선택 --</option>'; // 기본 옵션
 
         if (selectedType && STATUS_OPTIONS_BY_TYPE[selectedType]) {
             STATUS_OPTIONS_BY_TYPE[selectedType].forEach(option => {
@@ -115,38 +130,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 opt.textContent = option.text;
                 scheduleStatusSelect.appendChild(opt);
             });
-            scheduleStatusSelect.disabled = false;
+            scheduleStatusSelect.disabled = false; // 옵션이 있으면 활성화
         } else {
-            scheduleStatusSelect.disabled = true;
+            scheduleStatusSelect.disabled = true; // 옵션이 없으면 비활성화
         }
 
+        // 현재 상태가 있으면 해당 옵션 선택
         if (currentStatus) {
             scheduleStatusSelect.value = currentStatus;
         }
     }
 
+    // 일정 타입 선택 변경 시 이벤트
     scheduleTypeSelect.addEventListener('change', function() {
         const selectedType = this.value;
-        loadStatusOptions(selectedType);
+        loadStatusOptions(selectedType); // 상태 옵션 로드
 
+        // 프로젝트 타입일 경우 프로젝트 선택 영역 표시
         if (selectedType === '프로젝트') {
             projectSelectionArea.style.display = 'block';
             scheduleProjectTitleSelect.required = true;
         } else {
             projectSelectionArea.style.display = 'none';
             scheduleProjectTitleSelect.required = false;
-            scheduleProjectTitleSelect.value = '';
+            scheduleProjectTitleSelect.value = ''; // 프로젝트 선택 초기화
         }
     });
 
+    // 캘린더 날짜 클릭 이벤트
     calendarGrid.addEventListener('click', function(event) {
         const dayElement = event.target.closest('.calendar-day');
         if (dayElement) {
             const date = dayElement.dataset.date;
+            // 선택된 날짜로 페이지 이동 (일정 ID는 유지하지 않음)
             window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${date}`;
         }
     });
 
+    // 이전 달 버튼 클릭 이벤트
     prevMonthBtn.addEventListener('click', function() {
         if (currentMonth === 1) {
             currentMonth = 12;
@@ -157,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}`;
     });
 
+    // 다음 달 버튼 클릭 이벤트
     nextMonthBtn.addEventListener('click', function() {
         if (currentMonth === 12) {
             currentMonth = 1;
@@ -167,108 +189,131 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}`;
     });
 
+    // 일일 일정 목록 항목 클릭 이벤트
     dailyScheduleList.addEventListener('click', function(event) {
         const listItem = event.target.closest('.schedule-item');
         if (listItem) {
             currentScheduleId = listItem.dataset.scheduleId;
+            // 선택된 일정 ID를 포함하여 페이지 이동
             window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}&schedule_id=${currentScheduleId}`;
         }
     });
 
+    // '일정 추가' 버튼 클릭 이벤트
     addScheduleBtn.addEventListener('click', function() {
         scheduleFormModal.querySelector('.modal-title').textContent = '일정 추가';
+        saveScheduleBtn.textContent = '일정 추가';
+        isEditMode = false;
+        currentScheduleId = null;
+
+        // 모든 입력 필드 초기화
         scheduleNameInput.value = '';
-        schedulePersonNameSelect.value = ''; 
         scheduleContentTextarea.value = '';
         scheduleTypeSelect.value = '';
         scheduleProjectTitleSelect.value = '';
         projectSelectionArea.style.display = 'none';
         scheduleProjectTitleSelect.required = false;
 
+        // 시작일/종료일은 현재 선택된 날짜로 기본 설정
         scheduleStartDateInput.value = selectedDate;
         scheduleEndDateInput.value = selectedDate;
         scheduleStartTimeInput.value = '09:00';
         scheduleEndTimeInput.value = '18:00';
 
-        loadStatusOptions('');
-        saveScheduleBtn.textContent = '일정 추가';
-        isEditMode = false;
-        currentScheduleId = null;
-
-        selectedMembers.clear();
-        updateMemberListUI();
-
-        openModal(scheduleFormModal);
-    });
-if (editScheduleBtn) {
-    editScheduleBtn.addEventListener('click', function() {
-        const scheduleDataElement = document.getElementById('selected-schedule-data');
-        const detailScheduleId = scheduleDataElement.dataset.scheduleId;
-
-        if (detailScheduleId === 'None' || !detailScheduleId) {
-            alert('수정할 일정을 선택해주세요.');
-            return;
-        }
-
-        currentScheduleId = detailScheduleId;
-        isEditMode = true;
-        
-        scheduleFormModal.querySelector('.modal-title').textContent = '일정 수정';
-        saveScheduleBtn.textContent = '일정 수정';
-
-        scheduleNameInput.value = scheduleDataElement.dataset.scheduleName;
-        schedulePersonNameSelect.value = scheduleDataElement.dataset.personName;
-        scheduleContentTextarea.value = scheduleDataElement.dataset.content;
-        scheduleStartDateInput.value = scheduleDataElement.dataset.startDate;
-        scheduleStartTimeInput.value = scheduleDataElement.dataset.startTime;
-        scheduleEndDateInput.value = scheduleDataElement.dataset.endDate;
-        scheduleEndTimeInput.value = scheduleDataElement.dataset.endTime;
-
-        const scheduleType = scheduleDataElement.dataset.type;
-        scheduleTypeSelect.value = scheduleType;
-        loadStatusOptions(scheduleType, scheduleDataElement.dataset.status);
-
-        if (scheduleType === '프로젝트') {
-            projectSelectionArea.style.display = 'block';
-            scheduleProjectTitleSelect.value = scheduleDataElement.dataset.projectTitle;
-            scheduleProjectTitleSelect.required = true;
+        // 작성자 필드 자동 반영 및 비활성화
+        if (loggedInUserName && loggedInUserName !== '-') {
+            schedulePersonNameSelect.value = loggedInUserName;
         } else {
-            projectSelectionArea.style.display = 'none';
-            scheduleProjectTitleSelect.value = '';
-            scheduleProjectTitleSelect.required = false;
+            schedulePersonNameSelect.value = '-'; // 로그인 사용자 없으면 "-"
         }
+        schedulePersonNameSelect.disabled = true; // 항상 비활성화
 
-        selectedMembers.clear();
-        const memberNamesString = scheduleDataElement.dataset.memberIds;
-        if (memberNamesString) { 
-            try {
-                const ids = JSON.parse(memberNamesString);
-                if (Array.isArray(ids) && window.user_names) {
-                    ids.forEach(memberId => {
-                        const userObj = window.user_names.find(u => 
-                            (u._id && u._id['$oid'] === memberId) || u._id === memberId
-                        );
-                        if (userObj) {
-                            const actualId = (userObj._id && userObj._id['$oid']) ? userObj._id['$oid'] : userObj._id;
-                            selectedMembers.add({ id: actualId, name: userObj.name });
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error("Failed to parse memberIds as JSON:", e);
-            }
-        }
+        loadStatusOptions(''); // 상태 옵션 초기화
+        selectedMembers.clear(); // 참여자 목록 초기화
+        updateMemberListUI(); // 참여자 UI 업데이트
 
-        updateMemberListUI();
-
-        openModal(scheduleFormModal);
+        openModal(scheduleFormModal); // 모달 열기
     });
-} else {
-    console.warn('editScheduleBtn 요소를 찾을 수 없습니다.');
-}
+
+    // '일정 수정' 버튼 클릭 이벤트
+    if (editScheduleBtn) {
+        editScheduleBtn.addEventListener('click', function() {
+            const scheduleDataElement = document.getElementById('selected-schedule-data');
+            const detailScheduleId = scheduleDataElement.dataset.scheduleId;
+
+            if (detailScheduleId === 'None' || !detailScheduleId) {
+                // 커스텀 메시지 박스로 대체 (alert 사용 금지)
+                showCustomMessageBox('수정할 일정을 선택해주세요.');
+                return;
+            }
+
+            currentScheduleId = detailScheduleId;
+            isEditMode = true;
+            
+            scheduleFormModal.querySelector('.modal-title').textContent = '일정 수정';
+            saveScheduleBtn.textContent = '일정 수정';
+
+            // 선택된 일정 상세 정보로 폼 채우기
+            scheduleNameInput.value = scheduleDataElement.dataset.scheduleName;
+            scheduleContentTextarea.value = scheduleDataElement.dataset.content;
+            scheduleStartDateInput.value = scheduleDataElement.dataset.startDate;
+            scheduleStartTimeInput.value = scheduleDataElement.dataset.startTime;
+            scheduleEndDateInput.value = scheduleDataElement.dataset.endDate;
+            scheduleEndTimeInput.value = scheduleDataElement.dataset.endTime;
+
+            // 작성자 필드 설정 및 비활성화
+            schedulePersonNameSelect.value = scheduleDataElement.dataset.personName;
+            schedulePersonNameSelect.disabled = true;
+
+            const scheduleType = scheduleDataElement.dataset.type;
+            scheduleTypeSelect.value = scheduleType;
+            loadStatusOptions(scheduleType, scheduleDataElement.dataset.status);
+
+            // 프로젝트 타입인 경우 프로젝트 선택 영역 표시 및 값 설정
+            if (scheduleType === '프로젝트') {
+                projectSelectionArea.style.display = 'block';
+                scheduleProjectTitleSelect.value = scheduleDataElement.dataset.projectTitle;
+                scheduleProjectTitleSelect.required = true;
+            } else {
+                projectSelectionArea.style.display = 'none';
+                scheduleProjectTitleSelect.value = '';
+                scheduleProjectTitleSelect.required = false;
+            }
+
+            // 참여자 목록 로드
+            selectedMembers.clear();
+            const memberIdsString = scheduleDataElement.dataset.memberIds; // memberIds를 가져옴
+            if (memberIdsString) { 
+                try {
+                    const ids = JSON.parse(memberIdsString); // JSON 문자열 파싱
+                    if (Array.isArray(ids) && window.user_names) {
+                        ids.forEach(memberId => {
+                            // user_names에서 해당 ID를 가진 사용자 찾기
+                            const userObj = window.user_names.find(u => 
+                                (u._id === memberId) // MongoDB ObjectId가 문자열로 넘어온 경우
+                            );
+                            if (userObj) {
+                                // Set에 추가 (id와 name 모두 필요)
+                                selectedMembers.add({ id: userObj._id, name: userObj.name });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error("Failed to parse memberIds as JSON:", e);
+                }
+            }
+            updateMemberListUI(); // 참여자 UI 업데이트
+
+            openModal(scheduleFormModal); // 모달 열기
+        });
+    } else {
+        console.warn('editScheduleBtn 요소를 찾을 수 없습니다.');
+    }
+
+    // '일정 추가/수정' 모달 저장 버튼 클릭 이벤트
     saveScheduleBtn.addEventListener('click', function() {
         const scheduleName = scheduleNameInput.value.trim();
-        const schedulePersonName = schedulePersonNameSelect.value;
+        // schedulePersonNameSelect의 값은 UI 표시용이며, 실제 user_id는 세션에서 가져옵니다.
         const scheduleStartDate = scheduleStartDateInput.value;
         const scheduleStartTime = scheduleStartTimeInput.value;
         const scheduleEndDate = scheduleEndDateInput.value;
@@ -278,23 +323,25 @@ if (editScheduleBtn) {
         const scheduleProjectTitle = scheduleProjectTitleSelect.value;
         const scheduleContent = scheduleContentTextarea.value.trim();
 
-        if (!scheduleName || !schedulePersonName || !scheduleStartDate || !scheduleStartTime || !scheduleEndDate || !scheduleEndTime || !scheduleType || !scheduleStatus) {
-            alert('필수 입력 필드를 모두 채워주세요.');
+        // 필수 입력 필드 유효성 검사 (작성자 필드는 비활성화되어 있으므로 검사에서 제외)
+        if (!scheduleName || !scheduleStartDate || !scheduleStartTime || !scheduleEndDate || !scheduleEndTime || !scheduleType || !scheduleStatus) {
+            showCustomMessageBox('필수 입력 필드를 모두 채워주세요.');
             return;
         }
 
         if (scheduleType === '프로젝트' && !scheduleProjectTitle) {
-            alert('프로젝트 일정을 선택한 경우 프로젝트 목록을 선택해주세요.');
+            showCustomMessageBox('프로젝트 일정을 선택한 경우 프로젝트 목록을 선택해주세요.');
             return;
         }
 
-        const selectedArray = Array.from(selectedMembers).map(m => m.name);
-        const jsonString = JSON.stringify(selectedArray);
+        // 선택된 참여자들의 이름만 추출하여 JSON 문자열로 변환
+        const selectedMemberNamesArray = Array.from(selectedMembers).map(m => m.name);
+        const memberNamesJsonString = JSON.stringify(selectedMemberNamesArray);
 
         const data = {
             schedule_name: scheduleName,
-            person_name: schedulePersonName,
-            member_names: jsonString,
+            // person_name은 백엔드에서 세션 user_id를 사용하므로 클라이언트에서 보내지 않음
+            member_names: memberNamesJsonString, // 참여자 이름 배열 JSON 문자열
             start_date: `${scheduleStartDate}T${scheduleStartTime}:00`,
             end_date: `${scheduleEndDate}T${scheduleEndTime}:00`,
             content: scheduleContent,
@@ -309,78 +356,83 @@ if (editScheduleBtn) {
         if (isEditMode) {
             url = '/timeline/update_schedule';
             method = 'POST';
-            data.original_schedule_id_param = currentScheduleId;
+            data.original_schedule_id_param = currentScheduleId; // 수정 시 필요
         } else {
             url = '/timeline/create_schedule';
             method = 'POST';
         }
 
         fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => {
-                throw new Error('서버 오류: ' + text);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            closeModal(scheduleFormModal);
-            const refreshUrl = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}` + 
-                            (currentScheduleId ? `&schedule_id=${currentScheduleId}` : '');
-            window.location.href = refreshUrl;
-        } else {
-            alert('오류: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('서버 통신 중 오류가 발생했습니다. 서버 상태를 확인해주세요.');
-    });
-
-    });
-
-        if (cancelScheduleBtn) {
-            cancelScheduleBtn.addEventListener('click', function() {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                // 서버 에러 메시지 파싱
+                return response.text().then(text => {
+                    throw new Error('서버 오류: ' + text);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showCustomMessageBox(data.message);
                 closeModal(scheduleFormModal);
-            });
-        } else {
-            console.warn('cancelScheduleBtn 요소를 찾을 수 없습니다.');
-        }
+                // 성공 시 페이지 새로고침 (선택된 날짜와 일정 ID 유지)
+                const refreshUrl = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}` + 
+                                    (currentScheduleId ? `&schedule_id=${currentScheduleId}` : '');
+                window.location.href = refreshUrl;
+            } else {
+                showCustomMessageBox('오류: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showCustomMessageBox('서버 통신 중 오류가 발생했습니다. 서버 상태를 확인해주세요.');
+        });
+    });
 
-        if (deleteScheduleBtn) {
-            deleteScheduleBtn.addEventListener('click', function() {
-                const scheduleDataElement = document.getElementById('selected-schedule-data');
-                const detailScheduleId = scheduleDataElement.dataset.scheduleId;
+    // '일정 추가/수정' 모달 취소 버튼 클릭 이벤트
+    if (cancelScheduleBtn) {
+        cancelScheduleBtn.addEventListener('click', function() {
+            closeModal(scheduleFormModal);
+        });
+    } else {
+        console.warn('cancelScheduleBtn 요소를 찾을 수 없습니다.');
+    }
 
-                if (detailScheduleId === 'None' || !detailScheduleId) {
-                    alert('삭제할 일정을 선택해주세요.');
-                    return;
-                }
+    // '일정 삭제' 버튼 클릭 이벤트
+    if (deleteScheduleBtn) {
+        deleteScheduleBtn.addEventListener('click', function() {
+            const scheduleDataElement = document.getElementById('selected-schedule-data');
+            const detailScheduleId = scheduleDataElement.dataset.scheduleId;
 
-                currentScheduleId = detailScheduleId;
-                openModal(deleteConfirmModal);
-            });
-        } else {
-            console.warn('deleteScheduleBtn 요소를 찾을 수 없습니다.');
-        }
+            if (detailScheduleId === 'None' || !detailScheduleId) {
+                showCustomMessageBox('삭제할 일정을 선택해주세요.');
+                return;
+            }
 
+            currentScheduleId = detailScheduleId;
+            openModal(deleteConfirmModal); // 삭제 확인 모달 열기
+        });
+    } else {
+        console.warn('deleteScheduleBtn 요소를 찾을 수 없습니다.');
+    }
+
+    // '삭제 확인' 모달 취소 버튼 클릭 이벤트
     cancelDeleteBtn.addEventListener('click', function() {
         closeModal(deleteConfirmModal);
-        currentScheduleId = null;
+        currentScheduleId = null; // 일정 ID 초기화
     });
 
+    // '삭제 확인' 모달 삭제 버튼 클릭 이벤트
     confirmDeleteBtn.addEventListener('click', function() {
         if (!currentScheduleId) {
-            alert('삭제할 일정 정보가 없습니다.');
+            showCustomMessageBox('삭제할 일정 정보가 없습니다.');
             closeModal(deleteConfirmModal);
             return;
         }
@@ -395,20 +447,22 @@ if (editScheduleBtn) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
+                showCustomMessageBox(data.message);
                 closeModal(deleteConfirmModal);
-                currentScheduleId = null;
+                currentScheduleId = null; // 일정 ID 초기화
+                // 성공 시 페이지 새로고침 (선택된 날짜 유지)
                 window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}`;
             } else {
-                alert('오류: ' + data.message);
+                showCustomMessageBox('오류: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('서버 통신 중 오류가 발생했습니다.');
+            showCustomMessageBox('서버 통신 중 오류가 발생했습니다.');
         });
     });
 
+    // 모달 외부 클릭 시 닫기 이벤트
     window.addEventListener('click', function(event) {
         if (event.target === scheduleFormModal) {
             closeModal(scheduleFormModal);
@@ -418,7 +472,8 @@ if (editScheduleBtn) {
         }
     });
 
-    const initialScheduleId = urlParams.schedule_id;
-    if (initialScheduleId && initialScheduleId !== 'None') {
+    // Alert 대신 사용할 커스텀 메시지 박스 함수 (선택 사항)
+    function showCustomMessageBox(message) {
+        alert(message);
     }
 });

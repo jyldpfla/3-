@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, session, url_for
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import datetime
@@ -7,6 +7,7 @@ from datetime import timedelta
 import json
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY") 
 
 # MongoDB 연결 설정
 uri = "mongodb+srv://team3_member:fwA36oY8zSlNez8w@team3.fxbwcnh.mongodb.net/"
@@ -31,6 +32,7 @@ STATUS_OPTIONS_BY_TYPE = {
     ],
     "프로젝트": [
         {"value": "진행중", "text": "진행중"},
+        {"value": "진행대기", "text": "진행대기"},
         {"value": "지연", "text": "지연"},
         {"value": "중단", "text": "중단"},
         {"value": "완료", "text": "완료"}
@@ -48,19 +50,20 @@ TAG_CLASS_MAP = {
     "출장": "travel-tag",
     "사내일정": "company-event-tag",
     "진행중": "status-inprogress-tag",
+    "진행대기": "status-wait-tag",
     "지연": "status-delayed-tag",
     "중단": "status-stopped-tag",
     "완료": "status-completed-tag",
 }
 
 # 헬퍼 함수
+# 사용자 이름으로 user_id (ObjectId) 찾아 반환
 def get_user_id_by_name(user_name):
-    """사용자 이름으로 user_id (ObjectId)를 찾아 반환합니다."""
     user = users_collection.find_one({"name": user_name}, {"_id": 1})
     return user["_id"] if user else None
 
+# user_id (ObjectId)로 사용자 이름 찾아 반환
 def get_user_name_by_id(user_obj_id):
-    """user_id (ObjectId)로 사용자 이름을 찾아 반환합니다."""
     try:
         if not isinstance(user_obj_id, ObjectId):
             user_obj_id = ObjectId(user_obj_id)
@@ -70,8 +73,8 @@ def get_user_name_by_id(user_obj_id):
         print(f"Error converting user ID {user_obj_id} to name: {e}")
         return None
 
+# 사용자 이름 리스트로 user_id (ObjectId) 리스트 찾아 반환
 def get_user_ids_by_names(user_names):
-    """사용자 이름 리스트로 user_id (ObjectId) 리스트를 찾아 반환합니다."""
     if not user_names:
         return []
     
@@ -83,8 +86,8 @@ def get_user_ids_by_names(user_names):
     member_ids = [user["_id"] for user in users]
     return member_ids
 
+# user_id 리스트로 사용자 이름 리스트 찾아 반환
 def get_user_names_by_ids(user_ids):
-    """user_id 리스트로 사용자 이름 리스트를 찾아 반환합니다."""
     if not user_ids:
         return []
     
@@ -105,13 +108,13 @@ def get_user_names_by_ids(user_ids):
         print(f"Error converting user IDs to names: {e}")
         return []
 
+# 프로젝트 제목으로 project_id (ObjectId) 찾아 반환
 def get_project_id_by_title(project_title):
-    """프로젝트 제목으로 project_id (ObjectId)를 찾아 반환합니다."""
     project = projects_collection.find_one({"title": project_title})
     return project["_id"] if project else None
 
+# project_id (ObjectId)로 프로젝트 제목 찾아 반환
 def get_project_title_by_id(project_obj_id):
-    """project_id (ObjectId)로 프로젝트 제목을 찾아 반환합니다."""
     try:
         if not isinstance(project_obj_id, ObjectId):
             project_obj_id = ObjectId(project_obj_id)
@@ -121,17 +124,57 @@ def get_project_title_by_id(project_obj_id):
         print(f"Error converting project ID {project_obj_id} to title: {e}")
         return None
 
+@app.context_processor
+def inject_user():
+    # 실제 환경에서는 사용자 로그인 정보를 세션에서 가져와야 합니다. 테스트를 위해 임시로 고정된 user_id를 사용.
+    session["user_id"] = "685cc3fc7163cce7db1fd18f" # 실제 사용자 ID로 변경 필요
+    user_id = session.get("user_id")
+    user = None
+    if user_id:
+        try:
+            user = users_collection.find_one({"_id": ObjectId(user_id)})
+        except Exception as e:
+            print(f"Error fetching user info for ID {user_id}: {e}")
+            user = None
+
+    # db.notifications 컬렉션에서 안 읽은 알림 불러오기
+    unread_notes = []
+    has_notification = False
+    if user_id and "notifications" in db.list_collection_names(): 
+        try:
+            unread_notes = list(db.notifications.find({
+                "user_id": ObjectId(user_id),
+                "read": False
+            }))
+            messages = [n["message"] for n in unread_notes]
+            has_notification = len(messages) > 0
+        except Exception as e:
+            print(f"Error fetching notifications for user {user_id}: {e}")
+            messages = []
+    else:
+        messages = []
+
+    return dict(
+        user_info=user,
+        notifications=messages,
+        has_notification=has_notification
+    )
+
 # 라우팅
 @app.route('/timeline')
 def timeline():
+    user_id = session.get("user_id") # 세션에서 user_id 가져오기 (ObjectId로 변환 필요 시 get_user_name_by_id 사용)
+    
     year_param = request.args.get('year')
     month_param = request.args.get('month')
     date_param = request.args.get('date')
     schedule_id_param = request.args.get('schedule_id')
+    
     user_names = [ 
         {"_id": str(user["_id"]), "name": user["name"]}
         for user in users_collection.find({}, {"_id": 1, "name": 1})
     ]
+    
     today = datetime.date.today()
     current_year = int(year_param) if year_param else today.year
     current_month = int(month_param) if month_param else today.month
@@ -141,10 +184,10 @@ def timeline():
     
     calendar_days = []
     first_day_of_week = start_of_month.weekday()
-    start_offset = (first_day_of_week + 1) % 7
+    start_offset = (first_day_of_week + 1) % 7 # 월요일을 0으로 가정하면 (일요일=6) -> (일요일=0)
     start_date = start_of_month - datetime.timedelta(days=start_offset)
 
-    for _ in range(42):
+    for _ in range(35): # 5주 (35일) 표시
         is_current_month = (start_date.month == current_month)
         formatted_date = start_date.strftime('%Y-%m-%d')
         
@@ -186,8 +229,9 @@ def timeline():
         schedule_type = schedule.get("type", "")
         schedule_status = schedule.get("status", "")
         
-        tag_class = TAG_CLASS_MAP.get(schedule_type, "default-tag")
+        tag_class = TAG_CLASS_MAP.get(schedule_type, "default-tag") # 기본 태그 클래스
         
+        # 일정 타입에 따라 태그 클래스 오버라이드
         if schedule_type == "개인":
             tag_class = TAG_CLASS_MAP.get(schedule_status, "personal-tag")
         elif schedule_type == "프로젝트":
@@ -227,18 +271,22 @@ def timeline():
                 selected_schedule_detail["type"] = schedule.get("type", "")
                 selected_schedule_detail["status"] = schedule.get("status", "") 
                 
+                # 작성자 이름 가져오기
                 user_name = get_user_name_by_id(schedule.get("user_id")) 
-                selected_schedule_detail["personName"] = user_name if user_name else ""
+                selected_schedule_detail["personName"] = user_name if user_name else "-" # 작성자 이름 없으면 "-"
                 
+                # 프로젝트 제목 가져오기
                 project_title = get_project_title_by_id(schedule.get("project_id")) 
                 selected_schedule_detail["projectTitle"] = project_title if project_title else ""
                 
+                # 참여자 ID 리스트 가져오기
                 member_ids = schedule.get("member", []) 
                 
-                print("data확인", member_ids)
+                # 참여자 이름 리스트로 변환 (JS에서 사용하기 위함)
                 member_names = get_user_names_by_ids(member_ids)
                 selected_schedule_detail["memberNames"] = member_names 
-                
+                selected_schedule_detail["memberIds"] = [str(mid) for mid in member_ids] # ObjectId를 문자열로 변환하여 JS로 전달
+
             else:
                 print(f"DEBUG: No schedule found for ID: {schedule_id_param}")
         except Exception as e:
@@ -256,21 +304,21 @@ def timeline():
                             selected_schedule_detail=selected_schedule_detail, 
                             status_options_by_type=STATUS_OPTIONS_BY_TYPE, 
                             project_titles=project_titles,
-                            user_names=user_names)
+                            user_names=user_names) # 모든 사용자 이름 전달
 
 @app.route('/timeline/create_schedule', methods=['POST'])
 def create_schedule():
     data = request.get_json()
     
-    if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status', 'person_name']):
-        return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태, 작성자)가 누락되었습니다."}), 400
+    if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
+        return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태)가 누락되었습니다."}), 400
 
-    person_name = data.get("person_name")
-    user_id = get_user_id_by_name(person_name) 
+    # 세션에서 사용자 ID 가져오기
+    user_id_from_session = session.get("user_id")
 
-    if not user_id:
-        return jsonify({"success": False, "message": f"작성자 '{person_name}'을(를) 찾을 수 없습니다. 유효한 사용자를 선택해주세요."}), 400
-
+    if not user_id_from_session:
+        return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
+    
     try:
         start_date_iso = data.get("start_date")
         end_date_iso = data.get("end_date")
@@ -287,21 +335,23 @@ def create_schedule():
         "content": data.get("content", ""),
         "type": data.get("type"),
         "status": data.get("status"),
-        "user_id": user_id, 
+        "user_id": ObjectId(user_id_from_session), # 세션의 user_id를 ObjectId로 변환하여 저장
         "created_at": datetime.datetime.now() 
     }
 
+    # member_names 처리 (멤버 이름 리스트를 받아 ID 리스트로 변환하여 저장)
     member_names_json = data.get("member_names", "[]")
     members_to_save = []
     if member_names_json:
         try:
             parsed_members = json.loads(member_names_json)
             if isinstance(parsed_members, list):
+                # 클라이언트에서 ['이름1', '이름2'] 또는 [{'id': '...', 'name': '이름'}] 형태로 올 수 있음
                 if parsed_members and isinstance(parsed_members[0], dict) and "name" in parsed_members[0]:
                     member_names = [m["name"] for m in parsed_members]
                 else:
-                    member_names = parsed_members
-                members_to_save = get_user_ids_by_names(member_names)
+                    member_names = parsed_members # 이미 이름 리스트인 경우
+                members_to_save = get_user_ids_by_names(member_names) # 이름 리스트로 ID 리스트 가져오기
             else:
                 print(f"WARN: member_names is not a list after parsing: {parsed_members}")
         except json.JSONDecodeError as e:
@@ -324,10 +374,9 @@ def create_schedule():
 
     try:
         result = timeline_collection.insert_one(new_schedule) 
-        return jsonify({"success": True, "message": "일정이 성공적으로 추가되었습니다.", "new_schedule_id": str(result.inserted_id)})
+        return jsonify({"success": True, "message": "일정이 성공적으로 생성되었습니다."})
     except Exception as e:
-        print(f"ERROR create_schedule: {e}") 
-        return jsonify({"success": False, "message": f"일정 추가 중 오류 발생: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"일정 생성 중 오류 발생: {str(e)}"}), 500
 
 @app.route('/timeline/update_schedule', methods=['POST'])
 def update_schedule():
@@ -344,18 +393,20 @@ def update_schedule():
     except Exception as e:
         return jsonify({"success": False, "message": f"유효하지 않은 일정 ID 형식입니다: {e}"}), 400
 
-    if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status', 'person_name']):
-        return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태, 작성자)가 누락되었습니다."}), 400
+    # 세션에서 사용자 ID 가져오기 (작성자 확인용)
+    user_id_from_session = session.get("user_id")
 
-    person_name = data.get("person_name")
-    user_id = get_user_id_by_name(person_name) 
-
-    if not user_id:
-        return jsonify({"success": False, "message": f"작성자 '{person_name}'을(를) 찾을 수 없습니다. 유효한 사용자를 선택해주세요."}), 400
+    if not user_id_from_session:
+        return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
     
+    # 일정 이름, 날짜, 타입, 상태 등 필수 항목 확인
+    if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
+        return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태)가 누락되었습니다."}), 400
+
     try:
         start_date_iso = data.get("start_date")
         end_date_iso = data.get("end_date")
+        # Z 문자가 있을 경우 UTC로 처리하기 위해 +00:00으로 대체
         start_date_dt = datetime.datetime.fromisoformat(start_date_iso.replace('Z', '+00:00'))
         end_date_dt = datetime.datetime.fromisoformat(end_date_iso.replace('Z', '+00:00'))
     except ValueError as e:
@@ -368,10 +419,10 @@ def update_schedule():
         "content": data.get("content", ""),
         "type": data.get("type"),
         "status": data.get("status"),
-        "user_id": user_id, 
         "updated_at": datetime.datetime.now()
     }
 
+    # member_names 처리
     member_names_json = data.get("member_names", "[]")
     members_to_save = []
     if member_names_json:
