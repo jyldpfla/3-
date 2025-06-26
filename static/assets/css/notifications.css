@@ -1,35 +1,70 @@
 .notification-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             max-width: 800px;
             margin: 2rem auto;
             padding: 1rem;
             background: #fff;
             border-radius: 10px;
         }
-        .notification-item {
+
+        .notification-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .notification-list li {
             padding: 1rem;
             border-bottom: 1px solid #eee;
             display: flex;
-            justify-content: center;
             align-items: center;
+            transition: background 0.2s;
         }
-        .notification-item.unread {
+
+        .notification-list li:last-child {
+            border-bottom: none;
+        }
+
+        .notification-list li.unread {
             background-color: #f8f9ff;
             font-weight: bold;
         }
+
+        .notification-list > a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #2a4fa7;
+            text-decoration: none;
+            flex: 1;
+            transition: color 0.2s;
+        }
+
+        .notification-list a:hover {
+            text-decoration: underline;
+            color: #1a3570;
+        }
+
         .notification-time {
             font-size: 0.85rem;
             color: #888;
+            margin-left: 1rem;
         }
+
         .no-notifications {
             text-align: center;
             margin: 2rem;
             color: #aaa;
         }
+
         .pagination {
             display: flex;
             justify-content: center;
             margin-top: 10px;
-                }
+        }
         .pagination > * {
-            margin: 0 5px; /* 좌우 5px씩 = 버튼 사이 10px */
+            margin: 0 5px; 
         }
