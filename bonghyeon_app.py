@@ -67,11 +67,12 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# ✅ 마이페이지 (현재는 로그인으로 리다이렉트)
+# ✅ 마이페이지
 @app.route("/mypage")
 @login_required
 def mypage():
-    return redirect(url_for("login"))
+    user = user_collection.find_one({"_id": ObjectId(session["user_id"])})
+    return render_template("mypage.html", user=user)
 
 # ✅ 회원가입
 @app.route("/signup", methods=["GET", "POST"])
@@ -115,8 +116,6 @@ def signup():
             ("position", request.form["position"]),
             ("createAt", str(date.today())),
             ("phone_num", request.form["phone"]),
-            ("Personal_todoId", None),
-            ("BoardId", None)
         ])
 
         user_collection.insert_one(new_user)
