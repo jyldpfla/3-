@@ -276,6 +276,21 @@ def mypage():
             t["end_date"] = datetime.strftime(t["end_date"], "%Y-%m-%d")
         personal_timeline = [t for t in timeline if t['project_id'] == None] # 개인 일정
         project_timeline = [t for t in timeline if t['project_id'] in project_id_list]# 프로젝트 내 일정
+        other_timeline = list(timeline_collection.find({
+            "$and": [
+                { "project_id": { "$nin": project_id_list } }, 
+                { "project_id": { "$ne": None } },
+                {
+                    "$or": [
+                        { "member": user['_id'] },           # 배열 안에 포함된 경우
+                        { "user_id": user['_id'] }
+                    ]
+                }
+            ]
+        }))
+        for t in other_timeline:
+            t["start_date"] = datetime.strftime(t["start_date"], "%Y-%m-%d")
+            t["end_date"] = datetime.strftime(t["end_date"], "%Y-%m-%d")
         for p in project_timeline:
             if p["status"] in ["미완료", "지연", "중단"]:
                 p["status"] = "To do"
@@ -283,8 +298,8 @@ def mypage():
                 p["status"] = "In Progress"
             else:
                 p["status"] = "Done"
-        
-        return render_template("/my_page.html", todo=todo, done=done, doing=doing, personal_timeline=personal_timeline, project_timeline=project_timeline)
+        all_projects = list(project_collection.find({"_id": {"$nin": project_id_list}}))
+        return render_template("/my_page.html", todo=todo, done=done, doing=doing, all_projects=all_projects, personal_timeline=personal_timeline, project_timeline=project_timeline, other_timeline=other_timeline)
     except Exception as e:
         print(f"유저 정보를 찾을 수 없습니다: {e}")
         return redirect("/login")
