@@ -62,7 +62,7 @@
             {% for post in posts %}
             <tr>
               <td class="center"><input type="checkbox" name="post-check" value="{{ post['_id'] }}"><br>{{ loop.index }}</td>
-              <td class="center">{{ post["title"]}}</td>
+              <td class="center"><a href="/board/detail/{{post["_id"]}}">{{ post["title"]}}</a></td>
               <td class="center">{{ post["update_date"]}}</td>
               <td class="center">{{ post["writer"]}}</td>
             </tr>

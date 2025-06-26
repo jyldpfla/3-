@@ -1,117 +1,26 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>게시글 상세보기</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f9f9f9;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: white;
-      padding: 10px 40px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .nav-left, .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 30px;
-    }
-
-    .nav-item {
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-      color: black;
-      padding: 5px 10px;
-      border-radius: 15px;
-    }
-
-    .nav-item.active {
-      border: 2px solid black;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .title {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .meta {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .content {
-      font-size: 16px;
-      line-height: 1.6;
-      white-space: pre-line;
-    }
-
-    .back-button {
-      margin-top: 30px;
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .footer {
-      text-align: right;
-      margin-top: 50px;
-      padding: 20px;
-      color: #666;
-      font-size: 14px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/freeboard_detail.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>3조 Main</title>
 </head>
 <body>
+    {% include 'components/nav.html' %}
 
-  <div class="navbar">
-    <div class="nav-left">
-      <a href="/project" class="nav-item">프로젝트</a>
-      <a href="/schedule" class="nav-item">업무 일정</a>
-      <a href="/board" class="nav-item active">게시판</a>
-      <a href="/mypage" class="nav-item">마이 페이지</a>
-    </div>
-    <div class="nav-right">
-      <span>Chorong</span>
-      <button class="btn" style="background:white; color:black; border:1px solid #ccc;">Logout</button>
-    </div>
-  </div>
+    <main>
+      <div class="container">
+      <div class="title">{{ post.title }}</div>
+      <div class="meta">작성자: {{ post.writer }} | 날짜: {{ post.update_date }}</div>
+      <div class="content">{{ post.content }}</div>
 
-  <div class="container">
-    <div class="title">{{ post.title }}</div>
-    <div class="meta">작성자: {{ post.author }} | 날짜: {{ post.date }}</div>
-    <div class="content">{{ post.content }}</div>
+      <a href="/board" class="back-button">← 목록으로</a>
+      </div>
+    </main>
 
-    <a href="/board" class="back-button">← 목록으로</a>
-  </div>
-
-  <div class="footer">
-    © 2025 MyCompany. All rights reserved.
-  </div>
-
+    {% include 'components/footer.html' %}
 </body>
 </html>

@@ -398,10 +398,23 @@ def board():
     posts = list(board_collection.find({"category": "자유"}))
     
     for p in posts:
+        if p["title"] == "" or p["title"] == None:
+            p["title"] = "-"
         p["writer"] = user_collection.find_one({"_id": p["user_id"]})["name"]
+        
+        p["update_date"] = p["update_date"].strftime("%Y-%m-%d %H:%M")
     
     posts.sort(key=lambda x: x.get("no", 0), reverse=True)
     return render_template("freeboard_main.html", posts=posts)
+
+@app.route("/board/detail/<id>")
+def freeboard_detail(id):
+    post = board_collection.find_one({"_id": ObjectId(id)})
+    post["writer"] = user_collection.find_one({"_id": post["user_id"]})["name"]
+
+    # 2. 원하는 형식으로 다시 문자열로 저장
+    post["update_date"] = post["update_date"].strftime("%Y-%m-%d %H:%M")
+    return render_template("freeboard_detail.html", post=post)
 
 @app.route('/board_insert', methods=['GET', 'POST'])
 def insert_form():
@@ -410,15 +423,14 @@ def insert_form():
         return render_template('/freeboard_insert.html')
     title = request.form.get("title")
     content = request.form.get("content")
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     board_collection.insert_one({
         "title": title,
         "category": "자유",
         "user_id": ObjectId(user_id),
         "content": content,
-        "create_date": now,
-        "update_date": now
+        "create_date": datetime.now(),
+        "update_date": datetime.now()
     })
 
     return redirect(url_for("board"))
