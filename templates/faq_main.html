@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>FAQ 게시판</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: white;
+      padding: 10px 40px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .nav-left, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .nav-item {
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      border: 2px solid black;
+      border-radius: 15px;
+      padding: 5px 10px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background-color: white;
+      border-radius: 10px;
+      padding: 40px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      margin-bottom: 30px;
+      font-size: 26px;
+    }
+
+    .faq-box {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+    }
+
+    .faq-box:hover {
+      background-color: #f7f7f7;
+    }
+
+    .faq-question {
+      padding: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    .faq-answer {
+      padding: 20px;
+      font-size: 16px;
+      line-height: 1.6;
+      background-color: #fcfcfc;
+      display: none;
+      border-top: 1px solid #ddd;
+    }
+
+    .faq-icon {
+      color: #0c5c79;
+      font-weight: bold;
+      margin-right: 10px;
+      font-size: 20px;
+    }
+
+    .faq-actions {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+
+    .faq-actions button {
+      margin-left: 5px;
+      background-color: #888;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .form {
+      margin-top: 40px;
+      border-top: 1px solid #ccc;
+      padding-top: 30px;
+    }
+
+    .form input, .form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .form .form-buttons {
+      text-align: right;
+    }
+
+    .form .form-buttons button {
+      background-color: #888;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .footer {
+      background-color: transparent;
+      text-align: right;
+      font-size: 12px;
+      color: #888;
+      padding: 20px 40px;
+    }
+
+    .footer a {
+      color: purple;
+      margin-right: 10px;
+      text-decoration: none;
+    }
+
+    .btn {
+      background-color: #0c5c79;
+      color: white;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+
+  <script>
+    function toggleBoardPage() {
+      const current = window.location.pathname;
+      if (current.includes("faq_main")) {
+        location.href = "freeboard_main.html";
+      } else {
+        location.href = "faq_main.html";
+      }
+    }
+
+    let faqs = JSON.parse(localStorage.getItem("faqs")) || [
+      { question: "게시판 글 작성은 누구나 가능한가요?", answer: "네, 로그인한 사용자는 누구나 자유롭게 글을 작성할 수 있습니다." },
+      { question: "작성한 글을 수정 또는 삭제하려면 어떻게 하나요?", answer: "게시글 우측 하단의 수정/삭제 버튼을 눌러 편집할 수 있습니다." },
+      { question: "공지글은 어떤 기준으로 정해지나요?", answer: "공지글은 관리자에 의해 고정되며, 일반 사용자는 작성할 수 없습니다." }
+    ];
+
+    function renderFaqs() {
+      const list = document.getElementById('faq-list');
+      list.innerHTML = '';
+      faqs.forEach((faq, index) => {
+        const box = document.createElement('div');
+        box.className = 'faq-box';
+        box.innerHTML = `
+          <div class="faq-question"><span class="faq-icon">Q.</span>${faq.question}</div>
+          <div class="faq-answer"><span class="faq-icon">A.</span>${faq.answer}</div>
+          <div class="faq-actions">
+            <button onclick="editFaq(${index})">수정</button>
+            <button onclick="deleteFaq(${index})">삭제</button>
+          </div>
+        `;
+        box.querySelector('.faq-question').addEventListener('click', () => {
+          const answer = box.querySelector('.faq-answer');
+          const isOpen = answer.style.display === 'block';
+          document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
+          answer.style.display = isOpen ? 'none' : 'block';
+        });
+        list.appendChild(box);
+      });
+      localStorage.setItem("faqs", JSON.stringify(faqs));
+    }
+
+    function addFaq() {
+      const q = document.getElementById('new-question').value.trim();
+      const a = document.getElementById('new-answer').value.trim();
+      if (!q || !a) return alert("질문과 답변을 모두 입력해주세요.");
+      faqs.push({ question: q, answer: a });
+      document.getElementById('new-question').value = '';
+      document.getElementById('new-answer').value = '';
+      renderFaqs();
+    }
+
+    function editFaq(index) {
+      const newQ = prompt("새 질문을 입력하세요", faqs[index].question);
+      const newA = prompt("새 답변을 입력하세요", faqs[index].answer);
+      if (newQ && newA) {
+        faqs[index].question = newQ;
+        faqs[index].answer = newA;
+        renderFaqs();
+      }
+    }
+
+    function deleteFaq(index) {
+      if (confirm("정말 삭제하시겠습니까?")) {
+        faqs.splice(index, 1);
+        renderFaqs();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", renderFaqs);
+  </script>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="nav-left">
+      <div class="nav-item">프로젝트</div>
+      <div class="nav-item">업무 일정</div>
+      <div class="nav-item active" onclick="toggleBoardPage()">게시판</div>
+      <div class="nav-item">마이 페이지</div>
+    </div>
+    <div class="nav-right">
+      <span>Chorong</span>
+      <button class="btn" style="background:white; color:black; border:1px solid #ccc;">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>FAQ 게시판</h2>
+    <div id="faq-list"></div>
+
+    <div class="form">
+      <h3>새 질문 추가</h3>
+      <input type="text" id="new-question" placeholder="질문을 입력하세요">
+      <textarea id="new-answer" placeholder="답변을 입력하세요" rows="4"></textarea>
+      <div class="form-buttons">
+        <button onclick="addFaq()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="#">개인정보처리방침</a>
+    <a href="#">이용약관</a>
+    <a href="#">고객센터</a>
+    © 2025 MyCompany. All rights reserved.
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>자유 게시판</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #fff;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      border-bottom: 1px solid #ddd;
+      background-color: #fff;
+    }
+
+    .nav-left, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 50px;
+    }
+
+    .nav-item {
+      font-weight: bold;
+      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: 20px;
+    }
+
+    .nav-item.active {
+      border: 2px solid black;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+    }
+
+    .board-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .board-header .toggle-tip {
+      font-size: 14px;
+      margin-top: 6px;
+      color: #333;
+      border: 1px solid #000;
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 16px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    th {
+      background-color: #125276;
+      color: white;
+      font-size: 16px;
+    }
+
+    td.center, th.center {
+      text-align: center;
+    }
+
+    a.title-link {
+      text-decoration: none;
+      color: #125276;
+      font-weight: bold;
+      display: block;
+      text-align: center;
+    }
+
+    a.title-link:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      background-color: #0e2d40;
+      color: #fff;
+      text-align: right;
+      padding: 20px 40px;
+      font-size: 13px;
+    }
+
+    .footer a {
+      color: #ccc;
+      text-decoration: none;
+      margin-left: 15px;
+    }
+
+    .btn-box {
+      margin-top: 30px;
+      text-align: right;
+    }
+
+    .btn {
+      background-color: #125276;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .btn.delete {
+      background-color: #c0392b;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+  </style>
+
+  <script>
+    function toggleBoardPage() {
+      location.href = "faq_main.html";
+    }
+
+    function goToInsertPage() {
+      location.href = "/freeboard_insert";
+    }
+
+    function deleteSelectedPosts() {
+      const checkboxes = document.querySelectorAll("input[name='post-check']:checked");
+      if (checkboxes.length === 0) return alert("삭제할 게시글을 선택해주세요.");
+
+      let posts = JSON.parse(localStorage.getItem("posts")) || [];
+      const indexesToDelete = Array.from(checkboxes).map(cb => parseInt(cb.value));
+      posts = posts.filter((_, i) => !indexesToDelete.includes(i));
+      localStorage.setItem("posts", JSON.stringify(posts));
+      location.reload();
+    }
+
+    // document.addEventListener("DOMContentLoaded", () => {
+    //   let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+    //   posts = posts.map(post => {
+    //     if (!post.date) {
+    //       const now = new Date();
+    //       const formatted = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} / ` +
+    //                         `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    //       return { ...post, date: formatted };
+    //     }
+    //     return post;
+    //   });
+
+    //   localStorage.setItem("posts", JSON.stringify(posts));
+
+    //   const tbody = document.getElementById("post-tbody");
+    //   posts.forEach((post, index) => {
+    //     const row = document.createElement("tr");
+    //     row.innerHTML = `
+    //       <td class="center"><input type="checkbox" name="post-check" value="${index}"><br>${index + 1}</td>
+    //       <td><a class="title-link" href="freeboard_detail.html?index=${index}">${post.title}</a></td>
+    //       <td class="center">${post.date}</td>
+    //     `;
+    //     tbody.appendChild(row);
+    //   });
+    // });
+  </script>
+</head>
+<body>
+
+  <div class="navbar">
+    <div class="nav-left">
+      <div class="nav-item">프로젝트</div>
+      <div class="nav-item">업무 일정</div>
+      <div class="nav-item active" onclick="toggleBoardPage()">게시판</div>
+      <div class="nav-item">마이 페이지</div>
+    </div>
+    <div class="nav-right">
+      <span>Chorong</span>
+      <button class="btn" style="background:white; color:black; border:1px solid #ccc;">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="board-header">
+      <h2>자유 게시판</h2>
+    </div>
+    
+    <form action="/freeboard_delete" method="post">
+    <table>
+      <thead>
+        <tr>
+          <th class="center">번호</th>
+          <th class="center">자유 게시판</th>
+          <th class="center">날짜/시간</th>
+        </tr>
+      </thead>
+      <tbody id="post-tbody">
+        {% for post in posts %}
+        <tr>
+          <td class="center"><input name="no" type="checkbox" name="post-check" value={{ post['no'] }}><br>{{ loop.index }}</td>
+          <td class="center">{{ post["title"]}}</th>
+          <td class="center">{{ post["date"]}}</th>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="btn-box">
+      <button class="btn" onclick="goToInsertPage()">등록</button>
+        <button type="submit" class="btn delete">삭제</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2025 MyCompany. All rights reserved.
+    <a href="#">개인정보처리방침</a>
+    <a href="#">이용약관</a>
+    <a href="#">고객센터</a>
+  </div>
+
+</body>
+</html>
