@@ -28,12 +28,13 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    session["user_id"] = "6854be045d8c554194fe197b"
-    user_id = session.get("user_id")
+    session["user_id"] = "6854be045d8c554194fe197b"  # 테스트용
+    user_id = session.get("user_id")  # 이 줄이 꼭 필요!
+    user = None
+    messages = []
+    has_notification = False
     if user_id:
         user = user_collection.find_one({"_id": ObjectId(user_id)})
-
-        # 안 읽은 알림 불러오기
         unread_notes = list(db.notifications.find({
             "user_id": ObjectId(user_id),
             "read": False
@@ -41,33 +42,18 @@ def inject_user():
         messages = [n["message"] for n in unread_notes]
         has_notification = len(messages) > 0
 
-        return dict(
-            user_info=user,
-            notifications=messages,
-            has_notification=has_notification
-        )
-    return dict()
+    return dict(
+        user_info=user,
+        notifications=messages,
+        has_notification=has_notification,
+        current_page=request.endpoint
+    )
 
-@app.context_processor
-def inject_global_context():
-    user_id = session.get("user_id")
-    if user_id:
-        user = user_collection.find_one({"_id": ObjectId(user_id)})
 
-        # 안 읽은 알림 불러오기
-        unread_notes = list(db.notifications.find({
-            "user_id": ObjectId(user_id),
-            "read": False
-        }))
-        messages = [n["message"] for n in unread_notes]
-        has_notification = len(messages) > 0
-
-        return dict(
-            user_info=user,
-            notifications=messages,
-            has_notification=has_notification
-        )
-    return dict()
+@app.route('/set_user/<user_id>') # 테스트용 세선 함수
+def set_user(user_id):
+    session["user_id"] = user_id
+    return f"세션에 사용자 {user_id} 저장 완료"
 
 
 @app.route("/")
@@ -430,7 +416,7 @@ def teamMemberManage(project_id):
     manager_user = user_collection.find_one({"_id": project_manager_id})
     
     if not manager_user:
-        return "팀장 유저 정보를 찾을 수 없습니다.", 404
+        return "팀장 유저 정보를 찾을 수 없습니다.", 404 
     team_doc = team_collection.find_one({"project_id": project_obj_id})
     member_ids = team_doc.get("member", []) if team_doc else []
     status_list = team_doc.get("status", []) if team_doc else []

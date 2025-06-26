@@ -34,38 +34,43 @@
       </thead>
       <tbody>
         {% for member in team_members %}
-<tr>
-  <td>{{ member.name }}</td>
-  <td>{{ member.email }}</td>
-  <td>{{ member.role }}</td>
-  <td>
-    {% if member.status == '대기' %}
-      <span class="status-dot red"></span>
-    {% else %}
-      <span class="status-dot green"></span>
-    {% endif %}
+  <tr>
+    <td>
+      {% if member.is_manager and not member.name %}
+        <span>-</span>
+      {% else %}
+        {{ member.name }}
+      {% endif %}
+    </td>
+    <td>{{ member.email }}</td>
+    <td>{{ member.role }}</td>
+    <td>
+      {% if member.status == '대기' %}
+        <span class="status-dot red"></span>
+      {% else %}
+        <span class="status-dot green"></span>
+      {% endif %}
 
-    {% if not member.is_manager %}
-    <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}" style="display:inline;">
-      <select name="status">
-        <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
-        <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
-      </select>
-  </td>
-  <td>
-      <button type="submit" class="btn btn-gray">저장</button>
-    </form>
+      {% if not member.is_manager %}
+      <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}" style="display:inline;">
+        <select name="status">
+          <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
+          <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
+        </select>
+    </td>
+    <td>
+        <button type="submit" class="btn btn-gray">저장</button>
+      </form>
 
-    <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}" style="display:inline;">
-      <button type="submit" class="btn btn-gray">삭제</button>
-    </form>
-    {% else %}
-      </td>
-      <td><span style="color: gray;">-</span></td>
-    {% endif %}
-</tr>
-{% endfor %}
-
+      <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}" style="display:inline;">
+        <button type="submit" class="btn btn-gray">삭제</button>
+      </form>
+      {% else %}
+        </td>
+        <td><span style="color: gray;">-</span></td>
+      {% endif %}
+  </tr>
+  {% endfor %}
       </tbody>
     </table>
   </main>
