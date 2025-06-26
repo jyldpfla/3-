@@ -1,152 +1,39 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>글 작성하기</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #fff;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      border-bottom: 1px solid #ddd;
-      background-color: #fff;
-    }
-
-    .menu {
-      display: flex;
-      gap: 60px;
-      font-weight: bold;
-    }
-
-    .menu a {
-      text-decoration: none;
-      color: black;
-      padding: 8px 20px;
-      border-radius: 12px;
-    }
-
-    .menu a.active {
-      border: 2px solid black;
-    }
-
-    .userinfo {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .main-title {
-      max-width: 1000px;
-      margin: 40px auto 10px auto;
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .form-container {
-      max-width: 1000px;
-      margin: 20px auto;
-    }
-
-    label {
-      display: block;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
-    }
-
-    textarea {
-      min-height: 200px;
-    }
-
-    .btn-box {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      background-color: #1b5d73;
-      color: white;
-      border: none;
-      padding: 10px 24px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      text-decoration: none;
-    }
-
-    .footer {
-      background-color: #001f3f;
-      color: white;
-      text-align: right;
-      padding: 12px 40px;
-      font-size: 13px;
-      margin-top: 60px;
-    }
-
-    .footer a {
-      color: white;
-      margin-left: 10px;
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/freeboard_insert.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>3조 Main</title>
 </head>
 <body>
+    {% include 'components/nav.html' %}
 
-  <div class="navbar">
-    <div class="menu">
-      <a href="#">프로젝트</a>
-      <a href="#">업무 일정</a>
-      <a href="{{ url_for('freeboard_main') }}" class="active">게시판</a>
-      <a href="#">마이 페이지</a>
-    </div>
-    <div class="userinfo">
-      <span>Yerim</span>
-      <span>🔔</span>
-      <button>Logout</button>
-    </div>
-  </div>
-
-  <div class="main-title">글 작성하기</div>
+    <main>
+      <div class="main-title">글 작성하기</div>
 
   <div class="form-container">
     <!-- ✅ 여기서 수정: insert_action → freeboard_insert_action -->
-    <form action="{{ url_for('freeboard_insert_action') }}" method="post">
+    <form action="/board_insert" method="post">
       <label for="title">제목</label>
-      <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
+      <input type="text" id="title" name="title" placeholder="제목을 입력하세요">
 
       <label for="content">내용</label>
-      <textarea id="content" name="content" placeholder="내용을 입력하세요" required></textarea>
+      <textarea id="content" name="content" placeholder="내용을 입력하세요"></textarea>
 
       <div class="btn-box">
         <button type="submit" class="btn">등록</button>
-        <a href="{{ url_for('freeboard_main') }}" class="btn">취소</a>
+        <button type="button" class="btn" style="padding: 0"><a href="/board" style="color:white; padding:10px 24px">취소</a></button>
       </div>
     </form>
   </div>
 
-  <div class="footer">
-    © 2025 MyCompany. All rights reserved.
-    <a href="#">개인정보처리방침</a> |
-    <a href="#">이용약관</a> |
-    <a href="#">고객센터</a>
-  </div>
+    </main>
 
+    {% include 'components/footer.html' %}
 </body>
 </html>
+
+

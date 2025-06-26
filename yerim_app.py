@@ -393,5 +393,42 @@ def mark_notifications_as_read():
     )
     return jsonify({"success": True})
 
+@app.route("/board")
+def board():
+    posts = list(board_collection.find({"category": "자유"}))
+    
+    for p in posts:
+        p["writer"] = user_collection.find_one({"_id": p["user_id"]})["name"]
+    
+    posts.sort(key=lambda x: x.get("no", 0), reverse=True)
+    return render_template("freeboard_main.html", posts=posts)
+
+@app.route('/board_insert', methods=['GET', 'POST'])
+def insert_form():
+    user_id = session.get("user_id")
+    if request.method == 'GET':
+        return render_template('/freeboard_insert.html')
+    title = request.form.get("title")
+    content = request.form.get("content")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    board_collection.insert_one({
+        "title": title,
+        "category": "자유",
+        "user_id": ObjectId(user_id),
+        "content": content,
+        "create_date": now,
+        "update_date": now
+    })
+
+    return redirect(url_for("board"))
+
+@app.route('/board_delete', methods=['POST'])
+def delete():
+    id = request.get_json()["_id"]
+    board_collection.delete_one({"_id": ObjectId(id)})
+
+    return redirect(url_for("board"))
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
