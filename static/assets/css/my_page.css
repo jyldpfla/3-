@@ -237,6 +237,10 @@ hr {
     width: 20%;
 }
 
+.todo_content {
+    width: 100%;
+}
+
 .tasks td:nth-child(2) {
     color: #808080;
     font-size: 0.8rem;

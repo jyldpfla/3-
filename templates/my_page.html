@@ -88,7 +88,7 @@
                                 <input type="radio" name="taskSelect" />
                             </td>
                             <td name="task_id" value={{t["_id"]}}> {{ loop.index }}</td>
-                            <td>{{ t["content"] }} </td>
+                            <td class="todo_content">{{ t["content"] }} </td>
                             <td>
                                 <span class="status {{ t.status.lower().replace(' ', '') }}">
                                     <span class="dot"></span>

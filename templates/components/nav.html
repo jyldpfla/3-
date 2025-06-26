@@ -1,3 +1,13 @@
+<script>
+    function showSubMenu() {
+        document.getElementById('board-submenu').classList.remove('hidden');
+    }
+
+    function hideSubMenu() {
+        document.getElementById('board-submenu').classList.add('hidden');
+    }
+</script>
+
 <header>
     <h1 class="header-title" onclick="location.href='/'"><i class="fa-solid fa-building"></i> Team 3</h1>
     <div class="nav-box">
@@ -5,7 +15,18 @@
     <div class="divider"></div>
     <div class="nav-item" onclick="location.href='/timeline'"><i class="fa-solid fa-calendar-days"></i><br>업무 일정</div>
     <div class="divider"></div>
-    <div class="nav-item" onclick="location.href='/board'"><i class="fa-solid fa-chess-board"></i><br>게시판</div>
+    <!-- 전체 감싸는 wrapper -->
+    <div class="nav-item-wrapper" onmouseenter="showSubMenu()" onmouseleave="hideSubMenu()">
+    <div class="nav-item">
+        <i class="fa-solid fa-chess-board"></i><br>게시판
+    </div>
+    <!-- 서브 메뉴 -->
+    <div class="sub-menu hidden" id="board-submenu">
+        <div class="sub-item" onclick="location.href='/faq'">FAQ</div>
+        <div class="sub-item" onclick="location.href='/board'">Board</div>
+    </div>
+    </div>
+    
     <div class="divider"></div>
     <div class="nav-item" onclick="location.href='/mypage'"><i class="fa-solid fa-user-tie"></i><br>마이 페이지</div>
     <div class="user-info">
@@ -45,5 +66,4 @@
     {% endif %}
     </div>
     </div>
-      
 </header>
