@@ -17,7 +17,7 @@
       <div class="header">
         <div class="buttons">
           <button type="submit" form="editForm">수정 완료</button>
-          <button type="button" onclick="window.location.href='/projectDatil'">뒤로 가기</button>
+          <button type="button" onclick="window.location.href='{{ url_for('projectDetail', project_id=project._id) }}'">뒤로 가기</button>
         </div>
       </div>
 
