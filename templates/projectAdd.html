@@ -16,31 +16,29 @@
     <div class="container">
 
       <form class="project-form" action="/projectAdd" method="POST">
-        <label>
-          프로젝트 이름
-          <input type="text" name="name" placeholder="다크모드 지원" required>
-        </label>
-        <label>
-          클라이언트
-          <input type="text" name="client" placeholder="UK Holdings" required>
-        </label>
-        <label>
-          담당자
-          <select name="project_manager" required>
-            <option value="" disabled selected>담당자를 선택하세요</option>
-            {% for user in user_list %}
-              <option value="{{ user['_id'] }}">{{ user['name'] }}</option>
-            {% endfor %}
-          </select>
-        </label>
-        <label>
-          시작일
-          <input type="date" name="start" value="2025-06-26" required>
-        </label>
-        <label>
-          마감일
-          <input type="date" name="end" value="2025-07-13" required>
-        </label>
+        <!-- 프로젝트 이름 -->
+      <label>
+        프로젝트 이름
+        <input type="text" name="name" placeholder="프로젝트 이름을 입력하세요" required>
+      </label>
+
+      <!-- 클라이언트 -->
+      <label>
+        클라이언트
+        <input type="text" name="client" placeholder="클라이언트를 입력하세요" required>
+      </label>
+
+      <!-- 시작일 -->
+      <label>
+        시작일
+        <input type="date" name="start" required>
+      </label>
+
+      <!-- 마감일 -->
+      <label>
+        마감일
+        <input type="date" name="end" required>
+      </label>
         <label>
           상태
           <select name="status">
