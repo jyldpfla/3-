@@ -103,9 +103,9 @@ def projectAdd():
 @app.route("/projectUpdate/<project_id>", methods=["GET", "POST"])
 def projectUpdate(project_id):
     if request.method == "POST":
-        # 📥 값 받아오기
         name = request.form.get("name")
         client = request.form.get("client")
+        manager_id = request.form.get("project_manager")  # ✅ 추가됨
         start_date_str = request.form.get("start")
         end_date_str = request.form.get("end")
         status = request.form.get("status")
@@ -121,6 +121,7 @@ def projectUpdate(project_id):
             {"$set": {
                 "title": name,
                 "client": client,
+                "project_manager": ObjectId(manager_id),  # ✅ 여기도 반영
                 "start_date": start_date,
                 "end_date": end_date,
                 "status": status,
@@ -129,6 +130,7 @@ def projectUpdate(project_id):
         )
 
         return redirect(url_for('projectDetail', project_id=project_id))
+
 
     # ✅ 여기가 GET 요청 처리 — 여기부터 붙여넣기
     project = project_collection.find_one({"_id": ObjectId(project_id)})
