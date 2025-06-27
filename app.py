@@ -35,7 +35,6 @@ timeline_collection = db["timeline"]
 def inject_user():
     try:
         user_id = session.get("user_id")
-        user_id = session.get("user_id")
         user = None
         notifications = []
         has_notification = False
@@ -468,6 +467,7 @@ def teamMemberAdd(project_id):
 def teamMemberManage(project_id):
     if "user_id" not in session:
         return redirect(url_for("login"))
+    
     current_user_id = ObjectId(session["user_id"])
     project_obj_id = ObjectId(project_id)
     project_doc = project_collection.find_one({"_id": project_obj_id})

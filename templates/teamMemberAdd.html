@@ -22,13 +22,13 @@
             <select name="_id" class="name-select" onchange="updateUserInfo(this)" required>
               <option value="" disabled selected>팀원을 선택하세요</option>
               {% for user in users %}
-                <option value="{{ user._id }}">{{ user.name }}</option>
+                <option value="{{ user._id }}">{{ user.name }} {{ user.email }}</option>
               {% endfor %}
             </select>
 
             <div class="member-info-box">
               <p class="email">이메일: 선택된 팀원이 없습니다.</p>
-              <p class="role">역할: -</p>
+              <p class="position">직급: -</p>
               <p class="department">소속: -</p>
             </div>
 

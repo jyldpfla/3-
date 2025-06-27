@@ -54,19 +54,23 @@
       {% endif %}
     </td>
     <td>
-      {% if member.is_manager and not member.role %}
-        -
+      {% if member.is_manager %}
+        팀장
       {% else %}
         {{ member.position }}
       {% endif %}
     </td>
     <td>
-      {% if member.status == '대기' %}
-        <span class="status-dot red"></span>
-      {% else %}
+      {% if member.is_manager %}
         <span class="status-dot green"></span>
+      {% else %}
+        {% if member.status == '대기' %}
+          <span class="status-dot red"></span>
+        {% else %}
+          <span class="status-dot green"></span>
+        {% endif %}
+        {{ member.status }}
       {% endif %}
-      {{ member.status }}
     </td>
     <td>
       {% if is_manager and not member.is_manager %}
@@ -81,7 +85,6 @@
           <button type="submit" class="btn btn-gray">삭제</button>
         </form>
       {% else %}
-        <span>-</span>
       {% endif %}
     </td>
   </tr>

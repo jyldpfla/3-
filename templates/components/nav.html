@@ -47,21 +47,17 @@
             </li>
             {% endfor %}
           </ul>
-          {% if notifications|length > 5 %}
-          <a
-            href="{{ url_for('show_notifications') }}"
-            style="font-size: 0.9rem"
-            >더보기</a
-          >
+          {% if  notifications|length > 5 %}
+          
           {% else %}
-          <a
-            href="{{ url_for('show_notifications') }}"
-            style="font-size: 0.9rem"
-            >전체보기</a
-          >
           {% endif %} {% else %}
           <p>새로운 알림이 없습니다.</p>
           {% endif %}
+          <a
+                href="{{ url_for('show_notifications') }}"
+                style="font-size: 0.9rem"
+                >전체보기</a
+              >
         </div>
       </div>
       {% endif %}
