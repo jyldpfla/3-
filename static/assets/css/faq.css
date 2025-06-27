@@ -1,0 +1,156 @@
+.faq-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 700px;
+    margin: 50px auto;
+    padding: 32px 24px;
+    background: #f8fafc;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.faq-container h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+    color: #22223b;
+    letter-spacing: -1px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+}
+
+li {
+    border: 1px solid #e0e4ea;
+    border-radius: 10px;
+    padding: 18px 22px 14px 22px;
+    margin-bottom: 18px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: box-shadow 0.2s;
+    position: relative;
+}
+
+li:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+
+li strong {
+    font-size: 1.08rem;
+    color: #3a5aef;
+    font-weight: 700;
+}
+
+li strong::before {
+    content: "Q. ";
+    color: #3a5aef;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+li form,
+li a {
+    display: inline-block;
+    margin-left: 8px;
+}
+
+li button,
+li a {
+    padding: 6px 16px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    background: linear-gradient(90deg, #3a5aef 60%, #6c757d 100%);
+    text-decoration: none;
+    transition: background 0.2s, box-shadow 0.2s;
+    margin-top: 8px;
+    margin-bottom: 2px;
+    box-shadow: 0 1px 4px rgba(58,90,239,0.07);
+}
+
+li button:hover,
+li a:hover {
+    background: linear-gradient(90deg, #2b3a8c 60%, #495057 100%);
+}
+
+hr {
+    margin: 40px 0 24px;
+    border: none;
+    border-top: 1.5px solid #e0e4ea;
+}
+
+.faq-container h3 {
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+    color: #22223b;
+    font-weight: 600;
+}
+
+form input[type="text"],
+form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 15px;
+    background: #f4f6fb;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+form input[type="text"]:focus,
+form textarea:focus {
+    border-color: #3a5aef;
+    background: #fff;
+}
+
+form textarea {
+    resize: vertical;
+    min-height: 90px;
+    font-family: inherit;
+}
+
+form button[type="submit"] {
+    float: right;
+    padding: 9px 22px;
+    background: linear-gradient(90deg, #3a5aef 60%, #6c757d 100%);
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: 0 1px 4px rgba(58,90,239,0.07);
+    transition: background 0.2s;
+}
+
+form button[type="submit"]:hover {
+    background: linear-gradient(90deg, #2b3a8c 60%, #495057 100%);
+}
+
+.edit-btn,
+.detail-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+}
+
+@media (max-width: 600px) {
+    .faq-container {
+        padding: 16px 4vw;
+    }
+    li {
+        padding: 12px 8px 10px 8px;
+    }
+    form button[type="submit"] {
+        width: 100%;
+        float: none;
+        margin-top: 8px;
+    }
+}

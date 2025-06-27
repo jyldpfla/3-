@@ -731,10 +731,53 @@ def projectDetail(project_id):
     ]
     return render_template("/projectDetail.html", project=project)
 
-@app.route("/projectDelete/<project_id>", methods=["POST"])
-def projectDelete(project_id):
-    project_collection.delete_one({"_id": ObjectId(project_id)})
-    return redirect(url_for('projectList'))
+@app.route("/faq")
+def faq_main():
+    faqs = list(board_collection.find().sort("create_date", -1))
+    return render_template("faq_main.html", faqs=faqs)
+
+@app.route("/faq/insert", methods=["POST"])
+def faq_insert():
+    title = request.form.get("title")
+    content = request.form.get("content")
+    category = request.form.get("category")
+    now = datetime.now(timezone('Asia/Seoul'))
+    if title and content and category:
+        board_collection.insert_one({
+            "title": title,
+            "content": content,
+            "category": category,
+            "create_date": now,
+            "update_date": now
+        })
+    return redirect(url_for("faq_main"))
+
+@app.route("/faq/update/<faq_id>", methods=["GET", "POST"])
+def faq_update(faq_id):
+    if request.method == "POST":
+        title = request.form.get("title")
+        content = request.form.get("content")
+        category = request.form.get("category")
+        now = datetime.now(timezone('Asia/Seoul'))
+        if title and content and category:
+            board_collection.update_one(
+                {"_id": ObjectId(faq_id)},
+                {"$set": {
+                    "title": title,
+                    "content": content,
+                    "category": category,
+                    "update_date": now
+                }}
+            )
+        return redirect(url_for("faq_main"))
+    else:
+        faq = board_collection.find_one({"_id": ObjectId(faq_id)})
+        return render_template("faq_update.html", faq=faq)
+
+@app.route("/faq/delete/<faq_id>", methods=["POST"])
+def faq_delete(faq_id):
+    board_collection.delete_one({"_id": ObjectId(faq_id)})
+    return redirect(url_for("faq_main"))
 
 
 if __name__ == '__main__':
