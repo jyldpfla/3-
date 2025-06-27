@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
-    const selectedMembers = new Set(); // 참여자 관리를 위한 Set
+    const selectedMembers = new Set(); // 참여자 관리를 위한 Set (id와 name 객체 저장)
     const memberList = document.getElementById('memberList'); // 참여자 목록 UI
     const scheduleMembersSelect = document.getElementById("scheduleMembers"); // 참여자 선택 드롭다운
 
@@ -42,14 +42,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // 참여자 선택 드롭다운 변경 이벤트 리스너
     if (scheduleMembersSelect) {
         scheduleMembersSelect.addEventListener("change", function () {
-            const selectedValue = this.value; // 선택된 참여자의 _id (ObjectId)
+            const selectedId = this.value; // 선택된 참여자의 _id (ObjectId 문자열)
             const selectedOption = this.options[this.selectedIndex];
-            const selectedName = selectedOption.dataset.name; // 선택된 참여자의 이름
+            const selectedName = selectedOption.dataset.name;
+            // 직급과 부서 데이터 속성 가져오기
+            const selectedPosition = selectedOption.dataset.position; //
+            const selectedDepartment = selectedOption.dataset.department; //
 
-            if (selectedValue && selectedName) {
-                const memberObj = { id: selectedValue, name: selectedName };
+            if (selectedId && selectedName) {
+                // memberObj에 직급과 부서 정보 추가
+                const memberObj = { 
+                    id: selectedId, 
+                    name: selectedName, 
+                    position: selectedPosition || '', // 데이터가 없을 경우 빈 문자열
+                    department: selectedDepartment || '' // 데이터가 없을 경우 빈 문자열
+                }; 
 
-                // 이미 추가된 참여자인지 확인
+                // 이미 추가된 참여자인지 확인 (ID 기반으로 중복 체크)
                 const alreadyExists = Array.from(selectedMembers).some(
                     m => m.id === memberObj.id
                 );
@@ -97,8 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
         memberList.innerHTML = ''; // 기존 목록 초기화
         selectedMembers.forEach(member => {
             const li = document.createElement("li");
-            li.textContent = member.name; // 참여자 이름
-            
+            // 참여자 이름 옆에 직급과 부서 정보를 함께 표시
+            li.textContent = `${member.name} (${member.position} - ${member.department})`; 
+
             const removeBtn = document.createElement("button");
             removeBtn.textContent = "❌"; // 삭제 아이콘
             removeBtn.style.marginLeft = "10px";
@@ -282,24 +292,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // 참여자 목록 로드
             selectedMembers.clear();
-            const memberIdsString = scheduleDataElement.dataset.memberIds; // memberIds를 가져옴
+            const memberIdsString = scheduleDataElement.dataset.memberIds; 
             if (memberIdsString) { 
                 try {
-                    const ids = JSON.parse(memberIdsString); // JSON 문자열 파싱
+                    const ids = JSON.parse(memberIdsString); 
+                    console.log("DEBUG: Parsed memberIds from dataset (on edit):", ids);
                     if (Array.isArray(ids) && window.user_names) {
                         ids.forEach(memberId => {
-                            // user_names에서 해당 ID를 가진 사용자 찾기
                             const userObj = window.user_names.find(u => 
                                 (u._id === memberId) // MongoDB ObjectId가 문자열로 넘어온 경우
                             );
                             if (userObj) {
-                                // Set에 추가 (id와 name 모두 필요)
-                                selectedMembers.add({ id: userObj._id, name: userObj.name });
+                                // userObj에서 position과 department 정보도 함께 추가
+                                selectedMembers.add({ 
+                                    id: userObj._id, 
+                                    name: userObj.name, 
+                                    position: userObj.position || '', 
+                                    department: userObj.department || '' 
+                                });
+                                console.log("DEBUG: Added member to selectedMembers (on edit):", userObj.name, userObj._id, userObj.position, userObj.department);
+                            } else {
+                                console.warn("WARN: User not found in user_names for ID (on edit):", memberId);
                             }
                         });
+                    } else {
+                        console.warn("WARN: memberIds from dataset is not an array or user_names is missing (on edit).");
                     }
                 } catch (e) {
-                    console.error("Failed to parse memberIds as JSON:", e);
+                    console.error("ERROR: Failed to parse memberIds as JSON (on edit):", e);
                 }
             }
             updateMemberListUI(); // 참여자 UI 업데이트
@@ -313,7 +333,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // '일정 추가/수정' 모달 저장 버튼 클릭 이벤트
     saveScheduleBtn.addEventListener('click', function() {
         const scheduleName = scheduleNameInput.value.trim();
-        // schedulePersonNameSelect의 값은 UI 표시용이며, 실제 user_id는 세션에서 가져옵니다.
         const scheduleStartDate = scheduleStartDateInput.value;
         const scheduleStartTime = scheduleStartTimeInput.value;
         const scheduleEndDate = scheduleEndDateInput.value;
@@ -334,14 +353,17 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 선택된 참여자들의 이름만 추출하여 JSON 문자열로 변환
-        const selectedMemberNamesArray = Array.from(selectedMembers).map(m => m.name);
-        const memberNamesJsonString = JSON.stringify(selectedMemberNamesArray);
+        // 선택된 참여자들의 ID만 추출하여 JSON 문자열로 변환
+        const selectedMemberIdsArray = Array.from(selectedMembers).map(m => m.id);
+        const memberIdsJsonString = JSON.stringify(selectedMemberIdsArray); // ObjectId 문자열 리스트를 JSON 문자열로
+        
+        console.log("DEBUG (JS): selectedMembers Set contents:", Array.from(selectedMembers));
+        console.log("DEBUG (JS): Extracted selectedMemberIdsArray:", selectedMemberIdsArray);
+        console.log("DEBUG (JS): Sending member_ids JSON string to backend:", memberIdsJsonString);
 
         const data = {
             schedule_name: scheduleName,
-            // person_name은 백엔드에서 세션 user_id를 사용하므로 클라이언트에서 보내지 않음
-            member_names: memberNamesJsonString, // 참여자 이름 배열 JSON 문자열
+            member_ids: memberIdsJsonString, // 변경: 참여자 ID 배열 JSON 문자열 전송
             start_date: `${scheduleStartDate}T${scheduleStartTime}:00`,
             end_date: `${scheduleEndDate}T${scheduleEndTime}:00`,
             content: scheduleContent,
@@ -384,14 +406,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeModal(scheduleFormModal);
                 // 성공 시 페이지 새로고침 (선택된 날짜와 일정 ID 유지)
                 const refreshUrl = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}` + 
-                                    (currentScheduleId ? `&schedule_id=${currentScheduleId}` : '');
+                                         (currentScheduleId ? `&schedule_id=${currentScheduleId}` : '');
                 window.location.href = refreshUrl;
             } else {
                 showCustomMessageBox('오류: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error (fetch):', error);
             showCustomMessageBox('서버 통신 중 오류가 발생했습니다. 서버 상태를 확인해주세요.');
         });
     });
@@ -457,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error (delete):', error);
             showCustomMessageBox('서버 통신 중 오류가 발생했습니다.');
         });
     });
@@ -474,6 +496,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Alert 대신 사용할 커스텀 메시지 박스 함수 (선택 사항)
     function showCustomMessageBox(message) {
-        alert(message);
+        alert(message); // alert() 대신 사용자 정의 모달 사용 권장
     }
 });

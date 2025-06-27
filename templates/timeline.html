@@ -59,7 +59,8 @@
                                 {% if schedule.tag_class == 'personal-tag' %}개인
                                 {% elif schedule.tag_class == 'project-tag' %}프로젝트
                                 {% elif schedule.tag_class == 'company-tag' %}회사
-                                {% elif schedule.tag_class == 'vacation-tag' %}연차/월차
+                                {% elif schedule.tag_class == 'vacation-year-tag' %}연차
+                                {% elif schedule.tag_class == 'vacation-month-tag' %}월차
                                 {% elif schedule.tag_class == 'sick-leave-tag' %}병가
                                 {% elif schedule.tag_class == 'travel-tag' %}출장
                                 {% elif schedule.tag_class == 'company-event-tag' %}사내일정
@@ -98,13 +99,6 @@
             <div class="section-title">선택된 일정 상세 정보</div>
             <div class="schedule-detail-card" id="scheduleDetailCard">
                 {% if selected_schedule_detail %}
-                    <div class="detail-tag {{ selected_schedule_detail.get('type', '') | lower }}-tag">
-                        {% if selected_schedule_detail.get('type') == '개인' %}개인
-                        {% elif selected_schedule_detail.get('type') == '회사' %}회사
-                        {% elif selected_schedule_detail.get('type') == '프로젝트' %}프로젝트
-                        {% else %}{{ selected_schedule_detail.get('type', '타입 없음') }}
-                        {% endif %}
-                    </div>
                     <p><span class="detail-label">제목:</span> <span class="detail-value">{{ selected_schedule_detail.get('scheduleName', '') }}</span></p>
                     <p><span class="detail-label">작성자:</span> <span class="detail-value">{{ selected_schedule_detail.get('personName', '') }}</span></p> 
                     <p><span class="detail-label">시작일:</span> <span class="detail-value">{{ selected_schedule_detail.get('startDate', '') }} {{ selected_schedule_detail.get('startTime', '') }}</span></p>
@@ -114,8 +108,10 @@
                         <p><span class="detail-label">프로젝트:</span> <span class="detail-value">{{ selected_schedule_detail.get('projectTitle', '') }}</span></p>
                     {% endif %}
                     <p><span class="detail-label">참여자:</span> <span class="detail-value">
-                        {% if selected_schedule_detail.get('memberNames') %}
-                            {{ selected_schedule_detail.get('memberNames') | join(', ') }}
+                        {% if selected_schedule_detail.get('members_detailed_info') %}
+                            {% for member in selected_schedule_detail.get('members_detailed_info') %}
+                                {{ member.name }} ({{ member.position }} - {{ member.department }}){% if not loop.last %}, {% endif %}
+                            {% endfor %}
                         {% else %}
                             없음
                         {% endif %}
@@ -174,8 +170,13 @@
                 <label for="scheduleMembers">참여자</label>
                 <select id="scheduleMembers" name="scheduleMembers" class="form-input">
                     <option value="">-- 참여자 선택 --</option>
-                    {% for user_name in user_names %}
-                        <option value="{{ user_name['_id'] }}" data-name="{{ user_name['name'] }}">{{ user_name['name'] }}</option>
+                    {% for user in user_names %}
+                        <option value="{{ user._id }}" 
+                                data-name="{{ user.name }}" 
+                                data-position="{{ user.position }}" 
+                                data-department="{{ user.department }}">
+                            {{ user.name }} ({{ user.position }} - {{ user.department }})
+                        </option>
                     {% endfor %}
                 </select>
                 <ul id="memberList"></ul>

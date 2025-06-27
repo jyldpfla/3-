@@ -44,8 +44,8 @@ TAG_CLASS_MAP = {
     "개인": "personal-tag",
     "회사": "company-tag",
     "프로젝트": "project-tag",
-    "연차": "vacation-tag",
-    "월차": "vacation-tag",
+    "연차": "vacation-year-tag",
+    "월차": "vacation-month-tag",
     "병가": "sick-leave-tag",
     "출장": "travel-tag",
     "사내일정": "company-event-tag",
@@ -72,19 +72,6 @@ def get_user_name_by_id(user_obj_id):
     except Exception as e:
         print(f"Error converting user ID {user_obj_id} to name: {e}")
         return None
-
-# 사용자 이름 리스트로 user_id (ObjectId) 리스트 찾아 반환
-def get_user_ids_by_names(user_names):
-    if not user_names:
-        return []
-    
-    unique_user_names = [name.strip() for name in user_names if name.strip()]
-    if not unique_user_names: return []
-
-    users = users_collection.find({"name": {"$in": unique_user_names}}, {"_id": 1, "name": 1})
-    
-    member_ids = [user["_id"] for user in users]
-    return member_ids
 
 # user_id 리스트로 사용자 이름 리스트 찾아 반환
 def get_user_names_by_ids(user_ids):
@@ -126,13 +113,16 @@ def get_project_title_by_id(project_obj_id):
 
 @app.context_processor
 def inject_user():
-    # 실제 환경에서는 사용자 로그인 정보를 세션에서 가져와야 합니다. 테스트를 위해 임시로 고정된 user_id를 사용.
-    session["user_id"] = "685cc3fc7163cce7db1fd18f" # 실제 사용자 ID로 변경 필요
+    # 실제 환경에서는 사용자 로그인 정보를 세션에서 가져와야 합니다.
+    session["user_id"] = "685df192a2cd54b0683ea346" 
     user_id = session.get("user_id")
     user = None
     if user_id:
         try:
-            user = users_collection.find_one({"_id": ObjectId(user_id)})
+            user = users_collection.find_one(
+                {"_id": ObjectId(user_id)},
+                {"name": 1, "position": 1, "department": 1}
+            )
         except Exception as e:
             print(f"Error fetching user info for ID {user_id}: {e}")
             user = None
@@ -170,10 +160,19 @@ def timeline():
     date_param = request.args.get('date')
     schedule_id_param = request.args.get('schedule_id')
     
-    user_names = [ 
-        {"_id": str(user["_id"]), "name": user["name"]}
-        for user in users_collection.find({}, {"_id": 1, "name": 1})
-    ]
+    user_names = []
+    for user in users_collection.find({}, {"_id": 1, "name": 1, "position": 1, "department": 1}):
+        user_data = {"_id": str(user["_id"])}
+        if "name" in user and user["name"] is not None:
+            user_data["name"] = user["name"]
+        else:
+            print(f"WARN: User document with _id {user.get('_id', 'UNKNOWN_ID')} is missing or has a None 'name' field.")
+            user_data["name"] = "이름 없음"
+
+        user_data["position"] = user.get("position", "") # position 필드 추가
+        user_data["department"] = user.get("department", "") # department 필드 추가
+
+        user_names.append(user_data)
     
     today = datetime.date.today()
     current_year = int(year_param) if year_param else today.year
@@ -282,10 +281,31 @@ def timeline():
                 # 참여자 ID 리스트 가져오기
                 member_ids = schedule.get("member", []) 
                 
-                # 참여자 이름 리스트로 변환 (JS에서 사용하기 위함)
-                member_names = get_user_names_by_ids(member_ids)
-                selected_schedule_detail["memberNames"] = member_names 
-                selected_schedule_detail["memberIds"] = [str(mid) for mid in member_ids] # ObjectId를 문자열로 변환하여 JS로 전달
+                members_detailed_info = []
+                if member_ids: 
+                    member_object_ids = [ObjectId(mid) for mid in member_ids if isinstance(mid, str) and ObjectId.is_valid(mid)]
+                    member_object_ids.extend([mid for mid in member_ids if isinstance(mid, ObjectId)])
+                    
+                    # 중복 방지를 위해 set으로 변환 후 다시 list로
+                    member_object_ids = list(set(member_object_ids))
+
+                    # users_collection에서 이름, 직급, 부서 필드를 모두 가져옴
+                    for user in users_collection.find(
+                        {"_id": {"$in": member_object_ids}},
+                        {"name": 1, "position": 1, "department": 1} 
+                    ):
+                        members_detailed_info.append({
+                            "id": str(user["_id"]),
+                            "name": user.get("name", "이름 없음"),
+                            "position": user.get("position", "직급 없음"),
+                            "department": user.get("department", "부서 없음")
+                        })
+                
+                selected_schedule_detail["members_detailed_info"] = members_detailed_info # 새로운 필드 추가
+                
+                # 기존 memberNames, memberIds도 필요하다면 유지 (JS에서 활용할 수 있음)
+                selected_schedule_detail["memberNames"] = [m["name"] for m in members_detailed_info] #
+                selected_schedule_detail["memberIds"] = [m["id"] for m in members_detailed_info] #
 
             else:
                 print(f"DEBUG: No schedule found for ID: {schedule_id_param}")
@@ -309,23 +329,25 @@ def timeline():
 @app.route('/timeline/create_schedule', methods=['POST'])
 def create_schedule():
     data = request.get_json()
+    print("\n--- create_schedule API 호출됨 ---")
+    print("수신 데이터 (create_schedule):", data) 
     
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
+        print("ERROR: 필수 필드 누락.")
         return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태)가 누락되었습니다."}), 400
 
-    # 세션에서 사용자 ID 가져오기
     user_id_from_session = session.get("user_id")
-
     if not user_id_from_session:
+        print("ERROR: 세션 사용자 ID 없음.")
         return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
     
     try:
         start_date_iso = data.get("start_date")
         end_date_iso = data.get("end_date")
-
         start_date_dt = datetime.datetime.fromisoformat(start_date_iso)
         end_date_dt = datetime.datetime.fromisoformat(end_date_iso)
-    except ValueError:
+    except ValueError as e:
+        print(f"ERROR: 유효하지 않은 날짜/시간 형식: {e}")
         return jsonify({"success": False, "message": "유효하지 않은 날짜/시간 형식입니다. (YYYY-MM-DDTHH:MM:SS)"}), 400
 
     new_schedule = {
@@ -339,25 +361,29 @@ def create_schedule():
         "created_at": datetime.datetime.now() 
     }
 
-    # member_names 처리 (멤버 이름 리스트를 받아 ID 리스트로 변환하여 저장)
-    member_names_json = data.get("member_names", "[]")
+    # member_ids 처리 (프론트엔드에서 ObjectId 문자열 리스트로 받음)
+    member_ids_json = data.get("member_ids", "[]") # 'member_ids' 필드로 변경
     members_to_save = []
-    if member_names_json:
+    print(f"DEBUG: raw member_ids_json from frontend: {member_ids_json}")
+    if member_ids_json:
         try:
-            parsed_members = json.loads(member_names_json)
-            if isinstance(parsed_members, list):
-                # 클라이언트에서 ['이름1', '이름2'] 또는 [{'id': '...', 'name': '이름'}] 형태로 올 수 있음
-                if parsed_members and isinstance(parsed_members[0], dict) and "name" in parsed_members[0]:
-                    member_names = [m["name"] for m in parsed_members]
-                else:
-                    member_names = parsed_members # 이미 이름 리스트인 경우
-                members_to_save = get_user_ids_by_names(member_names) # 이름 리스트로 ID 리스트 가져오기
+            parsed_member_ids = json.loads(member_ids_json)
+            print(f"DEBUG: parsed_member_ids (after json.loads): {parsed_member_ids}, type: {type(parsed_member_ids)}")
+            if isinstance(parsed_member_ids, list):
+                for member_id_str in parsed_member_ids:
+                    print(f"DEBUG: processing member_id_str: {member_id_str}")
+                    if ObjectId.is_valid(member_id_str):
+                        members_to_save.append(ObjectId(member_id_str))
+                        print(f"DEBUG: added valid ObjectId: {member_id_str}")
+                    else:
+                        print(f"WARN: Invalid ObjectId string received for member (skipped): {member_id_str}")
             else:
-                print(f"WARN: member_names is not a list after parsing: {parsed_members}")
+                print(f"WARN: member_ids is not a list after parsing: {parsed_member_ids}")
         except json.JSONDecodeError as e:
-            print(f"ERROR: JSONDecodeError for member_names: {e} - Raw: {member_names_json}")
+            print(f"ERROR: JSONDecodeError for member_ids: {e} - Raw: {member_ids_json}")
     
     new_schedule["member"] = members_to_save
+    print(f"DEBUG: Final members_to_save before DB insert: {new_schedule['member']}")
 
     if new_schedule["type"] == "프로젝트":
         project_title = data.get("project_title")
@@ -374,33 +400,37 @@ def create_schedule():
 
     try:
         result = timeline_collection.insert_one(new_schedule) 
+        print(f"INFO: 일정 생성 성공. Inserted ID: {result.inserted_id}")
         return jsonify({"success": True, "message": "일정이 성공적으로 생성되었습니다."})
     except Exception as e:
+        print(f"ERROR: 일정 생성 중 오류 발생: {str(e)}")
         return jsonify({"success": False, "message": f"일정 생성 중 오류 발생: {str(e)}"}), 500
 
 @app.route('/timeline/update_schedule', methods=['POST'])
 def update_schedule():
     data = request.get_json()
-    print("수신 데이터:", data)
+    print("\n--- update_schedule API 호출됨 ---")
+    print("수신 데이터 (update_schedule):", data) 
 
     original_schedule_id_param = data.get("original_schedule_id_param")
 
     if not original_schedule_id_param:
+        print("ERROR: 수정할 일정 ID 누락.")
         return jsonify({"success": False, "message": "수정할 일정 ID가 누락되었습니다."}), 400
 
     try:
         schedule_obj_id_to_update = ObjectId(original_schedule_id_param)
     except Exception as e:
+        print(f"ERROR: 유효하지 않은 일정 ID 형식: {e}")
         return jsonify({"success": False, "message": f"유효하지 않은 일정 ID 형식입니다: {e}"}), 400
 
-    # 세션에서 사용자 ID 가져오기 (작성자 확인용)
     user_id_from_session = session.get("user_id")
-
     if not user_id_from_session:
+        print("ERROR: 세션 사용자 ID 없음.")
         return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
     
-    # 일정 이름, 날짜, 타입, 상태 등 필수 항목 확인
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
+        print("ERROR: 필수 필드 누락.")
         return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태)가 누락되었습니다."}), 400
 
     try:
@@ -410,6 +440,7 @@ def update_schedule():
         start_date_dt = datetime.datetime.fromisoformat(start_date_iso.replace('Z', '+00:00'))
         end_date_dt = datetime.datetime.fromisoformat(end_date_iso.replace('Z', '+00:00'))
     except ValueError as e:
+        print(f"ERROR: 유효하지 않은 날짜/시간 형식: {e}")
         return jsonify({"success": False, "message": f"유효하지 않은 날짜/시간 형식입니다: {e}"}), 400
 
     updated_schedule_data = {
@@ -422,24 +453,29 @@ def update_schedule():
         "updated_at": datetime.datetime.now()
     }
 
-    # member_names 처리
-    member_names_json = data.get("member_names", "[]")
+    # member_ids 처리 (프론트엔드에서 ObjectId 문자열 리스트로 받음)
+    member_ids_json = data.get("member_ids", "[]") # 'member_ids' 필드로 변경
     members_to_save = []
-    if member_names_json:
+    print(f"DEBUG: raw member_ids_json from frontend: {member_ids_json}")
+    if member_ids_json:
         try:
-            parsed_members = json.loads(member_names_json)
-            if isinstance(parsed_members, list):
-                if parsed_members and isinstance(parsed_members[0], dict) and "name" in parsed_members[0]:
-                    member_names = [m["name"] for m in parsed_members]
-                else:
-                    member_names = parsed_members
-                members_to_save = get_user_ids_by_names(member_names)
+            parsed_member_ids = json.loads(member_ids_json)
+            print(f"DEBUG: parsed_member_ids (after json.loads): {parsed_member_ids}, type: {type(parsed_member_ids)}")
+            if isinstance(parsed_member_ids, list):
+                for member_id_str in parsed_member_ids:
+                    print(f"DEBUG: processing member_id_str: {member_id_str}")
+                    if ObjectId.is_valid(member_id_str):
+                        members_to_save.append(ObjectId(member_id_str))
+                        print(f"DEBUG: added valid ObjectId: {member_id_str}")
+                    else:
+                        print(f"WARN: Invalid ObjectId string received for member (skipped): {member_id_str}")
             else:
-                print(f"WARN: member_names is not a list after parsing: {parsed_members}")
+                print(f"WARN: member_ids is not a list after parsing: {parsed_member_ids}")
         except json.JSONDecodeError as e:
-            print(f"ERROR: JSONDecodeError for member_names: {e} - Raw: {member_names_json}")
+            print(f"ERROR: JSONDecodeError for member_ids: {e} - Raw: {member_ids_json}")
     
     updated_schedule_data["member"] = members_to_save
+    print(f"DEBUG: Final members_to_save before DB update: {updated_schedule_data['member']}")
 
     if updated_schedule_data["type"] == "프로젝트":
         project_title = data.get("project_title")
@@ -460,12 +496,15 @@ def update_schedule():
             {"$set": updated_schedule_data}
         )
         if result.modified_count == 1:
+            print("INFO: 일정 수정 성공.")
             return jsonify({"success": True, "message": "일정이 성공적으로 수정되었습니다."})
         else:
             found_document = timeline_collection.find_one({"_id": schedule_obj_id_to_update})
             if found_document:
+                print("INFO: 일정 내용 변경 없음.")
                 return jsonify({"success": True, "message": "일정 내용이 변경되지 않았습니다."})
             else:
+                print("ERROR: 수정할 일정을 찾을 수 없음.")
                 return jsonify({"success": False, "message": "일정을 찾을 수 없습니다."}), 404
     except Exception as e:
         print(f"ERROR update_schedule: {e}")
