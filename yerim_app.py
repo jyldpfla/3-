@@ -30,10 +30,10 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    session["user_id"] = "685df192a2cd54b0683ea344"
-    user_id = session.get("user_id")
+    # session["user_id"] = "685df192a2cd54b0683ea356"
+    user_id = ObjectId(session.get("user_id"))
     if user_id:
-        user = user_collection.find_one({"_id": ObjectId(user_id)})
+        user = user_collection.find_one({"_id": user_id})
 
         # 안 읽은 알림 불러오기
         unread_notes = list(db.notifications.find({
@@ -158,13 +158,14 @@ def home():
             )
         ]
     
-    # 일정 가져오기
-    target_date = datetime.strptime("2025-06-24", "%Y-%m-%d")
+    # 일정 가져오
+    target_date = datetime.today()
+
 
     # 날짜 범위 설정
     start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
     end = start + timedelta(days=2)
-    timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}))
+    timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}).sort("end_date", 1))
     grouped_timeline = defaultdict(list) # defaultdict: key값 없을 때도 바로 append 가능하도록 설정
     
     for t in timeline:
@@ -173,7 +174,10 @@ def home():
         
         grouped_timeline[t["end_date"]].append(t)
     
-    return render_template("/index.html", projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"))
+    board_time = start - timedelta(days=-5)
+    board = board_collection.find({"update_date": {"$lte": board_time}})
+    
+    return render_template("/index.html", projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"), board=board)
 
 @app.route("/example")
 def example():
@@ -183,127 +187,150 @@ def example():
 def mypage():
     user_id = ObjectId(session.get("user_id"))
     # user 개인 정보 구성
-    user = user_collection.find_one({"_id": user_id})
     try:
-        # 개인 프로젝트 개수
-        team_pipeline = [
-            {
-                "$match": {
-                    "member": user['_id']
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "project_id": 1
-                }
+        user = user_collection.find_one({"_id": user_id})
+    except Exception as e:
+        print(f"User Data를 찾을 수 없습니다.: {e}")
+        # user 탈퇴로 인해 user data가 없을 경우 필요없는 data인 user의 personal todo data 삭제
+        personal_todo_collection.delete_many({"user_id": user_id})
+        return redirect("/login")
+    
+    # 개인 프로젝트 개수
+    # 팀 멤버로 참여중인 프로젝트
+    team_pipeline = [
+        {
+            "$match": {
+                "member": user_id
+                
             }
-        ]
-        manager_pipeline = [
-            {
-                "$match": {
-                    "project_manager": user['_id']
-                }
-            },
-            {
-                "$project": {
-                    "_id": 1
-                }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "project_id": 1
             }
-        ]
-        project_id_list = [data["project_id"] for data in team_collection.aggregate(team_pipeline)]
-        project_collection.aggregate(manager_pipeline)
-        for data in project_collection.aggregate(manager_pipeline):
-            project_id_list.append(data["_id"])
-        
-        # 진행중, 완료 프로젝트 분류
-        project_pipeline = [
-            {
-                "$match": {
-                    "_id": {"$in": project_id_list}
-                }
-            },
-            {
-                "$project": {
-                    "_id": 1,
-                    "project_id": 1,
-                    "title": 1,
-                    "status": 1
-                }
+        }
+    ]
+    # PM으로 참여중인 프로젝트
+    manager_pipeline = [
+        {
+            "$match": {
+                "project_manager": user_id
             }
-        ]
-        project_list = list(project_collection.aggregate(project_pipeline))
-        done = [t for t in project_list if t['status'] == '완료']
-        doing = [t for t in project_list if t['status'] in ['진행중', '진행 대기']]
-        
-        # user별 할 일 데이터
-        todo = list(personal_todo_collection.find({"user_id": user["_id"]}).sort("end_date", 1))  
-        today_str = datetime.today().strftime("%Y-%m-%d")
-        for t in todo:
-            t["end_date"] = "오늘" if t["end_date"] == today_str else t["end_date"]
-        
-        # user별 일정
-        timeline_pipeline = [
-            {
-                "$match": {
-                    "$or": [
+        },
+        {
+            "$project": {
+                "_id": 1
+            }
+        }
+    ]
+    
+    # 참여중인 프로젝트의 id list
+    project_id_list = [data["project_id"] for data in team_collection.aggregate(team_pipeline)] + [data["_id"] for data in project_collection.aggregate(manager_pipeline)]
+    
+    # 참여중인 진행중, 완료 프로젝트 분류 파이프라인
+    project_pipeline = [
+        {
+            "$match": {
+                "_id": {"$in": project_id_list}
+            }
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "project_id": 1,
+                "title": 1,
+                "status": 1
+            }
+        }
+    ]
+    # 참여중인 진행중, 완료 프로젝트
+    project_list = list(project_collection.aggregate(project_pipeline))
+    # 사용자가 참여 중인 완료된 프로젝트 목록
+    done_project = [t for t in project_list if t.get('status') == '완료']
+    # 사용자가 참여 중인 진행 대기/진행중인 프로젝트 목록
+    doing_project = [t for t in project_list if t.get('status') in ['진행중', '진행 대기']]
+    
+    # user별 할 일 데이터
+    todo = list(personal_todo_collection.find({"user_id": user["_id"]}))
+    today_str = datetime.today().strftime("%Y-%m-%d")
+    todo = sorted(todo, key=lambda t: t["end_date"])
+    for t in todo:
+        t["end_date"] = "오늘" if t["end_date"] == today_str else t["end_date"].strftime("%Y-%m-%d")
+    
+    # 참여된, 직접 작성한 일정 파이프라인
+    timeline_pipeline = [
+        {
+            "$match": {
+            "$or": [
+                        { "member": user_id },           
+                        { "user_id": user_id }
+                    ]
+            }
+        },
+        { "$sort": { "end_date": 1 } }
+    ]
+    
+    # 참여된, 직접 작성한 일정
+    timeline = list(timeline_collection.aggregate(timeline_pipeline))
+    for t in timeline:
+        if isinstance(t["start_date"], datetime):
+            t["start_date"] = t["start_date"].strftime("%Y-%m-%d")
+        if isinstance(t["end_date"], datetime):
+            t["end_date"] = t["end_date"].strftime("%Y-%m-%d")
+    # 참여중인 개인 일정
+    personal_timeline = [t for t in timeline if t['type'] == '개인']
+    # 참여중인 프로젝트 내 일정
+    project_timeline = [t for t in timeline if t['type'] == '프로젝트' and t.get('project_id') in project_id_list]
+    # 외부 프로젝트 일정 파이프라인
+    other_pipeline = [
+        {
+            "$match": {
+                "$and": [
+                    { "project_id": { "$nin": project_id_list } }, 
+                    { "project_id": { "$ne": None } },
                     {
-                        "$and": [
-                        { "project_id": None },
-                        { "user_id": user['_id'] }  # 예: ObjectId("...") 또는 문자열
-                        ]
-                    },
-                    {
-                        "$and": [
-                        { "project_id": { "$in": project_id_list } },  # project_ids는 리스트
-                        {
-                            "$or": [
+                        "$or": [
                             { "member": user['_id'] },           # 배열 안에 포함된 경우
                             { "user_id": user['_id'] }
-                            ]
-                        }
                         ]
                     }
+                    
                     ]
-                }
-            },
-            { "$sort": { "end_date": 1 } }
-        ]
-        timeline = list(timeline_collection.aggregate(timeline_pipeline))
-        for t in timeline:
-            t["start_date"] = datetime.strftime(t["start_date"], "%Y-%m-%d")
-            t["end_date"] = datetime.strftime(t["end_date"], "%Y-%m-%d")
-        personal_timeline = [t for t in timeline if t['project_id'] == None] # 개인 일정
-        project_timeline = [t for t in timeline if t['project_id'] in project_id_list]# 프로젝트 내 일정
-        other_timeline = list(timeline_collection.find({
-            "$and": [
-                { "project_id": { "$nin": project_id_list } }, 
-                { "project_id": { "$ne": None } },
-                {
-                    "$or": [
-                        { "member": user['_id'] },           # 배열 안에 포함된 경우
-                        { "user_id": user['_id'] }
-                    ]
-                }
-            ]
-        }))
-        for t in other_timeline:
-            t["start_date"] = datetime.strftime(t["start_date"], "%Y-%m-%d")
-            t["end_date"] = datetime.strftime(t["end_date"], "%Y-%m-%d")
-        for p in project_timeline:
-            if p["status"] in ["미완료", "지연", "중단"]:
-                p["status"] = "To do"
-            elif p["status"] == "진행중":
-                p["status"] = "In Progress"
-            else:
-                p["status"] = "Done"
-        all_projects = list(project_collection.find({"_id": {"$nin": project_id_list}}))
-        
-        board = list(board_collection.find({"user_id": user_id})).sort("created_at", -1)
-        return render_template("/my_page.html", todo=todo, done=done, doing=doing, all_projects=all_projects, personal_timeline=personal_timeline, project_timeline=project_timeline, other_timeline=other_timeline)
-    except Exception as e:
-        print(f"유저 정보를 찾을 수 없습니다: {e}")
-        return redirect("/login")
+            }
+        },
+        { "$sort": { "end_date": 1 } }
+    ]
+    # 소속되지 않았지만 일정에만 포함된 프로젝트 일정
+    other_timeline = list(timeline_collection.aggregate(other_pipeline))
+    for t in other_timeline:
+        if isinstance(t["start_date"], datetime):
+            t["start_date"] = t["start_date"].strftime("%Y-%m-%d")
+        if isinstance(t["end_date"], datetime):
+            t["end_date"] = t["end_date"].strftime("%Y-%m-%d")
+    for p in project_timeline:
+        status = p.get("status", "")
+        if status in ["진행 대기", "지연", "중단"]:
+            p["status"] = "To do"
+        elif status == "진행중":
+            p["status"] = "In Progress"
+        else:
+            p["status"] = "Done"
+    other_project_id_list = [o["project_id"] for o in other_timeline if o.get("project_id")]
+    # 소속되지 않았지만 일정에만 포함된 프로젝트 일정 정보
+    other_projects = list(project_collection.find({"_id": {"$in": other_project_id_list}}))
+    
+    return render_template(
+        "/my_page.html",
+        todo=todo, # 내 업무
+        done_project=done_project, # 참여중인 완료된 프로젝트 
+        doing_project=doing_project, # 참여중인 진행중/대기 프로젝트
+        other_projects=other_projects, # 외부 프로젝트(일정에만 포함)
+        personal_timeline=personal_timeline, # 개인 일정
+        project_timeline=project_timeline, # 참여중인 프로젝트 일정
+        other_timeline=other_timeline # 외부 프로젝트 일정
+    )
+    
 
 @app.route("/mypage/add_task", methods=["POST"])
 def add_task():
@@ -314,7 +341,7 @@ def add_task():
     personal_todo_collection.insert_one({
         "user_id": ObjectId(user_id),
         "content": content,
-        "end_date": end_date,
+        "end_date": datetime.strptime(end_date, "%Y-%m-%d"),
         "status": status
     })
     return redirect("/mypage")
@@ -325,7 +352,7 @@ def update_task():
     content = request.get_json()["content"]
     status = request.get_json()["status"]
     date = request.get_json()["date"]
-    personal_todo_collection.update_one({"_id": ObjectId(id)}, {"$set": {"content": content, "status": status, "end_date": date}})
+    personal_todo_collection.update_one({"_id": ObjectId(id)}, {"$set": {"content": content, "status": status, "end_date": datetime.strptime(date, "%Y-%m-%d")}})
     return redirect("/mypage")
 
 @app.route("/mypage/del_task", methods=['POST'])
@@ -407,7 +434,10 @@ def board():
             p["writer"] = "-"
             print(e)
         
-        p["update_date"] = p["update_date"].strftime("%Y-%m-%d %H:%M")
+        if "update_date" in p and p["update_date"]:
+            p["update_date"] = p["update_date"].strftime("%Y-%m-%d %H:%M")
+        else:
+            p["update_date"] = "-"
     
     posts.sort(key=lambda x: x.get("no", 0), reverse=True)
     return render_template("freeboard_main.html", posts=posts)
@@ -416,19 +446,23 @@ def board():
 def freeboard_detail(id):
     post = board_collection.find_one({"_id": ObjectId(id)}) 
     try:
-            post["writer"] = user_collection.find_one({"_id": post["user_id"]})["name"]
+        post["writer"] = user_collection.find_one({"_id": post["user_id"]})["name"]
     except Exception as e:
         post["writer"] = "-"
         print(e)
 
-    # 2. 원하는 형식으로 다시 문자열로 저장
-    post["update_date"] = post["update_date"].strftime("%Y-%m-%d %H:%M")
+    if "update_date" in post and post["update_date"]:
+        post["update_date"] = post["update_date"].strftime("%Y-%m-%d %H:%M")
+    else:
+        post["update_date"] = "-"
     return render_template("freeboard_detail.html", post=post)
 
 @app.route('/board_insert', methods=['GET', 'POST'])
 def insert_form():
     user_id = session.get("user_id")
     if request.method == 'GET':
+        if user_id == None:
+            return "<script>alert('로그인 후 이용 가능합니다'); window.location.href = './login';</script>"
         return render_template('/freeboard_insert.html')
     title = request.form.get("title")
     content = request.form.get("content")

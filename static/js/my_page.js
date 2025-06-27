@@ -70,9 +70,10 @@ document.querySelector('.btn-edit').addEventListener('click', () => {
         const today = new Date().toISOString().split('T')[0];
         dateCell.innerHTML = `<input type="date" class="date-picker" value="${today}" />`;
 
-        // 버튼 텍스트 변경 (선택)
+        // 버튼 텍스트 변경
         document.querySelector('.btn-edit').textContent = '저장';
         document.querySelector('.btn-del').textContent = "취소";
+        document.getElementById('btn-add').style.display = "none"
     } else if (document.querySelector('.btn-edit').textContent == '저장') {
         content = row.querySelector('.todo_content input').value;
         status = row.querySelector('.status-select').value;

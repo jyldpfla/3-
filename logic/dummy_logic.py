@@ -90,6 +90,7 @@ if __name__ == "__main__":
     # add_dummy(team_collection, team_list)
     # timeline_list = get_csv("dummy_timeline.csv")
     # timeline_list = turn_datetime(timeline_list, ["start_date", "end_date", "created_at", "updated_at"])
+    # timeline_list = turn_ObjectId(timeline_list, ["project_id", "user_id"])
     # timeline_list = turn_list(timeline_list, "member")
     # from bson import ObjectId
     
@@ -120,3 +121,4 @@ if __name__ == "__main__":
     #             {"_id": doc["_id"]},
     #             {"$set": {"profile": None}}
     #         )
+    

@@ -49,13 +49,17 @@
                 </div>
             </div>
 
-            <!-- 오른쪽 열: 공지사항 + 일정 -->
             <div class="right-column">
                 <div class="card notice">
-                    <h3>공지사항</h3>
+                    <h3>최신 글</h3>
                     <ul>
-                        <li>공지 1</li>
-                        <li>공지 2</li>
+                        {% for b in board %}
+                        {% if b["type"] == "자유" %}
+                            <li><a href="board/{{ b["_id"] }}">{{b["title"]}}</a></li>
+                        {% else %}
+                            <li><a href="faq">{{b["title"]}}</a></li>
+                        {% endif %}
+                        {% endfor %}
                     </ul>
                 </div>
 
