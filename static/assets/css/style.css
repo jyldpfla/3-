@@ -45,6 +45,21 @@ p {
     line-height: 1.6;
 }
 
+/* 링크 */
+a {
+    text-decoration: none;
+    color: black;
+}
+
+a:visited,
+a:hover,
+a:active {
+    color: d4d4d4;
+    /* 원하는 색으로 고정 */
+    text-decoration: none;
+    opacity: 0.5;
+}
+
 /* 버튼 */
 button {
     font-size: 15px;
@@ -108,12 +123,48 @@ h1 {
     padding: 10px 15px;
 }
 
+
 /* 구분선 */
 .divider {
     width: 1px;
     height: 40px;
     background-color: #ddd;
 }
+
+.board-nav {
+    position: relative;
+}
+
+.sub-menu {
+    background: #f9f9f9;
+    border-radius: 5px;
+    padding: 5px 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    z-index: 10;
+}
+
+.sub-item {
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.sub-item:hover {
+    background-color: #ececec;
+    border-radius: 3px;
+}
+
+.hidden {
+    display: none;
+}
+
+.nav-item-wrapper {
+    position: relative;
+    /* 필수: 서브메뉴 위치 기준 */
+    display: inline-block;
+}
+
 
 /* 사용자 정보 */
 .user-info {
@@ -291,7 +342,7 @@ footer a {
     height: 8px;
     background-color: red;
     border-radius: 50%;
-    z-index: 20;  
+    z-index: 20;
 }
 
 .notification-box {

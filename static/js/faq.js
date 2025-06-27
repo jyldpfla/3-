@@ -3,7 +3,6 @@ function addFaq() {
     const content = document.getElementById('new-answer').value;
     const category = prompt('카테고리를 입력하세요');
     const user_id = document.getElementById('user_id').value; // 여기서 읽어옴
-
     fetch('/faq/insert_action', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -14,7 +13,6 @@ function addFaq() {
         }
     });
 }
-
 function showEditForm(id, title, category, content) {
     document.querySelectorAll('.edit-form').forEach(f => f.style.display = 'none');
     const form = document.getElementById('edit-form-' + id);

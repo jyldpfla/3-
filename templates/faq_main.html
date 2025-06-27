@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>3조 Main</title>
 </head>
-
 <body>
     {% include 'components/nav.html' %}
     <div class="faq-container">
@@ -19,10 +17,12 @@
             <li>
                 <strong>{{ faq.title }}</strong> ({{ faq.category }})<br>
                 <span>{{ faq.content }}</span><br>
-                <a href="{{ url_for('faq_update', faq_id=faq._id) }}" class="edit-btn">수정</a>
-                <form action="{{ url_for('faq_delete', faq_id=faq._id) }}" method="post" style="display:inline;">
-                    <button type="submit" class="delete-btn">삭제</button>
-                </form>
+                <div class="btn-group">
+                    <a href="{{ url_for('faq_update', faq_id=faq._id) }}" class="btn btn-blue">수정</a>
+                    <form action="{{ url_for('faq_delete', faq_id=faq._id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-blue">삭제</button>
+                    </form>
+                </div>
             </li>
         {% else %}
             <li>등록된 FAQ가 없습니다.</li>
@@ -31,9 +31,14 @@
         <hr>
         <h3>새 질문 추가</h3>
         <form action="{{ url_for('faq_insert') }}" method="post">
-            <input type="text" name="title" placeholder="질문" required>
-            <textarea name="content" placeholder="내용" required></textarea>
-            <button type="submit">등록</button>
+            <select name="category" required>
+                <option value="" disabled selected>카테고리를 선택하세요</option>
+                <option value="자유">자유</option>
+                <option value="FAQ">FAQ</option>
+            </select>
+            <input type="text" name="title" placeholder="제목을 입력하세요" required>
+            <textarea name="content" placeholder="내용을 입력하세요" required></textarea>
+            <button type="submit" class="btn btn-blue">등록</button>
         </form>
     </div>
     {% include 'components/footer.html' %}

@@ -1229,5 +1229,54 @@ def delete_account_bh():
         return "<script>alert('탈퇴가 완료되었습니다.'); window.location.href='/'</script>"
     return render_template("delete_account.html")
 
+# ------------------------ FAQ ---------------------------
+@app.route("/faq")
+def faq_main():
+    faqs = list(board_collection.find().sort("create_date", -1))
+    return render_template("faq_main.html", faqs=faqs)
+
+@app.route("/faq/insert", methods=["POST"])
+def faq_insert():
+    title = request.form.get("title")
+    content = request.form.get("content")
+    category = request.form.get("category")
+    now = datetime.now(timezone('Asia/Seoul'))
+    if title and content and category:
+        board_collection.insert_one({
+            "title": title,
+            "content": content,
+            "category": category,
+            "create_date": now,
+            "update_date": now
+        })
+    return redirect(url_for("faq_main"))
+
+@app.route("/faq/update/<faq_id>", methods=["GET", "POST"])
+def faq_update(faq_id):
+    if request.method == "POST":
+        title = request.form.get("title")
+        content = request.form.get("content")
+        category = request.form.get("category")
+        now = datetime.now(timezone('Asia/Seoul'))
+        if title and content and category:
+            board_collection.update_one(
+                {"_id": ObjectId(faq_id)},
+                {"$set": {
+                    "title": title,
+                    "content": content,
+                    "category": category,
+                    "update_date": now
+                }}
+            )
+        return redirect(url_for("faq_main"))
+    else:
+        faq = board_collection.find_one({"_id": ObjectId(faq_id)})
+        return render_template("faq_update.html", faq=faq)
+
+@app.route("/faq/delete/<faq_id>", methods=["POST"])
+def faq_delete(faq_id):
+    board_collection.delete_one({"_id": ObjectId(faq_id)})
+    return redirect(url_for("faq_main"))
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
