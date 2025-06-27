@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 from pytz import timezone
 from math import ceil
 import json
+from functools import wraps
+from collections import OrderedDict
+import re
+from datetime import date
 
 # env 파일 로드
 load_dotenv()
@@ -30,25 +34,28 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    session["user_id"] = "685ca16614b66d015cdd6ade"
-    user_id = session.get("user_id")
-    if user_id:
-        user = user_collection.find_one({"_id": ObjectId(user_id)})
+    try:
+        user_id = session.get("user_id")
+        if user_id:
+            user = user_collection.find_one({"_id": ObjectId(user_id)})
 
-        # 안 읽은 알림 불러오기
-        unread_notes = list(db.notifications.find({
-            "user_id": ObjectId(user_id),
-            "read": False
-        }))
-        messages = [n["message"] for n in unread_notes]
-        has_notification = len(messages) > 0
+            # 안 읽은 알림 불러오기
+            unread_notes = list(db.notifications.find({
+                "user_id": ObjectId(user_id),
+                "read": False
+            }))
+            messages = [n["message"] for n in unread_notes]
+            has_notification = len(messages) > 0
 
-        return dict(
-            user_info=user,
-            notifications=messages,
-            has_notification=has_notification
-        )
-    return dict()
+            return dict(
+                user_info=user,
+                notifications=messages,
+                has_notification=has_notification
+            )
+        return dict()
+    except Exception as e:
+        print(f"Error is occured. {e}")
+        return redirect("/")
 
 @app.context_processor
 def inject_global_context():
@@ -74,8 +81,6 @@ def inject_global_context():
 
 @app.route("/")
 def home():
-    session["user_id"] = "6854be045d8c554194fe197b"
-    
     projects = list(project_collection.find({}))
     project_pipeline = [
         {
@@ -1076,6 +1081,101 @@ def delete_schedule():
     except Exception as e:
         print(f"ERROR delete_schedule: {e}")
         return jsonify({"success": False, "message": f"일정 삭제 중 오류 발생: {str(e)}"}), 500
+
+# ===== bonghyeon_app.py에서 가져온 계정/인증 관련 라우트 및 함수 추가 =====
+def login_required_bh(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login_bh"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route("/login", methods=["GET", "POST"])
+def login_bh():
+    if request.method == "POST":
+        email = request.form.get("email").strip()
+        pw = request.form.get("password")
+        user = user_collection.find_one({"email": email})
+        if user and str(user["userPassword"]) == pw:
+            session["user_id"] = str(user["_id"])
+            return redirect(url_for("home"))
+        else:
+            return render_template("login.html", error="이메일 또는 비밀번호가 틀렸습니다.")
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout_bh():
+    session.clear()
+    return redirect(url_for("home"))
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup_bh():
+    if request.method == "POST":
+        email_id = request.form.get("email_id")
+        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
+        email = f"{email_id}@{email_domain}".strip()
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        phone = re.sub(r'\D', '', request.form["phone"])
+        if password != confirm_password:
+            return render_template("signup.html", error="비밀번호가 일치하지 않습니다.")
+        if not re.match(r"^[^@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+            return render_template("signup.html", error="올바른 이메일 형식이 아닙니다.")
+        if user_collection.find_one({"email": email}):
+            return render_template("signup.html", error="이미 존재하는 이메일입니다.")
+        new_user = OrderedDict([
+            ("email", email),
+            ("name", request.form["name"]),
+            ("userPassword", password),
+            ("profile", request.form.get("profile", "")),
+            ("department", request.form["department"]),
+            ("position", request.form["position"]),
+            ("createAt", str(date.today())),
+            ("phone_num", phone),
+        ])
+        user_collection.insert_one(new_user)
+        return redirect(url_for("login_bh"))
+    return render_template("signup.html")
+
+@app.route("/profile_edit", methods=["GET", "POST"])
+@login_required_bh
+def profile_edit_bh():
+    user_id = ObjectId(session["user_id"])
+    print("data check", user_id)
+    if request.method == "POST":
+        email_id = request.form.get("email_id")
+        email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
+        email = f"{email_id}@{email_domain}".strip()
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+        phone = re.sub(r'\D', '', request.form.get("phone", ""))
+        if password != confirm_password:
+            user = user_collection.find_one({"_id": user_id})
+            return render_template("profile_edit.html", user=user, error="비밀번호가 일치하지 않습니다.")
+        update_data = {
+            "name": request.form.get("name"),
+            "userPassword": password,
+            "phone_num": phone,
+            "department": request.form.get("department"),
+            "position": request.form.get("position"),
+            "profile": request.form.get("profile"),
+            "email": email
+        }
+        user_collection.update_one({"_id": user_id}, {"$set": update_data})
+        return redirect(url_for("mypage"))
+    user = user_collection.find_one({"_id": user_id})
+    return render_template("profile_edit.html", user=user)
+
+@app.route("/delete_account", methods=["GET", "POST"])
+@login_required_bh
+def delete_account_bh():
+    user_id = ObjectId(session["user_id"])
+    if request.method == "POST":
+        user_collection.delete_one({"_id": user_id})
+        session.clear()
+        return "<script>alert('탈퇴가 완료되었습니다.'); window.location.href='/'</script>"
+    return render_template("delete_account.html")
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

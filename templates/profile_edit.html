@@ -57,12 +57,11 @@
            value="{{ user.phone_num }}" required>
     <input type="text" name="position" class="signup-input" placeholder="직책" value="{{ user.position }}" required>
     <input type="text" name="department" class="signup-input" placeholder="부서명" value="{{ user.department }}" required>
-    <input type="text" name="role" class="signup-input" placeholder="역할" value="{{ user.role }}" required>
-    <input type="text" name="profile" class="signup-input" placeholder="프로필" value="{{ user.profile }}" required>
+    <!-- <input type="text" name="profile" class="signup-input" placeholder="프로필" value="{{ user.profile }}" required> -->
 
     <div class="profile-btn-group">
       <button type="submit" class="btn-fixed complete-btn">완료</button>
-      <a href="{{ url_for('delete_account') }}" class="btn-fixed delete-btn">회원탈퇴</a>
+      <a href='delete_account' class="btn-fixed delete-btn">회원탈퇴</a>
     </div>
   </form>
 </main>
