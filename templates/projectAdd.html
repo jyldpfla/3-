@@ -28,6 +28,16 @@
         <input type="text" name="client" placeholder="클라이언트를 입력하세요" required>
       </label>
 
+            <!-- 담당자 선택 -->
+      <label>
+        담당자
+        <select name="project_manager" required>
+          {% for user in user_list %}
+            <option value="{{ user['_id'] }}">{{ user['name'] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
       <!-- 시작일 -->
       <label>
         시작일
@@ -46,6 +56,7 @@
             <option value="진행 대기" selected>진행 대기</option>
             <option value="완료">완료</option>
           </select>
+
         </label>
         <label for="description">설명</label>
         <textarea id="description" name="description" placeholder="메모를 입력하세요..." rows="8"></textarea>

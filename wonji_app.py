@@ -90,7 +90,6 @@ def projectAdd():
             "end_date": end_date,
             "status": status,
             "description": description,
-            "schedule_id": None
         }
         result = project_collection.insert_one(project)
 
@@ -126,7 +125,6 @@ def projectUpdate(project_id):
                 "end_date": end_date,
                 "status": status,
                 "description": description,
-                "schedule_id": None
             }}
         )
 
@@ -161,8 +159,18 @@ def projectUpdate(project_id):
 def projectDetail(project_id):
     project = project_collection.find_one({"_id": ObjectId(project_id)})
 
-    # 🔧 담당자 이름
-    manager = user_collection.find_one({"_id": project["project_manager"]})["name"]
+    # ✅ 이미 상단에서 import 했으니 여기선 다시 하지 말고 바로 사용
+    DEFAULT_MANAGER_ID = ObjectId("6853aebf690a71fa9ad4b6e3")
+
+    manager_id = project.get("project_manager", DEFAULT_MANAGER_ID)
+
+    try:
+        manager_id = ObjectId(manager_id)
+    except:
+        manager_id = DEFAULT_MANAGER_ID
+
+    manager_doc = user_collection.find_one({"_id": manager_id})
+    manager = manager_doc["name"] if manager_doc else "알 수 없음"
     project["manager_name"] = manager
 
     # ✅ 날짜 포맷 처리
@@ -184,6 +192,8 @@ def projectDetail(project_id):
     ]
 
     return render_template("/projectDetail.html", project=project)
+
+
 
 @app.route("/projectDelete/<project_id>", methods=["POST"])
 def projectDelete(project_id):
