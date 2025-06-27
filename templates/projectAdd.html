@@ -31,11 +31,12 @@
             <!-- 담당자 선택 -->
       <label>
         담당자
-        <select name="project_manager" required>
-          {% for user in user_list %}
-            <option value="{{ user['_id'] }}">{{ user['name'] }}</option>
-          {% endfor %}
-        </select>
+      <select name="project_manager" required>
+        <option value="" disabled selected>담당자를 선택하세요</option>
+        {% for user in user_list %}
+          <option value="{{ user['_id'] }}">{{ user['name'] }}</option>
+        {% endfor %}
+      </select>
       </label>
 
       <!-- 시작일 -->
