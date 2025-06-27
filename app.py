@@ -16,7 +16,6 @@ from datetime import date
 # env 파일 로드
 load_dotenv()
 user = os.getenv("USER")
-# session_key = os.getenv("SECRET_KEY")
 uri = f"mongodb+srv://{user}@team3.fxbwcnh.mongodb.net/"
 
 app = Flask(__name__)
@@ -36,26 +35,35 @@ timeline_collection = db["timeline"]
 def inject_user():
     try:
         user_id = session.get("user_id")
+        user_id = session.get("user_id")
+        user = None
+        notifications = []
+        has_notification = False
         if user_id:
             user = user_collection.find_one({"_id": ObjectId(user_id)})
-
-            # 안 읽은 알림 불러오기
             unread_notes = list(db.notifications.find({
                 "user_id": ObjectId(user_id),
                 "read": False
             }))
-            messages = [n["message"] for n in unread_notes]
-            has_notification = len(messages) > 0
+            notifications = [
+                {
+                    "message": n.get("message", ""),
+                    "link": n.get("notification_link")
+                }
+                for n in unread_notes
+            ]
+            has_notification = len(notifications) > 0
 
             return dict(
                 user_info=user,
-                notifications=messages,
-                has_notification=has_notification
+                notifications=notifications,
+                has_notification=has_notification,
+                current_page=request.endpoint
             )
         return dict()
     except Exception as e:
-        print(f"Error is occured. {e}")
-        return redirect("/")
+            print(f"Error is occured. {e}")
+            return redirect("/")
 
 @app.context_processor
 def inject_global_context():
@@ -332,7 +340,17 @@ def show_notifications():
     user_id = ObjectId(session["user_id"])
     kst = timezone("Asia/Seoul")
 
-    notifications = list(db.notifications.find({"user_id": user_id}).sort("created_at", -1))
+    notification_docs = db.notifications.find({
+        "user_id": user_id
+    }).sort("created_at", -1)
+    notifications = [
+        {
+            "message": note.get("message", ""),
+            "link": note.get("notification_link"),
+            "created_at": note.get("created_at")
+        }
+        for note in notification_docs
+    ]   
 
     for note in notifications:
         if "created_at" in note and isinstance(note["created_at"], datetime):
@@ -434,13 +452,15 @@ def teamMemberAdd(project_id):
         for uid in object_ids:
             user = user_collection.find_one({"_id": uid})
             message = f"{manager['name']}님이 프로젝트 '{project_doc['title']}'에 팀원으로 {user['name']}님을 추가했습니다."
+            notification_link = url_for('projectDetail', project_id=str(project_doc['_id']))
             notification = {
                 "user_id": uid,
                 "sender_id": current_user_id,
                 "message": message,
                 "project_id": ObjectId(project_id),
                 "read": False,
-                "created_at": datetime.utcnow()
+                "created_at": datetime.utcnow(),
+                "notification_link":notification_link
             }
             db.notifications.insert_one(notification)
 
@@ -458,15 +478,12 @@ def teamMemberManage(project_id):
         return redirect(url_for("login"))
     current_user_id = ObjectId(session["user_id"])
     project_obj_id = ObjectId(project_id)
-    
     project_doc = project_collection.find_one({"_id": project_obj_id})
+    is_manager = (project_doc.get("project_manager") == current_user_id)
     if not project_doc:
         return "해당 프로젝트를 찾을 수 없습니다.", 404
     project_manager_id = project_doc.get("project_manager")
-    manager_user = user_collection.find_one({"_id": project_manager_id})
     
-    if not manager_user:
-        return "팀장 유저 정보를 찾을 수 없습니다.", 404
     team_doc = team_collection.find_one({"project_id": project_obj_id})
     member_ids = team_doc.get("member", []) if team_doc else []
     status_list = team_doc.get("status", []) if team_doc else []
@@ -489,7 +506,6 @@ def teamMemberManage(project_id):
         if user:
             if query and query not in user.get("name", "").lower() and query not in user.get("email", "").lower():
                 continue
-            
             members.append({
                 "_id": str(member_id),
                 "name": user.get("name"),
@@ -498,18 +514,45 @@ def teamMemberManage(project_id):
                 "status": status_list[i],
                 "is_manager": member_id == project_manager_id
             })
+        elif member_id == project_manager_id:
+            members.append({
+                "_id": "",
+                "name": "",
+                "email": "",
+                "role": "",
+                "status": status_list[i],
+                "is_manager": True
+            })
+
+    if not members:
+        members.append({
+            "_id": "",
+            "name": "",
+            "email": "",
+            "role": "",
+            "status": "-",
+            "is_manager": True
+        })
+
     notification_docs = db.notifications.find({
         "user_id": current_user_id,
         "read": False
     })
-    notifications = [doc["message"] for doc in notification_docs]
+    notifications = [
+        {
+            "message": doc.get("message", ""),
+            "link": doc.get("notification_link")
+        }
+        for doc in notification_docs
+    ]
     has_notification = len(notifications) > 0
     return render_template(
         'teamMemberManage.html',
         project_id=project_id,
         team_members=members,
         notifications=notifications,
-        has_notification=has_notification
+        has_notification=has_notification,
+        is_manager=is_manager
     )
 
 @app.route('/teamMemberUpdate/<project_id>/<member_id>', methods=["POST"])
@@ -534,13 +577,15 @@ def teamMemberUpdate(project_id, member_id):
     manager = user_collection.find_one({"_id": manager_id})
     member = user_collection.find_one({"_id": ObjectId(member_id)})
     message = f"{manager['name']}님이 프로젝트 '{project_doc['title']}'에서 {member['name']}님의 상태를 '{new_status}'(으)로 변경했습니다."
+    notification_link = url_for('projectDetail', project_id=str(project_doc['_id']))
     notification = {
         "user_id": ObjectId(member_id),
         "sender_id": manager_id,
         "message": message,
         "project_id": ObjectId(project_id),
         "read": False,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow(),
+        "notification_link": url_for('projectDetail', project_id=str(project_doc['_id']))
     }
     db.notifications.insert_one(notification)
 

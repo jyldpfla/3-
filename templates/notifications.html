@@ -16,19 +16,17 @@
         <h2>📬 알림 전체 보기</h2>
 
         {% if notifications %}
+            <ul>
             {% for note in notifications %}
-            <div class="notification-item {% if not note.read %}unread{% endif %}">
-                <div>
-                {{ note.message }}
-                <div class="notification-time">{{ note.created_at_kst.strftime('%Y-%m-%d %H:%M') }}</div>
-                </div>
-                {% if not note.read %}
-                <form method="POST" action="{{ url_for('mark_single_notification_read', notification_id=note._id) }}">
-                    <button class="btn btn-gray">읽음 처리</button>
-                </form>
-                {% endif %}
-            </div>
+                <li>
+                    {% if note.link %}
+                        <a href="{{ note.link }}">{{ note.message }}</a>
+                    {% else %}
+                        {{ note.message }}
+                    {% endif %}
+                </li>
             {% endfor %}
+            </ul>
 
             {% if total_pages > 1 %}
             <div class="pagination">

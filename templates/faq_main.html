@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/faq.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>3조 Main</title>
+</head>
+
+<body>
+    {% include 'components/nav.html' %}
+    <div class="faq-container">
+        <h2>FAQ 게시판</h2>
+        <ul>
+        {% for faq in faqs %}
+            <li>
+                <strong>{{ faq.title }}</strong> ({{ faq.category }})<br>
+                <span>{{ faq.content }}</span><br>
+                <a href="{{ url_for('faq_update', faq_id=faq._id) }}" class="edit-btn">수정</a>
+                <form action="{{ url_for('faq_delete', faq_id=faq._id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="delete-btn">삭제</button>
+                </form>
+            </li>
+        {% else %}
+            <li>등록된 FAQ가 없습니다.</li>
+        {% endfor %}
+        </ul>
+        <hr>
+        <h3>새 질문 추가</h3>
+        <form action="{{ url_for('faq_insert') }}" method="post">
+            <input type="text" name="title" placeholder="질문" required>
+            <textarea name="content" placeholder="내용" required></textarea>
+            <button type="submit">등록</button>
+        </form>
+    </div>
+    {% include 'components/footer.html' %}
+</body>
+</html>

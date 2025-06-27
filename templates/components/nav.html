@@ -1,49 +1,74 @@
 <header>
-    <h1 class="header-title" onclick="location.href='/'"><i class="fa-solid fa-building"></i> Team 3</h1>
-    <div class="nav-box">
-    <div class="nav-item" onclick="location.href='/projectList'"><i class="fa-solid fa-folder-open"></i><br>프로젝트</div>
+  <h1 class="header-title" onclick="location.href='/'">
+    <i class="fa-solid fa-building"></i> Team 3
+  </h1>
+  <div class="nav-box">
+    <div class="nav-item" onclick="location.href='/projectList'">
+      <i class="fa-solid fa-folder-open"></i><br />프로젝트
+    </div>
     <div class="divider"></div>
-    <div class="nav-item" onclick="location.href='/timeline'"><i class="fa-solid fa-calendar-days"></i><br>업무 일정</div>
+    <div class="nav-item" onclick="location.href='/timeline'">
+      <i class="fa-solid fa-calendar-days"></i><br />업무 일정
+    </div>
     <div class="divider"></div>
-    <div class="nav-item" onclick="location.href='/board'"><i class="fa-solid fa-chess-board"></i><br>게시판</div>
+    <div class="nav-item" onclick="location.href='/board'">
+      <i class="fa-solid fa-chess-board"></i><br />게시판
+    </div>
     <div class="divider"></div>
-    <div class="nav-item" onclick="location.href='/mypage'"><i class="fa-solid fa-user-tie"></i><br>마이 페이지</div>
+    <div class="nav-item" onclick="location.href='/mypage'">
+      <i class="fa-solid fa-user-tie"></i><br />마이 페이지
+    </div>
     <div class="user-info">
-    {% if user_info %}
-    <span><i class="fa-solid fa-user" style="margin-right: 5px"></i>{{ user_info.name }}</span>
-    {% if current_page != 'notifications' %}
-        <div class="nav-item notification-wrapper">
-            <div class="notification-icon" onclick="toggleNotification()">
-                <i class="fa-regular fa-bell"></i>
-                {% if has_notification %}
-                    <span class="red-dot"></span>
-                {% endif %}
-            </div>
-            <div id="notification-box" class="notification-box hidden">
-                {% if notifications and notifications|length > 0 %}
-                    <ul>
-                        {% for note in notifications[:5] %}
-                            <li>{{ note }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% if notifications|length > 5 %}
-                        <a href="{{ url_for('show_notifications') }}" class="more-btn" style="font-size: 0.9rem;">더보기</a>
-                    {% else %}
-                        <a href="{{ url_for('show_notifications') }}" style="font-size: 0.9rem;">전체보기</a>
-                    {% endif %}
-                {% else %}
-                    <p>새로운 알림이 없습니다.</p>
-                    <a href="{{ url_for('show_notifications') }}" style="font-size: 0.9rem;">전체보기</a>
-                {% endif %}
-            </div>
+      {% if user_info %}
+      <span
+        ><i class="fa-solid fa-user" style="margin-right: 5px"></i>{{
+        user_info.name }}</span
+      >
+      {% if current_page != 'notifications' %}
+      <div class="nav-item notification-wrapper">
+        <div class="notification-icon" onclick="toggleNotification()">
+          <i class="fa-regular fa-bell"></i>
+          {% if has_notification %}
+          <span class="red-dot"></span>
+          {% endif %}
         </div>
-    {% endif %}
-    <button class="join-btn" onclick="/logout">로그아웃</button>
-    {% else %}
-        <button class="join-btn" onclick="location.href='/login'">로그인</button>
-        <button class="join-btn" onclick="location.href='/signup'">회원 가입</button>
-    {% endif %}
+        <div id="notification-box" class="notification-box hidden">
+          {% if notifications %}
+          <ul>
+            {% for note in notifications[:5] %}
+            <li>
+              {% if note.link %}
+              <a href="{{ note.link }}">{{ note.message }}</a>
+              {% else %} {{ note.message }} {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+          {% if notifications|length > 5 %}
+          <a
+            href="{{ url_for('show_notifications') }}"
+            style="font-size: 0.9rem"
+            >더보기</a
+          >
+          {% else %}
+          <a
+            href="{{ url_for('show_notifications') }}"
+            style="font-size: 0.9rem"
+            >전체보기</a
+          >
+          {% endif %} {% else %}
+          <p>새로운 알림이 없습니다.</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+      <button class="join-btn">로그아웃</button>
+      {% else %}
+      <button class="join-btn" onclick="location.href='/login'">로그인</button>
+      <button class="join-btn" onclick="location.href='/signup'">
+        회원 가입
+      </button>
+      {% endif %}
     </div>
-    </div>
-      
+  </div>
+  <script src="{{ url_for('static', filename='js/nav.js') }}"></script>
 </header>

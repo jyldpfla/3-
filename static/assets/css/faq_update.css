@@ -1,0 +1,83 @@
+.faq-update-container {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 32px 24px;
+    background: #f8fafc;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.faq-update-container h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+    color: #22223b;
+    letter-spacing: -1px;
+    text-align: center;
+}
+
+.faq-update-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #22223b;
+    margin-bottom: 2px;
+}
+
+.faq-update-container input[type="text"],
+.faq-update-container textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 15px;
+    background: #f4f6fb;
+    transition: border-color 0.2s;
+    outline: none;
+    color: #22223b;
+}
+
+.faq-update-container input[type="text"]:focus,
+.faq-update-container textarea:focus {
+    border-color: #3a5aef;
+    background: #fff;
+}
+
+.faq-update-container textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+
+
+.faq-update-container button[type="submit"]:hover {
+    background: linear-gradient(90deg, #2b3a8c 60%, #495057 100%);
+}
+
+.faq-update-container .cancel-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #6c757d;
+    text-decoration: underline;
+    font-size: 15px;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .faq-update-container {
+        padding: 16px 4vw;
+    }
+}

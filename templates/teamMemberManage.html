@@ -13,12 +13,12 @@
   {% include 'components/nav.html' %}
   <main class="container">
     <h2>| 👥팀원 관리</h2>
-        <form method="GET" action="{{ url_for('teamMemberManage', project_id=project_id) }}">
+    <form method="GET" action="{{ url_for('teamMemberManage', project_id=project_id) }}">
       <input type="text" class="q" name="q" placeholder="이름 또는 이메일로 검색" value="{{ request.args.get('q', '') }}">
       <button type="submit" class="btn btn-gray">검색</button>
-        </form>
+    </form>
     <div class="btn-box">
-      <button class="btn btn-blue" onclick="location.href='{{ url_for('teamMemberAdd', project_id=project_id) }}'">+ 팀원 추가</button>
+      <button class="btn btn-blue" onclick="{% if is_manager %}location.href='{{ url_for('teamMemberAdd', project_id=project_id) }}'{% else %}alert('팀원 추가는 프로젝트 관리자만 가능합니다.'){% endif %}">+ 팀원 추가</button>
       <button class="btn btn-blue" onclick="window.history.back()">뒤로 가기</button>
     </div>
 
@@ -33,40 +33,56 @@
         </tr>
       </thead>
       <tbody>
-        {% for member in team_members %}
-<tr>
-  <td>{{ member.name }}</td>
-  <td>{{ member.email }}</td>
-  <td>{{ member.role }}</td>
-  <td>
-    {% if member.status == '대기' %}
-      <span class="status-dot red"></span>
-    {% else %}
-      <span class="status-dot green"></span>
-    {% endif %}
-  </td>
-  <td>
-  {% if not member.is_manager %}
-    <div class="member-action-box">
-      <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}">
-        <select name="status" class="status-select" data-current="{{ member.status }}">
-          <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
-          <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
-        </select>
-        <button type="submit" class="btn btn-gray" onclick="return confirmStatusChange(this)">저장</button>
-      </form>
-      <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}">
-        <button type="submit" class="btn btn-gray" onclick="return confirm('정말로 이 팀원을 삭제하시겠습니까?')">삭제</button>
-      </form>
-    </div>
-  {% else %}
-    <span style="color: gray;">-</span>
-  {% endif %}
-  </td>
-</tr>
-{% endfor %}
-
-      </tbody>
+  {% for member in team_members %}
+  <tr>
+    <td>
+      {% if member.is_manager and not member.name %}
+        -
+      {% else %}
+        {{ member.name }}
+      {% endif %}
+    </td>
+    <td>
+      {% if member.is_manager and not member.email %}
+        -
+      {% else %}
+        {{ member.email }}
+      {% endif %}
+    </td>
+    <td>
+      {% if member.is_manager and not member.role %}
+        -
+      {% else %}
+        {{ member.role }}
+      {% endif %}
+    </td>
+    <td>
+      {% if member.status == '대기' %}
+        <span class="status-dot red"></span>
+      {% else %}
+        <span class="status-dot green"></span>
+      {% endif %}
+      {{ member.status }}
+    </td>
+    <td>
+      {% if is_manager and not member.is_manager %}
+        <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}" style="display:inline;">
+          <select name="status" class="status-select" data-current="{{ member.status }}">
+            <option value="참여중" {% if member.status == '참여중' %}selected{% endif %}>참여중</option>
+            <option value="대기" {% if member.status == '대기' %}selected{% endif %}>대기</option>
+          </select>
+          <button type="submit" class="btn btn-gray">저장</button>
+        </form>
+        <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}" style="display:inline; margin-left:4px;">
+          <button type="submit" class="btn btn-gray">삭제</button>
+        </form>
+      {% else %}
+        <span style="color: gray;">-</span>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
     </table>
   </main>
   <script src="{{ url_for('static', filename='js/teamMemberManage.js') }}"></script>
