@@ -30,7 +30,7 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    session["user_id"] = "6853aebf690a71fa9ad4b6e3"
+    session["user_id"] = "685df192a2cd54b0683ea344"
     user_id = session.get("user_id")
     if user_id:
         user = user_collection.find_one({"_id": ObjectId(user_id)})
@@ -298,6 +298,8 @@ def mypage():
             else:
                 p["status"] = "Done"
         all_projects = list(project_collection.find({"_id": {"$nin": project_id_list}}))
+        
+        board = list(board_collection.find({"user_id": user_id})).sort("created_at", -1)
         return render_template("/my_page.html", todo=todo, done=done, doing=doing, all_projects=all_projects, personal_timeline=personal_timeline, project_timeline=project_timeline, other_timeline=other_timeline)
     except Exception as e:
         print(f"유저 정보를 찾을 수 없습니다: {e}")
@@ -395,12 +397,15 @@ def mark_notifications_as_read():
 @app.route("/board")
 def board():
     posts = list(board_collection.find({"category": "자유"}))
-    user_id = ObjectId(session.get("user_id"))
     
     for p in posts:
         if p["title"] == "" or p["title"] == None:
             p["title"] = "-"
-        p["writer"] = user_collection.find_one({"_id": user_id})["name"]
+        try:
+            p["writer"] = user_collection.find_one({"_id": p["user_id"]})["name"]
+        except Exception as e:
+            p["writer"] = "-"
+            print(e)
         
         p["update_date"] = p["update_date"].strftime("%Y-%m-%d %H:%M")
     
@@ -410,7 +415,11 @@ def board():
 @app.route("/board/detail/<id>")
 def freeboard_detail(id):
     post = board_collection.find_one({"_id": ObjectId(id)}) 
-    post["writer"] = user_collection.find_one({"_id": post["user_id"]})["name"]
+    try:
+            post["writer"] = user_collection.find_one({"_id": post["user_id"]})["name"]
+    except Exception as e:
+        post["writer"] = "-"
+        print(e)
 
     # 2. 원하는 형식으로 다시 문자열로 저장
     post["update_date"] = post["update_date"].strftime("%Y-%m-%d %H:%M")
