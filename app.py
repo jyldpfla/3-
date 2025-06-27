@@ -573,17 +573,26 @@ def to_str(date):
 
 @app.route("/projectList")
 def projectList():
+    def to_str(date):
+        if not date:
+            return ""
+        return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
+
     project_list = list(project_collection.find())
     done = [t for t in project_list if t['status'] == '완료']
     doing = [t for t in project_list if t['status'] == '진행중']
     wait = [t for t in project_list if t['status'] == '진행 대기']
+
     for project in project_list:
         manager = user_collection.find_one({"_id": project["project_manager"]})
-        project["project_manager"] = manager["name"] if manager else "-"
+        project["project_manager"] = manager["name"] if manager else "알 수 없음"
         project["start_date"] = to_str(project.get("start_date"))
         project["end_date"] = to_str(project.get("end_date"))
+
+    # ✅ 상태 기준 정렬
     status_order = {"진행 대기": 0, "진행중": 1, "완료": 2}
     project_list.sort(key=lambda x: status_order.get(x["status"], 99))
+
     return render_template("/projectList.html", project_list=project_list, done=done, doing=doing, wait=wait)
 
 @app.route("/projectAdd", methods=["GET", "POST"])
@@ -611,25 +620,8 @@ def projectAdd():
             "end_date": end_date,
             "status": status,
             "description": description,
-            "schedule_id": None
         }
         result = project_collection.insert_one(project)
-        new_project_id = result.inserted_id
-
-        # ✅ timeline 일정 자동 생성
-        timeline_doc = {
-            "title": f"[{title}] 프로젝트 일정",
-            "user_id": ObjectId(manager_id),
-            "start_date": start_date,
-            "end_date": end_date,
-            "type": "프로젝트",
-            "status": status,
-            "content": description,
-            "project_id": new_project_id,
-            "member": [],
-            "updated_at": datetime.utcnow()
-        }
-        timeline_collection.insert_one(timeline_doc)
 
         return redirect(url_for('projectList'))
 
@@ -662,28 +654,21 @@ def projectUpdate(project_id):
                 "end_date": end_date,
                 "status": status,
                 "description": description,
-                "schedule_id": None
-            }}
-        )
-
-        # 🔁 타임라인 일정도 함께 수정
-        timeline_collection.update_many(
-            {"project_id": ObjectId(project_id)},
-            {"$set": {
-                "start_date": start_date,
-                "end_date": end_date
             }}
         )
 
         return redirect(url_for('projectDetail', project_id=project_id))
 
-    # ✅ 여기가 GET 요청 처리
+    # ✅ 여기가 GET 요청 처리 — 여기부터 붙여넣기
     project = project_collection.find_one({"_id": ObjectId(project_id)})
+
+    # 🔒 담당자 안전하게 가져오기
     manager_doc = user_collection.find_one({"_id": project.get("project_manager")})
     manager = manager_doc["name"] if manager_doc else "알 수 없음"
     project["manager_name"] = manager
+
     user_list = list(user_collection.find({"position": "팀장"}))
-    
+
     # 📅 날짜 포맷 처리
     def to_str(date):
         if not date:
@@ -697,16 +682,38 @@ def projectUpdate(project_id):
 
     return render_template("/projectUpdate.html", project=project, user_list=user_list)
 
+
 @app.route('/projectDetail/<project_id>')
-def projectDetail(project_id):
+def projectDetail(project_id): 
     project = project_collection.find_one({"_id": ObjectId(project_id)})
-    try:
-        manager = user_collection.find_one({"_id": project["project_manager"]})["name"]
-    except Exception as e:
-        manager = "-"
+    
+
+    # # ✅ 이미 상단에서 import 했으니 여기선 다시 하지 말고 바로 사용
+    # DEFAULT_MANAGER_ID = ObjectId("6853aebf690a71fa9ad4b6e3")
+
+    # manager_id = project.get("project_manager", DEFAULT_MANAGER_ID)
+    manager_id = project.get("project_manager")
+
+    # try:
+    #     manager_id = ObjectId(manager_id)
+    # except:
+    #     manager_id = DEFAULT_MANAGER_ID
+
+    manager_doc = user_collection.find_one({"_id": manager_id})
+    manager = manager_doc["name"] if manager_doc else "-"
+        
     project["manager_name"] = manager
+    
+    # ✅ 날짜 포맷 처리
+    def to_str(date):
+        if not date:
+            return ""
+        return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
+    
     project["start_date"] = to_str(project.get("start_date"))
     project["end_date"] = to_str(project.get("end_date"))
+    
+    # 🔧 팀원 처리
     team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
     project["team"] = [
         user["name"] for user in user_collection.find(
