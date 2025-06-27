@@ -1,0 +1,95 @@
+.withdraw-page {
+  max-width: 800px;
+  margin: 80px auto;
+  padding: 0 24px;
+  font-size: 18px;
+  color: #111827;
+  line-height: 1.8;
+  text-align: center;
+  background-color: #f9f9f9; 
+}
+
+.withdraw-page h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.withdraw-page p {
+  margin-bottom: 24px;
+}
+
+.withdraw-page form {
+  margin-top: 50px;
+}
+
+.withdraw-page button {
+  background-color: #2563eb; 
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 18px;
+  border: none;
+.withdraw-page {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 40px 24px;
+  font-size: 18px;
+  color: #111827;
+  line-height: 1.8;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+/* 제목 */
+.withdraw-page h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+/* 본문 문구 */
+.withdraw-page p {
+  margin-bottom: 24px;
+  white-space: normal;
+}
+
+/* 버튼 영역 */
+.withdraw-page form {
+  margin-top: 40px;
+}
+
+/* 버튼 스타일 */
+.withdraw-page button {
+  background-color: #2563eb;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 220px;
+}
+
+.withdraw-page button:hover {
+  opacity: 0.8;
+}
+
+/* 페이지 전체 배경 */
+body {
+  background-color: #f9fafb;  
+}
+
+  border-radius: 10px;
+  width: 280px; 
+  max-width: 90%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.withdraw-page button:hover {
+  opacity: 0.8;
+}

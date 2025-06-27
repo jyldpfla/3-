@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>로그인</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/login.css') }}">
+</head>
+<body>
+
+  {% include 'components/nav.html' %}
+
+  <div class="login-title-left">
+    <h2 class="login-title">로그인</h2>
+  </div>
+
+  <main class="login-center">
+    <form method="POST" class="login-form">
+      <!-- ✅ 이메일 입력 -->
+      <input type="email" name="email" class="login-input" placeholder="이메일" required>
+
+      <!-- ✅ 비밀번호 입력 -->
+      <input type="password" name="password" class="login-input" placeholder="비밀번호" required>
+
+      {% if error %}
+        <div class="login-error">{{ error }}</div>
+      {% endif %}
+
+      <button type="submit" class="login-btn">로그인</button>
+    </form>
+
+    <div class="login-footer-left">
+      <a href="{{ url_for('signup') }}">회원가입</a>
+    </div>
+  </main>
+
+  {% include 'components/footer.html' %}
+</body>
+</html>
