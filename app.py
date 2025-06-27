@@ -31,15 +31,24 @@ team_collection = db["team"]
 timeline_collection = db["timeline"]
 
 @app.context_processor
-def inject_user():
+def inject_user_context():
     try:
         user_id = session.get("user_id")
-        user_id = session.get("user_id")
-        user = None
+        if not user_id:
+            return dict()
+
+        # 사용자 정보 (이름, 직급, 부서만)
+        user = user_collection.find_one(
+            {"_id": ObjectId(user_id)},
+            {"name": 1, "position": 1, "department": 1}
+        )
+
+        # 알림 가져오기
         notifications = []
+        messages = []
         has_notification = False
-        if user_id:
-            user = user_collection.find_one({"_id": ObjectId(user_id)})
+
+        if "notifications" in db.list_collection_names():
             unread_notes = list(db.notifications.find({
                 "user_id": ObjectId(user_id),
                 "read": False
@@ -48,44 +57,24 @@ def inject_user():
                 {
                     "message": n.get("message", ""),
                     "link": n.get("notification_link")
-                }
-                for n in unread_notes
+                } for n in unread_notes
             ]
-            has_notification = len(notifications) > 0
-
-            return dict(
-                user_info=user,
-                notifications=notifications,
-                has_notification=has_notification,
-                current_page=request.endpoint
-            )
-        return dict()
-    except Exception as e:
-            print(f"Error is occured. {e}")
-            return redirect("/")
-
-@app.context_processor
-def inject_global_context():
-    user_id = session.get("user_id")
-    if user_id:
-        user = user_collection.find_one({"_id": ObjectId(user_id)})
-
-        # 안 읽은 알림 불러오기
-        unread_notes = list(db.notifications.find({
-            "user_id": ObjectId(user_id),
-            "read": False
-        }))
-        messages = [n["message"] for n in unread_notes]
-        has_notification = len(messages) > 0
+            messages = [n.get("message", "") for n in unread_notes]
+            has_notification = len(messages) > 0
 
         return dict(
             user_info=user,
-            notifications=messages,
-            has_notification=has_notification
+            notifications=notifications,
+            has_notification=has_notification,
+            current_page=request.endpoint
         )
-    return dict()
+    except Exception as e:
+        print(f"[inject_user_context] Error: {e}")
+        return dict()
 
 
+
+# ========== yerim - main page ==========
 @app.route("/")
 def home():
     projects = list(project_collection.find({}))
@@ -192,6 +181,7 @@ def home():
 def example():
     return render_template("/example.html")
 
+# ========== yerim - mypage ==========
 @app.route("/mypage")
 def mypage():
     user_id = ObjectId(session.get("user_id"))
@@ -330,7 +320,7 @@ def del_task():
     personal_todo_collection.delete_one({"_id": ObjectId(id)})
     return redirect("/mypage")
 
-# ===== inho.py에서 가져온 라우트 및 함수 추가 =====
+# ========== inho - notification ==========
 @app.route("/notifications")
 def show_notifications():
     if "user_id" not in session:
@@ -399,6 +389,7 @@ def mark_notifications_as_read():
     )
     return jsonify({"success": True})
 
+# ========== inho - team ==========
 @app.route('/teamMemberAdd/<project_id>', methods=["GET", "POST"])
 def teamMemberAdd(project_id):
     if "user_id" not in session:
@@ -598,7 +589,7 @@ def teamMemberDelete(project_id, member_id):
     )
     return redirect(url_for("teamMemberManage", project_id=project_id))
 
-# ===== wonji_app.py에서 가져온 프로젝트 관리 라우트 및 함수 추가 =====
+# ========== wonji - project ==========
 def to_str(date):
     if not date:
         return ""
@@ -764,7 +755,7 @@ def projectDelete(project_id):
     project_collection.delete_one({"_id": ObjectId(project_id)})
     return redirect(url_for('projectList'))
 
-# ===== timeline_app.py에서 가져온 헬퍼 함수 및 일정 관리 라우트 추가 =====
+# ========== hongseok - timeline ==========
 
 # 일정 타입에 따른 상태 옵션
 STATUS_OPTIONS_BY_TYPE = {
@@ -857,45 +848,6 @@ def get_project_title_by_id(project_obj_id):
     except Exception as e:
         print(f"Error converting project ID {project_obj_id} to title: {e}")
         return None
-
-@app.context_processor
-def inject_user():
-    # 실제 환경에서는 사용자 로그인 정보를 세션에서 가져와야 합니다.
-    session["user_id"] = "685df192a2cd54b0683ea346" 
-    user_id = session.get("user_id")
-    user = None
-    if user_id:
-        try:
-            user = user_collection.find_one(
-                {"_id": ObjectId(user_id)},
-                {"name": 1, "position": 1, "department": 1}
-            )
-        except Exception as e:
-            print(f"Error fetching user info for ID {user_id}: {e}")
-            user = None
-
-    # db.notifications 컬렉션에서 안 읽은 알림 불러오기
-    unread_notes = []
-    has_notification = False
-    if user_id and "notifications" in db.list_collection_names(): 
-        try:
-            unread_notes = list(db.notifications.find({
-                "user_id": ObjectId(user_id),
-                "read": False
-            }))
-            messages = [n["message"] for n in unread_notes]
-            has_notification = len(messages) > 0
-        except Exception as e:
-            print(f"Error fetching notifications for user {user_id}: {e}")
-            messages = []
-    else:
-        messages = []
-
-    return dict(
-        user_info=user,
-        notifications=messages,
-        has_notification=has_notification
-    )
 
 # 라우팅
 @app.route('/timeline')
@@ -1281,7 +1233,7 @@ def delete_schedule():
         return jsonify({"success": False, "message": f"일정 삭제 중 오류 발생: {str(e)}"}), 500
 
 
-# ===== bonghyeon_app.py에서 가져온 계정/인증 관련 라우트 및 함수 추가 =====
+# ========== bonghyeon - login ==========
 def login_required_bh(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -1376,7 +1328,7 @@ def delete_account_bh():
         return "<script>alert('탈퇴가 완료되었습니다.'); window.location.href='/'</script>"
     return render_template("delete_account.html")
 
-# ------------------------ FAQ ---------------------------
+# ========== inho - faq ==========
 @app.route("/faq")
 def faq_main():
     faqs = list(board_collection.find().sort("create_date", -1))
@@ -1424,6 +1376,71 @@ def faq_update(faq_id):
 def faq_delete(faq_id):
     board_collection.delete_one({"_id": ObjectId(faq_id)})
     return redirect(url_for("faq_main"))
+
+# ========== yerim - board ==========
+@app.route("/board")
+def board():
+    posts = list(board_collection.find({"category": "자유"}))
+    
+    for p in posts:
+        if p["title"] == "" or p["title"] == None:
+            p["title"] = "-"
+        try:
+            p["writer"] = user_collection.find_one({"_id": p["user_id"]})["name"]
+        except Exception as e:
+            p["writer"] = "-"
+            print(e)
+        
+        if "update_date" in p and p["update_date"]:
+            p["update_date"] = p["update_date"].strftime("%Y-%m-%d %H:%M")
+        else:
+            p["update_date"] = "-"
+    
+    posts.sort(key=lambda x: x.get("no", 0), reverse=True)
+    return render_template("freeboard_main.html", posts=posts)
+
+@app.route("/board/detail/<id>")
+def freeboard_detail(id):
+    post = board_collection.find_one({"_id": ObjectId(id)}) 
+    try:
+        post["writer"] = user_collection.find_one({"_id": post["user_id"]})["name"]
+    except Exception as e:
+        post["writer"] = "-"
+        print(e)
+
+    if "update_date" in post and post["update_date"]:
+        post["update_date"] = post["update_date"].strftime("%Y-%m-%d %H:%M")
+    else:
+        post["update_date"] = "-"
+    return render_template("freeboard_detail.html", post=post)
+
+@app.route('/board_insert', methods=['GET', 'POST'])
+def insert_form():
+    user_id = session.get("user_id")
+    if request.method == 'GET':
+        if user_id == None:
+            return "<script>alert('로그인 후 이용 가능합니다'); window.location.href = './login';</script>"
+        return render_template('/freeboard_insert.html')
+    title = request.form.get("title")
+    content = request.form.get("content")
+
+    board_collection.insert_one({
+        "title": title,
+        "category": "자유",
+        "user_id": ObjectId(user_id),
+        "content": content,
+        "create_date": datetime.now(),
+        "update_date": datetime.now()
+    })
+
+    return redirect(url_for("board"))
+
+@app.route('/board_delete', methods=['POST'])
+def delete():
+    id = request.get_json()["_id"]
+    board_collection.delete_one({"_id": ObjectId(id)})
+
+    return redirect(url_for("board"))
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
