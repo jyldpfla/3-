@@ -74,7 +74,6 @@ def inject_global_context():
 
 @app.route("/")
 def home():
-    session["user_id"] = "6854be045d8c554194fe197b"
     
     projects = list(project_collection.find({}))
     project_pipeline = [
@@ -396,11 +395,12 @@ def mark_notifications_as_read():
 @app.route("/board")
 def board():
     posts = list(board_collection.find({"category": "자유"}))
+    user_id = ObjectId(session.get("user_id"))
     
     for p in posts:
         if p["title"] == "" or p["title"] == None:
             p["title"] = "-"
-        p["writer"] = user_collection.find_one({"_id": p["user_id"]})["name"]
+        p["writer"] = user_collection.find_one({"_id": user_id})["name"]
         
         p["update_date"] = p["update_date"].strftime("%Y-%m-%d %H:%M")
     
@@ -409,7 +409,7 @@ def board():
 
 @app.route("/board/detail/<id>")
 def freeboard_detail(id):
-    post = board_collection.find_one({"_id": ObjectId(id)})
+    post = board_collection.find_one({"_id": ObjectId(id)}) 
     post["writer"] = user_collection.find_one({"_id": post["user_id"]})["name"]
 
     # 2. 원하는 형식으로 다시 문자열로 저장
