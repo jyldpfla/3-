@@ -51,6 +51,9 @@ document.querySelector('.btn-edit').addEventListener('click', () => {
     // 라디오 버튼이 포함된 tr 찾기
     const row = checkedRadio.closest('tr');
     if (document.querySelector('.btn-edit').textContent == '편집') {
+        // 내용 바꾸기
+        const contentCell = row.querySelector('.todo_content');
+        contentCell.innerHTML = `<input type="text" class="todo_content" value="${contentCell.textContent}" />`;
         // 상태 영역 바꾸기
         const statusCell = row.querySelector('.status');
         const currentStatus = statusCell.textContent.trim();
@@ -67,10 +70,12 @@ document.querySelector('.btn-edit').addEventListener('click', () => {
         const today = new Date().toISOString().split('T')[0];
         dateCell.innerHTML = `<input type="date" class="date-picker" value="${today}" />`;
 
-        // 버튼 텍스트 변경 (선택)
+        // 버튼 텍스트 변경
         document.querySelector('.btn-edit').textContent = '저장';
         document.querySelector('.btn-del').textContent = "취소";
+        document.getElementById('btn-add').style.display = "none"
     } else if (document.querySelector('.btn-edit').textContent == '저장') {
+        content = row.querySelector('.todo_content input').value;
         status = row.querySelector('.status-select').value;
         date = row.querySelector('.date-picker').value;
 
@@ -81,6 +86,7 @@ document.querySelector('.btn-edit').addEventListener('click', () => {
             },
             body: JSON.stringify({
                 _id: row.querySelector('td[name="task_id"]').getAttribute('value'),
+                content: content,
                 status: status,
                 date: date
             })

@@ -21,7 +21,7 @@
                     <div class="user-image">Image</div>
                     <div class="user-details">
                         <h2>{{ user_info.name }}</h2>
-                        <p>{{ user_info.department }} / {{user_info.role }}</p>
+                        <p>{{ user_info.department }} / {{user_info.position }}</p>
                     </div>
                     <a class="modify_btn" onclick="location.href='/profile_edit'">개인정보 수정</a>
                 </div>
@@ -36,10 +36,10 @@
                     </div>
                     <div class="stat-right">
                         <div>
-                            <span>진행중/예정</span><strong>{{ doing|length }}</strong>
+                            <span>진행중/예정</span><strong>{{ doing_project|length }}</strong>
                         </div>
                         <div>
-                            <span>완료</span><strong>{{ done|length }}</strong>
+                            <span>완료</span><strong>{{ done_project|length }}</strong>
                         </div>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
                                 <input type="radio" name="taskSelect" />
                             </td>
                             <td name="task_id" value={{t["_id"]}}> {{ loop.index }}</td>
-                            <td>{{ t["content"] }} </td>
+                            <td class="todo_content">{{ t["content"] }} </td>
                             <td>
                                 <span class="status {{ t.status.lower().replace(' ', '') }}">
                                     <span class="dot"></span>
@@ -110,7 +110,7 @@
                     <input type="hidden" name="user_id" value={{user_info["_id"]}} />
                     <input name="date" id="task-date" type="date" />
                     <input name="content" type="text" placeholder="할 일 내용" />
-                    <button type="submit" class="btn btn-blue">추가</button>
+                    <button type="submit" id="btn-add" class="btn btn-blue">추가</button>
                 </form>
             </div>
 
@@ -119,14 +119,15 @@
                 <h3>프로젝트</h3>
                 <div class="project-tab-container">
                     <div class="project-tabs">
-                        <button class="tab-btn active" data-tab="progress">진행중</button>
+                        <button class="tab-btn active" data-tab="progress">대기/진행중</button>
                         <button class="tab-btn" data-tab="complete">완료</button>
+                        <button class="tab-btn" data-tab="other">그 외</button>
                     </div>
 
                     <div class="project-wrapper">
                         <!-- 진행중 콘텐츠 -->
                         <div class="project-tab-content active" id="progress">
-                            {% for do in doing %}
+                            {% for do in doing_project %}
                             <div class="project-container">
                                 <div class="project-header-group">
                                     <div class="project-name"> {{ do.title }} </div>
@@ -153,7 +154,7 @@
 
                         <!-- 완료 콘텐츠 -->
                         <div class="project-tab-content" id="complete">
-                            {% for do in done %}
+                            {% for do in done_project %}
                             <div class="project-container">
                                 <div class="project-header-group">
                                     <div class="project-name"> {{ do.title }} </div>
@@ -169,6 +170,33 @@
                                             <span class="status {{ p_time["status"].lower().replace(' ', '') }}"><span class="dot"></span> {{p_time["status"]}} </span>
                                             <span> {{p_time["end_date"]}} </span>
                                             <button class="btn btn-gray" onclick="location.href='/timeline?year={{p_time["end_date"].split("-")[0]}}&month={{p_time["end_date"].split("-")[1]}}&date={{p_time["end_date"]}}&schedule_id={{p_time["_id"]}}'">일정 보기</button>
+                                        </li>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- 외부 프로젝트 콘텐츠 -->
+                        <div class="project-tab-content" id="other">
+                            {% for o in other_projects %}
+                            <div class="project-container">
+                                <div class="project-header-group">
+                                    <div class="project-name"> {{ o.title }} </div>
+                                    <button class="btn btn-blue" onclick="location.href='/projectDetail/{{o["_id"]}}'">상세보기</button>
+                                </div>
+                                <div class="project-body" style="display: none;">
+                                    <ul class="project-list">
+                                        {% for o_time in other_timeline %}
+                                        {% if o_time["project_id"] == o["_id"] %}
+                                        <li>
+                                            <span class="task-id" value={{ o_time["_id"] }}>{{ loop.index }}</span>
+                                            <span class="task-title">{{ o_time["title"] }}</span>
+                                            <span class="status {{ o_time["status"].lower().replace(' ', '') }}"><span class="dot"></span> {{o_time["status"]}} </span>
+                                            <span> {{o_time["end_date"]}} </span>
+                                            <button class="btn btn-gray" onclick="location.href='/timeline?year={{o_time["end_date"].split("-")[0]}}&month={{o_time["end_date"].split("-")[1]}}&date={{o_time["end_date"]}}&schedule_id={{o_time["_id"]}}'">일정 보기</button>
                                         </li>
                                         {% endif %}
                                         {% endfor %}

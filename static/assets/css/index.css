@@ -109,8 +109,10 @@ h3 {
 
 /* 공지사항 */
 .notice ul {
+    max-height: 300px;
     padding-left: 1rem;
     margin-top: 0.5rem;
+    overflow-y: auto;
 }
 
 .notice ul>li {
@@ -157,6 +159,8 @@ h3 {
 
 .schedule-body>ul {
     padding-top: 36px;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .schedule-body ul li {
@@ -248,6 +252,7 @@ h3 {
 
     .card {
         padding: 0.8rem;
+        max-height: 300px;
     }
 
     .project-progress th,

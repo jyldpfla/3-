@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>자유 게시판</title>
+  <script>
+    function deleteSelectedPost() {
+    const checkbox = document.querySelector("input[name='post-check']:checked");
+    if (!checkbox) return alert("삭제할 게시글을 선택해주세요.");
+
+    const selectedValue = checkbox.value;
+
+    // POST 요청
+    fetch("/board_delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ _id: selectedValue }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("삭제 실패");
+        alert("삭제 완료!");
+        location.reload();
+      })
+      .catch((err) => alert(err.message));
+  }
+  </script>
+</head>
+<body>
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/freeboard_main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>3조 Main</title>
+</head>
+<body>
+    {% include 'components/nav.html' %}
+
+    <main>
+      <div class="container">
+        <div class="board-header">
+          <h2>자유 게시판</h2>
+        </div>
+        
+        
+        <table>
+          <thead>
+            <tr>
+              <th class="center">번호</th>
+              <th class="center">자유 게시판</th>
+              <th class="center">날짜/시간</th>
+              <th class="center">작성자</th>
+            </tr>
+          </thead>
+          <tbody id="post-tbody">
+            {% for post in posts %}
+            <tr>
+              <td class="center"><input type="checkbox" name="post-check" value="{{ post['_id'] }}"><br>{{ loop.index }}</td>
+              <td class="center"><a href="/board/detail/{{post["_id"]}}">{{ post["title"]}}</a></td>
+              <td class="center">{{ post["update_date"]}}</td>
+              <td class="center">{{ post["writer"]}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="btn-box">
+          <button class="btn" onclick="location.href = '/board_insert'">등록</button>
+          <button class="btn delete" onclick="deleteSelectedPost()">삭제</button>
+      </div>
+    </main>
+
+    {% include 'components/footer.html' %}
+</body>
+</html>
