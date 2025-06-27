@@ -358,8 +358,7 @@ def show_notifications():
         else:
             note["created_at_kst"] = "시간 없음"
 
-    # 페이지네이션을 위한 코드 추가
-    per_page = 10  # 한 페이지에 보여줄 알림 수
+    per_page = 10
     page = int(request.args.get("page", 1))
     total_notifications = len(notifications)
     total_pages = ceil(total_notifications / per_page)
@@ -412,11 +411,6 @@ def teamMemberAdd(project_id):
     if not project_doc:
         return "해당 프로젝트를 찾을 수 없습니다.", 404
 
-    if project_doc.get("project_manager") != current_user_id:
-        manage_url = url_for('teamMemberManage', project_id=project_id)
-        return f"<h1><a href='{manage_url}'>팀원 등록은 프로젝트 관리자만 가능합니다.</a></h1>", 403
-
-
     if request.method == "POST":
         user_ids = request.form.getlist("_id")
         status_list = request.form.getlist("status")
@@ -424,7 +418,6 @@ def teamMemberAdd(project_id):
 
         team_doc = team_collection.find_one({"project_id": ObjectId(project_id)})
         project_doc = project_collection.find_one({"_id": ObjectId(project_id)})
-        project_manager_id = ObjectId(session["user_id"])
 
         if team_doc:
             members = team_doc["member"]
@@ -447,7 +440,6 @@ def teamMemberAdd(project_id):
                 "status": status_list
             })
 
-        # 알림 생성
         manager = user_collection.find_one({"_id": current_user_id})
         for uid in object_ids:
             user = user_collection.find_one({"_id": uid})
@@ -460,7 +452,7 @@ def teamMemberAdd(project_id):
                 "project_id": ObjectId(project_id),
                 "read": False,
                 "created_at": datetime.utcnow(),
-                "notification_link":notification_link
+                "notification_link": url_for('projectDetail', project_id=str(project_doc['_id']))
             }
             db.notifications.insert_one(notification)
 
@@ -494,7 +486,7 @@ def teamMemberManage(project_id):
     user_info_map = {
         str(user["_id"]): user
         for user in user_collection.find(
-            {"_id": {"$in": member_ids}}, {"name": 1, "email": 1, "role": 1}
+            {"_id": {"$in": member_ids}}, {"name": 1, "email": 1, "position": 1}
         )
     }
     
@@ -510,7 +502,7 @@ def teamMemberManage(project_id):
                 "_id": str(member_id),
                 "name": user.get("name"),
                 "email": user.get("email"),
-                "role": user.get("role"),
+                "position": user.get("position"),
                 "status": status_list[i],
                 "is_manager": member_id == project_manager_id
             })
@@ -519,7 +511,7 @@ def teamMemberManage(project_id):
                 "_id": "",
                 "name": "",
                 "email": "",
-                "role": "",
+                "position": "",
                 "status": status_list[i],
                 "is_manager": True
             })
@@ -529,7 +521,7 @@ def teamMemberManage(project_id):
             "_id": "",
             "name": "",
             "email": "",
-            "role": "",
+            "position": "",
             "status": "-",
             "is_manager": True
         })
@@ -571,7 +563,6 @@ def teamMemberUpdate(project_id, member_id):
         {"$set": {"status": team_doc["status"]}}
     )
 
-    # --- 알림 생성 코드 추가 ---
     project_doc = project_collection.find_one({"_id": ObjectId(project_id)})
     manager_id = project_doc.get("project_manager")
     manager = user_collection.find_one({"_id": manager_id})

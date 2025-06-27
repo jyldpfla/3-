@@ -18,7 +18,11 @@
       <button type="submit" class="btn btn-gray">검색</button>
     </form>
     <div class="btn-box">
-      <button class="btn btn-blue" onclick="{% if is_manager %}location.href='{{ url_for('teamMemberAdd', project_id=project_id) }}'{% else %}alert('팀원 추가는 프로젝트 관리자만 가능합니다.'){% endif %}">+ 팀원 추가</button>
+      <button class="btn btn-blue" id="add-member-btn"
+        data-add-url="{{ url_for('teamMemberAdd', project_id=project_id) }}"
+        {% if not is_manager %}data-not-manager="1"{% endif %}>
+        + 팀원 추가
+      </button>
       <button class="btn btn-blue" onclick="window.history.back()">뒤로 가기</button>
     </div>
 
@@ -27,7 +31,7 @@
         <tr>
           <th>이름</th>
           <th>이메일</th>
-          <th>역할</th>
+          <th>직급</th>
           <th>참여 상태</th>
           <th>관리</th>
         </tr>
@@ -53,7 +57,7 @@
       {% if member.is_manager and not member.role %}
         -
       {% else %}
-        {{ member.role }}
+        {{ member.position }}
       {% endif %}
     </td>
     <td>
@@ -77,7 +81,7 @@
           <button type="submit" class="btn btn-gray">삭제</button>
         </form>
       {% else %}
-        <span style="color: gray;">-</span>
+        <span>-</span>
       {% endif %}
     </td>
   </tr>

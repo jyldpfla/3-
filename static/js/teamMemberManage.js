@@ -79,4 +79,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+        var addBtn = document.getElementById('add-member-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function(e) {
+            if (addBtn.dataset.notManager) {
+                e.preventDefault();
+                showAlertBox('danger', '팀원 추가는 프로젝트 관리자만 가능합니다.', '확인');
+            } else {
+                location.href = addBtn.dataset.addUrl;
+            }
+        });
+    }
 });
