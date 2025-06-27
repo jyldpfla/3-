@@ -7,12 +7,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/signup.css') }}">
-  <style>
-    #email_domain_input { display: none; }
-    .hidden { display: none !important; }
-    .visible { display: inline-block !important; }
-    .pw-mismatch { color: red; font-size: 14px; text-align: left; padding-left: 10px; }
-  </style>
 </head>
 <body>
 
@@ -50,12 +44,12 @@
 
     <input type="text" name="name" class="signup-input" placeholder="사용자 이름" required>
     <input type="text" name="phone" id="phone" class="signup-input" placeholder="전화번호 (예: 01012345678)"
-       pattern="^010\d{8}$" maxlength="11"
+       pattern="^01\d{9}$" maxlength="11"
        title="01012345678 형식으로 입력해주세요" required>
     <input type="text" name="position" class="signup-input" placeholder="직책" required>
     <input type="text" name="department" class="signup-input" placeholder="부서명" required>
-    <input type="text" name="role" class="signup-input" placeholder="예: 마케팅 직원" required>
-    <input type="text" name="profile" class="signup-input" placeholder="예: 영업사원" required>
+    <input type="text" name="role" class="signup-input" placeholder="역할" required>
+    <input type="text" name="profile" class="signup-input" placeholder="프로필" required>
 
     <button type="submit" class="signup-btn">완료</button>
   </form>
@@ -92,6 +86,11 @@
     const pwConfirm = document.querySelector('input[name="confirm_password"]');
     const pwError = document.getElementById("pw-error");
 
+    // 전화번호 숫자만 허용
+    phoneInput.addEventListener("input", function () {
+      this.value = this.value.replace(/[^0-9]/g, "").slice(0, 11);
+    });
+
     // 비밀번호 실시간 비교
     function checkPasswordMatch() {
       if (pw.value && pwConfirm.value && pw.value !== pwConfirm.value) {
@@ -104,7 +103,7 @@
     pw.addEventListener("input", checkPasswordMatch);
     pwConfirm.addEventListener("input", checkPasswordMatch);
 
-    // 이메일 직접입력 유효성
+    // 이메일 직접입력 유효성 검사
     document.addEventListener("click", function (e) {
       const emailInput = document.getElementById("email_domain_input");
       const emailSelect = document.getElementById("email_domain_select");
@@ -113,10 +112,21 @@
       const isClickInsideSelect = emailSelect.contains(e.target);
 
       if (isInputVisible && !isClickInsideInput && !isClickInsideSelect) {
-        const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         const domainVal = emailInput.value.trim();
+        const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        if (!domainPattern.test(domainVal)) {
+        if (domainVal === "") {
+          // 입력이 없으면 alert 없이 복귀
+          emailInput.classList.remove("visible");
+          emailInput.classList.add("hidden");
+          emailInput.value = "";
+
+          emailSelect.classList.remove("hidden");
+          emailSelect.value = "";
+          emailSelect.setAttribute("name", "email_domain");
+          emailInput.setAttribute("name", "email_domain_input");
+        } else if (!domainPattern.test(domainVal)) {
+          // 형식이 틀리면 alert 표시
           alert("이메일 형식으로 다시 입력하세요 (예: example.com)");
           emailInput.classList.remove("visible");
           emailInput.classList.add("hidden");

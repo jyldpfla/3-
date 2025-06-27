@@ -37,7 +37,7 @@
   padding: 20px 20px;
   font-size: 20px;
   border: 2px solid #2563EB;
-  border-radius: 16px;
+  border-radius: 10px;
   outline: none;
   box-sizing: border-box;
 }
@@ -57,7 +57,7 @@
   font-weight: 600;
   padding: 20px;
   border: none;
-  border-radius: 16px;
+  border-radius: 10px;
   cursor: pointer;
 }
 

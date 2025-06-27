@@ -43,16 +43,17 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form.get("email")
+        email = request.form.get("email").strip()
         pw = request.form.get("password")
 
-        user = user_collection.find_one({"email": email, "userPassword": pw})
-        if user:
+        user = user_collection.find_one({"email": email})
+        if user and str(user["userPassword"]) == pw:
             session["user_id"] = str(user["_id"])
             return redirect(url_for("index"))
         else:
             return render_template("login.html", error="이메일 또는 비밀번호가 틀렸습니다.")
     return render_template("login.html")
+
 
 # ✅ 로그아웃
 @app.route("/logout")
