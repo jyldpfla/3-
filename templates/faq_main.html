@@ -15,8 +15,8 @@
         <ul>
         {% for faq in faqs %}
             <li>
-                <strong>{{ faq.title }}</strong> ({{ faq.category }})<br>
-                <span>{{ faq.content }}</span><br>
+                <strong>{{ faq.title }}</strong><br><br>
+                <span>{{ faq.content }}</span><br><br>
                 <div class="btn-group">
                     <a href="{{ url_for('faq_update', faq_id=faq._id) }}" class="btn btn-blue">수정</a>
                     <form action="{{ url_for('faq_delete', faq_id=faq._id) }}" method="post" style="display:inline;">

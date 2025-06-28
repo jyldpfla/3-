@@ -25,7 +25,7 @@ function addMemberField() {
         <label for="name">이름</label>
         <select name="_id" class="name-select" onchange="updateUserInfo(this)" required>
             <option value="" disabled selected>팀원을 선택하세요</option>
-            ${users.map(user => `<option value="${user._id}">${user.name}</option>`).join('')}
+            ${users.map(user => `<option value="${user._id}">${user.name} ${user.email}</option>`).join('')}
         </select>
 
         <div class="member-info-box">

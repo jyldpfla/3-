@@ -35,20 +35,19 @@ h2 {
 
 .member-table {
   width: 100%;
-  max-width: 1200px;
-  min-width: 1200px;
   border-collapse: collapse;
   font-size: 16px;
-  table-layout: fixed; /* 열 너비 고정 */
+  table-layout: fixed;
   text-align: center;
+  min-width: unset;
 }
 
-/* 헤더 스타일 */
+
+
 .member-table thead {
   background: #f0f6fc;
 }
 
-/* 테이블 셀 (헤더 + 바디 공통) */
 .member-table th,
 .member-table td {
   padding: 15px;
@@ -60,26 +59,6 @@ h2 {
   height: 30px;
 }
 
-/* 열 별 고정 너비 */
-.member-table th:nth-child(1),
-.member-table td:nth-child(1) {
-  width: 150px;
-}
-
-.member-table th:nth-child(2),
-.member-table td:nth-child(2) {
-  width: 150px;
-}
-
-.member-table th:nth-child(3),
-.member-table td:nth-child(3) {
-  width: 250px;
-}
-
-.member-table th:nth-child(4),
-.member-table td:nth-child(4) {
-  width: 250px;
-}
 
 .member-table th:nth-child(5),
 .member-table td:nth-child(5) {
@@ -138,7 +117,6 @@ h2 {
   align-items: center;
   margin-bottom: 20px;
   flex-wrap: wrap;
-  /* 반응형 대응 */
   gap: 10px;
 }
 
@@ -156,6 +134,10 @@ h2 {
   border: 1px solid #ccc;
   border-radius: 8px;
   box-sizing: border-box;
+}
+
+body > main > form {
+  margin-bottom: 10px;
 }
 
 .member-action-box {
@@ -176,11 +158,9 @@ h2 {
 }
 
 .btn.btn-gray {
-  /* 기존 버튼 스타일이 있다면 여기에 추가 */
   vertical-align: middle;
 }
 
-/* 중앙 정렬 및 오버레이 */
 .alert-box.custom {
   position: fixed;
   left: 50%;
@@ -196,14 +176,57 @@ h2 {
   flex-direction: column;
   align-items: center;
 }
+@media screen and (max-width: 768px) {
+  .member-table thead {
+    display: none;
+  }
 
-/* 어두운 배경 오버레이 */
-.alert-overlay {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.25);
-  z-index: 9998;
+  .member-table, 
+  .member-table tbody, 
+  .member-table tr, 
+  .member-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .member-table tr {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    padding: 10px;
+  }
+
+  .member-table td {
+    text-align: left;
+    padding-left: 40%;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid #eee;
+    white-space: normal;
+    height: auto;
+  }
+
+  .member-table td::before {
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    width: 35%;
+    white-space: nowrap;
+    font-weight: bold;
+    content: attr(data-label); /* data-label 속성 값 출력 */
+    color: #555;
+  }
+
+  .status-select {
+    width: 200px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+
+  .btn-gray {
+    text-align: center;
+    width: 100px;
+  }
 }
+

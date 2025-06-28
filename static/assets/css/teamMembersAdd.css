@@ -144,3 +144,114 @@ select {
     text-decoration: none;
     margin: 0 5px;
 }
+
+@media screen and (max-width: 1024px) {
+    .container {
+        padding: 20px;
+    }
+
+    .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 20px;
+    }
+
+    .main-nav {
+        margin-top: 10px;
+    }
+
+    .main-nav a {
+        margin: 0 10px;
+    }
+
+    .member-info-box {
+        width: 100%;
+        height: auto;
+        padding: 20px;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-blue {
+        width: 100%;
+        margin: 5px 0;
+    }
+    }
+
+    @media screen and (max-width: 768px) {
+    .top-header {
+        padding: 10px 15px;
+    }
+
+    .team-name {
+        font-size: 22px;
+    }
+
+    h2 {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-size: 14px;
+    }
+
+    select {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .member-info-box {
+        font-size: 14px;
+        padding: 16px;
+    }
+
+    .form-buttons {
+        gap: 8px;
+    }
+
+    .btn-blue {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .footer {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    }
+
+    @media screen and (max-width: 480px) {
+    .team-name {
+        font-size: 18px;
+    }
+
+    .main-nav a {
+        display: block;
+        margin: 8px 0;
+    }
+
+    .user-info {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .member-info-box {
+        font-size: 13px;
+    }
+
+    .btn-blue {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .footer {
+        font-size: 12px;
+    }
+}
+
