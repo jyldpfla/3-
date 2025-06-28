@@ -1,125 +1,40 @@
-import os
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for
-from pymongo import MongoClient
+from datetime import datetime, timedelta, date, time
 from bson.objectid import ObjectId
-import datetime
-from datetime import timedelta
+from pymongo import MongoClient
+from dotenv import load_dotenv
 import json
+import os
+
+# env 파일 로드
+load_dotenv()
+user = os.getenv("USER")
+uri = f"mongodb+srv://{user}@team3.fxbwcnh.mongodb.net/"
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") 
 
 # MongoDB 연결 설정
-uri = "mongodb+srv://team3_member:fwA36oY8zSlNez8w@team3.fxbwcnh.mongodb.net/"
 client = MongoClient(uri)
 db = client['team3']
 
 # 컬렉션 참조
-timeline_collection = db["timeline"] 
-users_collection = db["users"] 
-projects_collection = db["projects"] 
-
-# 일정 타입에 따른 상태 옵션
-STATUS_OPTIONS_BY_TYPE = {
-    "개인": [
-        {"value": "연차", "text": "연차"},
-        {"value": "월차", "text": "월차"},
-        {"value": "병가", "text": "병가"},
-        {"value": "출장", "text": "출장"}
-    ],
-    "회사": [
-        {"value": "사내일정", "text": "사내일정"}
-    ],
-    "프로젝트": [
-        {"value": "진행중", "text": "진행중"},
-        {"value": "진행대기", "text": "진행대기"},
-        {"value": "지연", "text": "지연"},
-        {"value": "중단", "text": "중단"},
-        {"value": "완료", "text": "완료"}
-    ]
-}
-
-# 태그 클래스 매핑
-TAG_CLASS_MAP = {
-    "개인": "personal-tag",
-    "회사": "company-tag",
-    "프로젝트": "project-tag",
-    "연차": "vacation-year-tag",
-    "월차": "vacation-month-tag",
-    "병가": "sick-leave-tag",
-    "출장": "travel-tag",
-    "사내일정": "company-event-tag",
-    "진행중": "status-inprogress-tag",
-    "진행대기": "status-wait-tag",
-    "지연": "status-delayed-tag",
-    "중단": "status-stopped-tag",
-    "완료": "status-completed-tag",
-}
-
-# 헬퍼 함수
-# 사용자 이름으로 user_id (ObjectId) 찾아 반환
-def get_user_id_by_name(user_name):
-    user = users_collection.find_one({"name": user_name}, {"_id": 1})
-    return user["_id"] if user else None
-
-# user_id (ObjectId)로 사용자 이름 찾아 반환
-def get_user_name_by_id(user_obj_id):
-    try:
-        if not isinstance(user_obj_id, ObjectId):
-            user_obj_id = ObjectId(user_obj_id)
-        user = users_collection.find_one({"_id": user_obj_id}, {"name": 1})
-        return user["name"] if user else None
-    except Exception as e:
-        print(f"Error converting user ID {user_obj_id} to name: {e}")
-        return None
-
-# user_id 리스트로 사용자 이름 리스트 찾아 반환
-def get_user_names_by_ids(user_ids):
-    if not user_ids:
-        return []
-    
-    try:
-        valid_ids = []
-        for id_val in user_ids:
-            if isinstance(id_val, ObjectId):
-                valid_ids.append(id_val)
-            elif isinstance(id_val, str) and ObjectId.is_valid(id_val):
-                valid_ids.append(ObjectId(id_val))
-        
-        if not valid_ids:
-            return []
-
-        users = users_collection.find({"_id": {"$in": valid_ids}}, {"name": 1})
-        return [user["name"] for user in users]
-    except Exception as e:
-        print(f"Error converting user IDs to names: {e}")
-        return []
-
-# 프로젝트 제목으로 project_id (ObjectId) 찾아 반환
-def get_project_id_by_title(project_title):
-    project = projects_collection.find_one({"title": project_title})
-    return project["_id"] if project else None
-
-# project_id (ObjectId)로 프로젝트 제목 찾아 반환
-def get_project_title_by_id(project_obj_id):
-    try:
-        if not isinstance(project_obj_id, ObjectId):
-            project_obj_id = ObjectId(project_obj_id)
-        project = projects_collection.find_one({"_id": project_obj_id})
-        return project["title"] if project else None
-    except Exception as e:
-        print(f"Error converting project ID {project_obj_id} to title: {e}")
-        return None
+project_collection = db["projects"]
+user_collection = db["users"]
+personal_todo_collection = db["personal_todo"]
+board_collection = db["board"]
+team_collection = db["team"]
+timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    # 실제 환경에서는 사용자 로그인 정보를 세션에서 가져와야 합니다.
+    # 실제 환경에서 사용자 로그인 정보를 세션에서 가져와야함.
     session["user_id"] = "685df192a2cd54b0683ea346" 
     user_id = session.get("user_id")
     user = None
     if user_id:
         try:
-            user = users_collection.find_one(
+            user = user_collection.find_one(
                 {"_id": ObjectId(user_id)},
                 {"name": 1, "position": 1, "department": 1}
             )
@@ -127,7 +42,7 @@ def inject_user():
             print(f"Error fetching user info for ID {user_id}: {e}")
             user = None
 
-    # db.notifications 컬렉션에서 안 읽은 알림 불러오기
+    # notifications 컬렉션에서 안 읽은 알림 불러오기
     unread_notes = []
     has_notification = False
     if user_id and "notifications" in db.list_collection_names(): 
@@ -150,6 +65,76 @@ def inject_user():
         has_notification=has_notification
     )
 
+# 일정 타입에 따른 상태 옵션
+STATUS_OPTIONS_BY_TYPE = {
+    "개인": [{"value": "연차", "text": "연차"}, {"value": "월차", "text": "월차"},
+        {"value": "병가", "text": "병가"}, {"value": "출장", "text": "출장"}],
+    "회사": [{"value": "사내일정", "text": "사내일정"}],
+    "프로젝트": [{"value": "진행중", "text": "진행중"}, {"value": "진행대기", "text": "진행대기"},
+        {"value": "지연", "text": "지연"}, {"value": "중단", "text": "중단"}, {"value": "완료", "text": "완료"}]}
+
+# 태그 클래스 매핑
+TAG_CLASS_MAP = {
+    "개인": "personal-tag", "회사": "company-tag", "프로젝트": "project-tag",
+    "연차": "vacation-year-tag", "월차": "vacation-month-tag", "병가": "sick-leave-tag",
+    "출장": "travel-tag",
+    "사내일정": "company-event-tag",
+    "진행중": "status-inprogress-tag", "진행대기": "status-wait-tag", "지연": "status-delayed-tag",
+    "중단": "status-stopped-tag", "완료": "status-completed-tag",
+}
+
+# 헬퍼 함수
+# 사용자 이름으로 user_id (ObjectId) 찾아 반환
+def get_user_id_by_name(user_name):
+    user = user_collection.find_one({"name": user_name}, {"_id": 1})
+    return user["_id"] if user else None
+
+# user_id (ObjectId)로 사용자 이름 찾아 반환
+def get_user_name_by_id(user_obj_id):
+    try:
+        if not isinstance(user_obj_id, ObjectId):
+            user_obj_id = ObjectId(user_obj_id)
+        user = user_collection.find_one({"_id": user_obj_id}, {"name": 1})
+        return user["name"] if user else None
+    except Exception as e:
+        print(f"Error converting user ID {user_obj_id} to name: {e}")
+        return None
+
+# user_id 리스트로 사용자 이름 리스트 찾아 반환
+def get_user_names_by_ids(user_ids):
+    if not user_ids:
+        return []
+    try:
+        valid_ids = []
+        for id_val in user_ids:
+            if isinstance(id_val, ObjectId):
+                valid_ids.append(id_val)
+            elif isinstance(id_val, str) and ObjectId.is_valid(id_val):
+                valid_ids.append(ObjectId(id_val))
+        if not valid_ids:
+            return []
+        users = user_collection.find({"_id": {"$in": valid_ids}}, {"name": 1})
+        return [user["name"] for user in users]
+    except Exception as e:
+        print(f"Error converting user IDs to names: {e}")
+        return []
+
+# 프로젝트 제목으로 project_id (ObjectId) 찾아 반환
+def get_project_id_by_title(project_title):
+    project = project_collection.find_one({"title": project_title})
+    return project["_id"] if project else None
+
+# project_id (ObjectId)로 프로젝트 제목 찾아 반환
+def get_project_title_by_id(project_obj_id):
+    try:
+        if not isinstance(project_obj_id, ObjectId):
+            project_obj_id = ObjectId(project_obj_id)
+        project = project_collection.find_one({"_id": project_obj_id})
+        return project["title"] if project else None
+    except Exception as e:
+        print(f"Error converting project ID {project_obj_id} to title: {e}")
+        return None
+
 # 라우팅
 @app.route('/timeline')
 def timeline():
@@ -161,7 +146,7 @@ def timeline():
     schedule_id_param = request.args.get('schedule_id')
     
     user_names = []
-    for user in users_collection.find({}, {"_id": 1, "name": 1, "position": 1, "department": 1}):
+    for user in user_collection.find({}, {"_id": 1, "name": 1, "position": 1, "department": 1}):
         user_data = {"_id": str(user["_id"])}
         if "name" in user and user["name"] is not None:
             user_data["name"] = user["name"]
@@ -169,29 +154,29 @@ def timeline():
             print(f"WARN: User document with _id {user.get('_id', 'UNKNOWN_ID')} is missing or has a None 'name' field.")
             user_data["name"] = "이름 없음"
 
-        user_data["position"] = user.get("position", "") # position 필드 추가
-        user_data["department"] = user.get("department", "") # department 필드 추가
+        user_data["position"] = user.get("position", "")
+        user_data["department"] = user.get("department", "")
 
         user_names.append(user_data)
     
-    today = datetime.date.today()
+    today = date.today()
     current_year = int(year_param) if year_param else today.year
     current_month = int(month_param) if month_param else today.month
 
-    start_of_month = datetime.date(current_year, current_month, 1)
-    end_of_month = (start_of_month + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
+    start_of_month = date(current_year, current_month, 1)
+    end_of_month = (start_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
     
     calendar_days = []
     first_day_of_week = start_of_month.weekday()
     start_offset = (first_day_of_week + 1) % 7 # 월요일을 0으로 가정하면 (일요일=6) -> (일요일=0)
-    start_date = start_of_month - datetime.timedelta(days=start_offset)
+    start_date = start_of_month - timedelta(days=start_offset)
 
     for _ in range(35): # 5주 (35일) 표시
         is_current_month = (start_date.month == current_month)
         formatted_date = start_date.strftime('%Y-%m-%d')
         
-        start_of_day_dt = datetime.datetime.combine(start_date, datetime.time.min)
-        end_of_day_dt = datetime.datetime.combine(start_date, datetime.time.max)
+        start_of_day_dt = datetime.combine(start_date, time.min)
+        end_of_day_dt = datetime.combine(start_date, time.max)
 
         schedules_on_day = timeline_collection.count_documents({
             "start_date": {"$lte": end_of_day_dt}, 
@@ -205,19 +190,19 @@ def timeline():
             'is_current_month': is_current_month,
             'has_schedule': schedules_on_day
         })
-        start_date += datetime.timedelta(days=1)
+        start_date += timedelta(days=1)
 
     selected_date_obj = None
     if date_param:
-        selected_date_obj = datetime.datetime.strptime(date_param, '%Y-%m-%d').date()
+        selected_date_obj = datetime.strptime(date_param, '%Y-%m-%d').date()
     else:
         selected_date_obj = today
     
     selected_date_str = selected_date_obj.strftime('%Y-%m-%d')
 
     daily_schedules = []
-    selected_start_of_day_dt = datetime.datetime.combine(selected_date_obj, datetime.time.min)
-    selected_end_of_day_dt = datetime.datetime.combine(selected_date_obj, datetime.time.max)
+    selected_start_of_day_dt = datetime.combine(selected_date_obj, time.min)
+    selected_end_of_day_dt = datetime.combine(selected_date_obj, time.max)
 
     schedules_cursor = timeline_collection.find({
         "start_date": {"$lte": selected_end_of_day_dt}, 
@@ -252,14 +237,14 @@ def timeline():
                 selected_schedule_detail["scheduleId"] = str(schedule["_id"])
                 selected_schedule_detail["scheduleName"] = schedule.get("title", "") 
                 
-                if isinstance(schedule.get("start_date"), datetime.datetime):
+                if isinstance(schedule.get("start_date"), datetime):
                     selected_schedule_detail["startDate"] = schedule["start_date"].strftime('%Y-%m-%d')
                     selected_schedule_detail["startTime"] = schedule["start_date"].strftime('%H:%M')
                 else:
                     selected_schedule_detail["startDate"] = ""
                     selected_schedule_detail["startTime"] = "09:00"
                 
-                if isinstance(schedule.get("end_date"), datetime.datetime):
+                if isinstance(schedule.get("end_date"), datetime):
                     selected_schedule_detail["endDate"] = schedule["end_date"].strftime('%Y-%m-%d')
                     selected_schedule_detail["endTime"] = schedule["end_date"].strftime('%H:%M')
                 else:
@@ -270,9 +255,9 @@ def timeline():
                 selected_schedule_detail["type"] = schedule.get("type", "")
                 selected_schedule_detail["status"] = schedule.get("status", "") 
                 
-                # 작성자 이름 가져오기
+                # 작성자 이름 가져오기. 이름 없으면 "-"
                 user_name = get_user_name_by_id(schedule.get("user_id")) 
-                selected_schedule_detail["personName"] = user_name if user_name else "-" # 작성자 이름 없으면 "-"
+                selected_schedule_detail["personName"] = user_name if user_name else "-"
                 
                 # 프로젝트 제목 가져오기
                 project_title = get_project_title_by_id(schedule.get("project_id")) 
@@ -289,8 +274,8 @@ def timeline():
                     # 중복 방지를 위해 set으로 변환 후 다시 list로
                     member_object_ids = list(set(member_object_ids))
 
-                    # users_collection에서 이름, 직급, 부서 필드를 모두 가져옴
-                    for user in users_collection.find(
+                    # user_collection에서 이름, 직급, 부서 필드를 모두 가져옴
+                    for user in user_collection.find(
                         {"_id": {"$in": member_object_ids}},
                         {"name": 1, "position": 1, "department": 1} 
                     ):
@@ -313,7 +298,7 @@ def timeline():
             print(f"ERROR: Failed to fetch schedule detail for ID {schedule_id_param}: {e}")
             selected_schedule_detail = {}
 
-    project_titles = [p["title"] for p in projects_collection.find({}, {"title": 1})]
+    project_titles = [p["title"] for p in project_collection.find({}, {"title": 1})]
 
     return render_template('timeline.html',
                             current_year=current_year,
@@ -324,7 +309,7 @@ def timeline():
                             selected_schedule_detail=selected_schedule_detail, 
                             status_options_by_type=STATUS_OPTIONS_BY_TYPE, 
                             project_titles=project_titles,
-                            user_names=user_names) # 모든 사용자 이름 전달
+                            user_names=user_names)
 
 @app.route('/timeline/create_schedule', methods=['POST'])
 def create_schedule():
@@ -344,8 +329,8 @@ def create_schedule():
     try:
         start_date_iso = data.get("start_date")
         end_date_iso = data.get("end_date")
-        start_date_dt = datetime.datetime.fromisoformat(start_date_iso)
-        end_date_dt = datetime.datetime.fromisoformat(end_date_iso)
+        start_date_dt = datetime.fromisoformat(start_date_iso)
+        end_date_dt = datetime.fromisoformat(end_date_iso)
     except ValueError as e:
         print(f"ERROR: 유효하지 않은 날짜/시간 형식: {e}")
         return jsonify({"success": False, "message": "유효하지 않은 날짜/시간 형식입니다. (YYYY-MM-DDTHH:MM:SS)"}), 400
@@ -358,7 +343,7 @@ def create_schedule():
         "type": data.get("type"),
         "status": data.get("status"),
         "user_id": ObjectId(user_id_from_session), # 세션의 user_id를 ObjectId로 변환하여 저장
-        "created_at": datetime.datetime.now() 
+        "created_at": datetime.now() 
     }
 
     # member_ids 처리 (프론트엔드에서 ObjectId 문자열 리스트로 받음)
@@ -437,8 +422,8 @@ def update_schedule():
         start_date_iso = data.get("start_date")
         end_date_iso = data.get("end_date")
         # Z 문자가 있을 경우 UTC로 처리하기 위해 +00:00으로 대체
-        start_date_dt = datetime.datetime.fromisoformat(start_date_iso.replace('Z', '+00:00'))
-        end_date_dt = datetime.datetime.fromisoformat(end_date_iso.replace('Z', '+00:00'))
+        start_date_dt = datetime.fromisoformat(start_date_iso.replace('Z', '+00:00'))
+        end_date_dt = datetime.fromisoformat(end_date_iso.replace('Z', '+00:00'))
     except ValueError as e:
         print(f"ERROR: 유효하지 않은 날짜/시간 형식: {e}")
         return jsonify({"success": False, "message": f"유효하지 않은 날짜/시간 형식입니다: {e}"}), 400
@@ -450,7 +435,7 @@ def update_schedule():
         "content": data.get("content", ""),
         "type": data.get("type"),
         "status": data.get("status"),
-        "updated_at": datetime.datetime.now()
+        "updated_at": datetime.now()
     }
 
     # member_ids 처리 (프론트엔드에서 ObjectId 문자열 리스트로 받음)

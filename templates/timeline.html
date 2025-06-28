@@ -89,8 +89,8 @@
                 data-type="{{ selected_schedule_detail.get('type', '') }}"
                 data-status="{{ selected_schedule_detail.get('status', '') }}"
                 data-project-title="{{ selected_schedule_detail.get('projectTitle', '') }}"
-                data-member-names="{{ selected_schedule_detail.get('memberNames', []) | tojson | safe }}"
-                data-member-ids="{{ selected_schedule_detail.get('memberIds', []) | tojson | safe }}"
+                data-member-names='{{ selected_schedule_detail.get('memberNames', []) | tojson | safe }}'
+                data-member-ids='{{ selected_schedule_detail.get('memberIds', []) | tojson | safe }}'
                 data-start-time="{{ selected_schedule_detail.get('startTime', '') }}" 
                 data-end-time="{{ selected_schedule_detail.get('endTime', '') }}"
                 data-logged-in-user-name="{{ user_info.name if user_info else '-' }}" {# 로그인된 사용자 이름 추가 #}
@@ -229,7 +229,7 @@
 
     <script>
         const STATUS_OPTIONS_BY_TYPE = {{ status_options_by_type | tojson }};
-        window.user_names = {{ user_names | tojson }};
+        window.user_names = {{ user_names | tojson | safe }};
     </script>
     <script src="{{ url_for('static', filename='timeline.js') }}"></script>
 </body>
