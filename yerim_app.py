@@ -137,7 +137,6 @@ def home():
     project_statuses = list(timeline_collection.aggregate(project_pipeline))
     # 딕셔너리로 변환
     status_map = {s["project_id"]: int(round(s["percentage"], 0)) for s in project_statuses}
-    print(status_map)
     team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
 
     # percent 붙이기

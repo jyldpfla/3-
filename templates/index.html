@@ -54,8 +54,8 @@
                     <h3>최신 글</h3>
                     <ul>
                         {% for b in board %}
-                        {% if b["type"] == "자유" %}
-                            <li><a href="board/{{ b["_id"] }}">{{b["title"]}}</a></li>
+                        {% if b["category"] == "자유" %}
+                            <li><a href="board/detail/{{ b['_id'] }}">{{b["title"]}}</a></li>
                         {% else %}
                             <li><a href="faq">{{b["title"]}}</a></li>
                         {% endif %}
