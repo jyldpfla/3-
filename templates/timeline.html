@@ -46,39 +46,30 @@
         </div>
 
         <div class="schedule-section">
-            <div class="daily-schedules">
-                <div class="section-title">
-                    <span id="selectedDateTitle">{{ selected_date }}</span> 일정
-                    <button id="addScheduleBtn" class="btn btn-primary add-btn"><i class="fa-solid fa-plus"></i> 일정 추가</button>
+            <div class="section-title">
+                <div style="display:flex; align-items:center;">
+                    <span id="selectedDateTitle" style="margin-right: 15px;"></span>
+                    <select id="scheduleTypeFilter" class="form-input" style="width: auto; padding: 5px 10px; font-size: 0.9em; border-radius: 5px;">
+                        {% for option in schedule_type_options %}
+                            <option value="{{ option.value }}" {% if option.value == selected_type_filter %}selected{% endif %}>{{ option.text }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <ul id="dailyScheduleList" class="schedule-list">
-                    {% for schedule in daily_schedules %}
-                        <li class="schedule-item" data-schedule-id="{{ schedule.schedule_id_param }}">
-                            <span class="schedule-name">{{ schedule.name }}</span>
-                            <span class="schedule-tag {{ schedule.tag_class }}">
-                                {% if schedule.tag_class == 'personal-tag' %}개인
-                                {% elif schedule.tag_class == 'project-tag' %}프로젝트
-                                {% elif schedule.tag_class == 'company-tag' %}회사
-                                {% elif schedule.tag_class == 'vacation-year-tag' %}연차
-                                {% elif schedule.tag_class == 'vacation-month-tag' %}월차
-                                {% elif schedule.tag_class == 'sick-leave-tag' %}병가
-                                {% elif schedule.tag_class == 'travel-tag' %}출장
-                                {% elif schedule.tag_class == 'company-event-tag' %}사내일정
-                                {% elif schedule.tag_class == 'status-inprogress-tag' %}진행중
-                                {% elif schedule.tag_class == 'status-wait-tag' %}진행대기
-                                {% elif schedule.tag_class == 'status-delayed-tag' %}지연
-                                {% elif schedule.tag_class == 'status-stopped-tag' %}중단
-                                {% elif schedule.tag_class == 'status-completed-tag' %}완료
-                                {% else %}기타
-                                {% endif %}
-                            </span>
-                        </li>
-                    {% else %}
-                        <li class="no-schedule">선택된 날짜에 일정이 없습니다.</li>
-                    {% endfor %}
-                </ul>
+                <button id="addScheduleBtn" class="add-btn"><i class="fa-solid fa-plus"></i>일정 추가</button>
             </div>
-            
+
+            <ul id="dailyScheduleList" class="schedule-list">
+                {% for schedule in daily_schedules %}
+                    <li class="schedule-item" data-schedule-id="{{ schedule.schedule_id_param }}" data-schedule-type="{{ schedule.type }}">
+                        <span class="schedule-name">{{ schedule.name }}</span>
+                        <span class="schedule-tag {{ schedule.status_tag_class }}">
+                            {{ schedule.status_display_text }}
+                        </span>
+                    </li>
+                {% else %}
+                    <li class="no-schedule">선택된 날짜에 일정이 없습니다.</li>
+                {% endfor %}
+            </ul>
             <div id="selected-schedule-data" 
                 data-schedule-id="{{ selected_schedule_detail.get('scheduleId', 'None') }}" 
                 data-schedule-name="{{ selected_schedule_detail.get('scheduleName', '') }}"
@@ -154,11 +145,11 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="scheduleName">일정 이름 <span class="required">*</span></label>
-                <input type="text" id="scheduleName" class="form-input" placeholder="일정 이름을 입력하세요.">
+                <label for="scheduleName"> 제목 <span class="required">*</span></label>
+                <input type="text" id="scheduleName" class="form-input" placeholder="제목을 입력하세요.">
             </div>
             <div class="form-group">
-                <label for="schedulePersonName">이름 <span class="required">*</span></label>
+                <label for="schedulePersonName"> 작성자 <span class="required">*</span></label>
                 <select id="schedulePersonName" class="form-input">
                     <option value="">-- 작성자 선택 --</option> {# JS에서 자동 채움 및 비활성화 처리 #}
                     {% for user_name in user_names %}
@@ -166,21 +157,13 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group">
-                <label for="scheduleMembers">참여자</label>
-                <select id="scheduleMembers" name="scheduleMembers" class="form-input">
-                    <option value="">-- 참여자 선택 --</option>
-                    {% for user in user_names %}
-                        <option value="{{ user._id }}" 
-                                data-name="{{ user.name }}" 
-                                data-position="{{ user.position }}" 
-                                data-department="{{ user.department }}">
-                            {{ user.name }} ({{ user.position }} - {{ user.department }})
-                        </option>
-                    {% endfor %}
-                </select>
-                <ul id="memberList"></ul>
+            <div class="form-group" id="memberSelectGroup">
+                <label>참여자</label>
+                <div id="departmentMemberPicker" class="department-member-picker">
+                    </div>
             </div>
+            <ul id="memberList" class="selected-members-list">
+                </ul>
             <div class="form-group">
                 <label for="scheduleStartDate">시작일 <span class="required">*</span></label>
                 <div style="display: flex; gap: 10px;">
@@ -230,6 +213,8 @@
     <script>
         const STATUS_OPTIONS_BY_TYPE = {{ status_options_by_type | tojson }};
         window.user_names = {{ user_names | tojson | safe }};
+        // 중요: grouped_users_by_department 데이터를 JavaScript에서 사용하기 위해 전역 변수로 설정
+        window.grouped_users_by_department = {{ grouped_users_by_department | tojson | safe }};
     </script>
     <script src="{{ url_for('static', filename='timeline.js') }}"></script>
 </body>

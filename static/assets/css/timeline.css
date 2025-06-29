@@ -126,3 +126,92 @@ textarea.form-input {resize: vertical;}
     .action-buttons .btn {padding: 8px 15px; font-size: 0.9em;}
     .modal-title {font-size: 1.3em;}
     .form-input {padding: 8px; font-size: 0.95em;}}
+
+/* Department Member Picker Styles */
+.department-member-picker {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 200px; /* 스크롤 가능한 높이 */
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+.department-group {
+    margin-bottom: 5px;
+}
+
+.department-header {
+    background-color: #e0e0e0;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+.department-header:hover {
+    background-color: #d5d5d5;
+}
+
+.department-header h3 {
+    margin: 0;
+    font-size: 1em;
+}
+
+.department-members-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-top: 5px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.member-item {
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+}
+
+.member-item:hover {
+    background-color: #f0f0f0;
+}
+
+.member-item input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.member-item label {
+    cursor: pointer;
+    flex-grow: 1; /* Allows label to take up available space */
+}
+
+/* Selected Members List (memberList) */
+.selected-members-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.selected-members-list li {
+    padding: 5px 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selected-members-list li:last-child {
+    border-bottom: none;
+}

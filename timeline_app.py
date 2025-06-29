@@ -73,15 +73,34 @@ STATUS_OPTIONS_BY_TYPE = {
     "프로젝트": [{"value": "진행중", "text": "진행중"}, {"value": "진행대기", "text": "진행대기"},
         {"value": "지연", "text": "지연"}, {"value": "중단", "text": "중단"}, {"value": "완료", "text": "완료"}]}
 
-# 태그 클래스 매핑
-TAG_CLASS_MAP = {
-    "개인": "personal-tag", "회사": "company-tag", "프로젝트": "project-tag",
-    "연차": "vacation-year-tag", "월차": "vacation-month-tag", "병가": "sick-leave-tag",
+# 일정 타입
+TYPE_TAG_CLASS_MAP = {
+    "개인": "personal-schedule-tag",
+    "회사": "company-schedule-tag",
+    "프로젝트": "project-schedule-tag",
+}
+
+# 일정 상태에 따른 태그 클래스
+STATUS_TAG_CLASS_MAP = {
+    "연차": "vacation-year-tag",
+    "월차": "vacation-month-tag",
+    "병가": "sick-leave-tag",
     "출장": "travel-tag",
     "사내일정": "company-event-tag",
-    "진행중": "status-inprogress-tag", "진행대기": "status-wait-tag", "지연": "status-delayed-tag",
-    "중단": "status-stopped-tag", "완료": "status-completed-tag",
+    "진행중": "status-inprogress-tag",
+    "진행대기": "status-wait-tag",
+    "지연": "status-delayed-tag",
+    "중단": "status-stopped-tag",
+    "완료": "status-completed-tag",
 }
+
+# 일정 타입 옵션 (드롭다운을 위해 전달)
+SCHEDULE_TYPE_OPTIONS = [
+    {"value": "전체", "text": "전체 일정"}, # "전체" 옵션 추가
+    {"value": "개인", "text": "개인 일정"},
+    {"value": "회사", "text": "회사 일정"},
+    {"value": "프로젝트", "text": "프로젝트 일정"},
+]
 
 # 헬퍼 함수
 # 사용자 이름으로 user_id (ObjectId) 찾아 반환
@@ -144,6 +163,7 @@ def timeline():
     month_param = request.args.get('month')
     date_param = request.args.get('date')
     schedule_id_param = request.args.get('schedule_id')
+    type_filter_param = request.args.get('type', '전체')
     
     user_names = []
     for user in user_collection.find({}, {"_id": 1, "name": 1, "position": 1, "department": 1}):
@@ -158,6 +178,17 @@ def timeline():
         user_data["department"] = user.get("department", "")
 
         user_names.append(user_data)
+    
+    grouped_users_by_department = {}
+    for user_data in user_names:
+        department = user_data.get("department", "기타") # 'department' 필드가 없으면 '기타'로 분류
+        if department not in grouped_users_by_department:
+            grouped_users_by_department[department] = []
+        grouped_users_by_department[department].append({
+            "id": user_data["_id"],
+            "name": user_data["name"],
+            "position": user_data["position"]
+        })
     
     today = date.today()
     current_year = int(year_param) if year_param else today.year
@@ -200,34 +231,8 @@ def timeline():
     
     selected_date_str = selected_date_obj.strftime('%Y-%m-%d')
 
-    daily_schedules = []
-    selected_start_of_day_dt = datetime.combine(selected_date_obj, time.min)
-    selected_end_of_day_dt = datetime.combine(selected_date_obj, time.max)
-
-    schedules_cursor = timeline_collection.find({
-        "start_date": {"$lte": selected_end_of_day_dt}, 
-        "end_date": {"$gte": selected_start_of_day_dt}  
-    }).sort("start_date", 1)
-
-    for schedule in schedules_cursor:
-        schedule_type = schedule.get("type", "")
-        schedule_status = schedule.get("status", "")
-        
-        tag_class = TAG_CLASS_MAP.get(schedule_type, "default-tag") # 기본 태그 클래스
-        
-        # 일정 타입에 따라 태그 클래스 오버라이드
-        if schedule_type == "개인":
-            tag_class = TAG_CLASS_MAP.get(schedule_status, "personal-tag")
-        elif schedule_type == "프로젝트":
-            tag_class = TAG_CLASS_MAP.get(schedule_status, "project-tag")
-        elif schedule_type == "회사":
-            tag_class = TAG_CLASS_MAP.get(schedule_status, "company-tag")
-
-        daily_schedules.append({
-            "schedule_id_param": str(schedule["_id"]), 
-            "name": schedule.get("title", "제목 없음"), 
-            "tag_class": tag_class 
-        })
+    daily_schedules_response = get_daily_schedules_api(date_param=selected_date_str, selected_type=type_filter_param).get_json()
+    daily_schedules = daily_schedules_response['daily_schedules'] if daily_schedules_response['success'] else []
 
     selected_schedule_detail = {}
     if schedule_id_param:
@@ -255,15 +260,12 @@ def timeline():
                 selected_schedule_detail["type"] = schedule.get("type", "")
                 selected_schedule_detail["status"] = schedule.get("status", "") 
                 
-                # 작성자 이름 가져오기. 이름 없으면 "-"
                 user_name = get_user_name_by_id(schedule.get("user_id")) 
                 selected_schedule_detail["personName"] = user_name if user_name else "-"
                 
-                # 프로젝트 제목 가져오기
                 project_title = get_project_title_by_id(schedule.get("project_id")) 
                 selected_schedule_detail["projectTitle"] = project_title if project_title else ""
                 
-                # 참여자 ID 리스트 가져오기
                 member_ids = schedule.get("member", []) 
                 
                 members_detailed_info = []
@@ -271,10 +273,8 @@ def timeline():
                     member_object_ids = [ObjectId(mid) for mid in member_ids if isinstance(mid, str) and ObjectId.is_valid(mid)]
                     member_object_ids.extend([mid for mid in member_ids if isinstance(mid, ObjectId)])
                     
-                    # 중복 방지를 위해 set으로 변환 후 다시 list로
                     member_object_ids = list(set(member_object_ids))
 
-                    # user_collection에서 이름, 직급, 부서 필드를 모두 가져옴
                     for user in user_collection.find(
                         {"_id": {"$in": member_object_ids}},
                         {"name": 1, "position": 1, "department": 1} 
@@ -285,12 +285,9 @@ def timeline():
                             "position": user.get("position", "직급 없음"),
                             "department": user.get("department", "부서 없음")
                         })
-                
-                selected_schedule_detail["members_detailed_info"] = members_detailed_info # 새로운 필드 추가
-                
-                # 기존 memberNames, memberIds도 필요하다면 유지 (JS에서 활용할 수 있음)
-                selected_schedule_detail["memberNames"] = [m["name"] for m in members_detailed_info] #
-                selected_schedule_detail["memberIds"] = [m["id"] for m in members_detailed_info] #
+                selected_schedule_detail["members_detailed_info"] = members_detailed_info
+                selected_schedule_detail["memberNames"] = [m["name"] for m in members_detailed_info]
+                selected_schedule_detail["memberIds"] = [m["id"] for m in members_detailed_info]
 
             else:
                 print(f"DEBUG: No schedule found for ID: {schedule_id_param}")
@@ -301,15 +298,61 @@ def timeline():
     project_titles = [p["title"] for p in project_collection.find({}, {"title": 1})]
 
     return render_template('timeline.html',
-                            current_year=current_year,
-                            current_month=current_month,
-                            calendar_days=calendar_days,
-                            daily_schedules=daily_schedules,
-                            selected_date=selected_date_str,
-                            selected_schedule_detail=selected_schedule_detail, 
-                            status_options_by_type=STATUS_OPTIONS_BY_TYPE, 
-                            project_titles=project_titles,
-                            user_names=user_names)
+                           current_year=current_year,
+                           current_month=current_month,
+                           calendar_days=calendar_days,
+                           daily_schedules=daily_schedules, # 이제 이 값은 초기 필터링된 결과
+                           selected_date=selected_date_str,
+                           selected_schedule_detail=selected_schedule_detail,
+                           status_options_by_type=STATUS_OPTIONS_BY_TYPE, # 이 부분이 이미 있어서 다행입니다!
+                           project_titles=project_titles,
+                           user_names=user_names,
+                           grouped_users_by_department=grouped_users_by_department,
+                           schedule_type_options=SCHEDULE_TYPE_OPTIONS, # 이 부분 추가
+                           selected_type_filter=type_filter_param # 현재 선택된 필터값도 전달
+                          )
+
+# --- 새로 추가할 API 엔드포인트: 일별 일정 필터링 ---
+@app.route('/timeline/get_daily_schedules', methods=['GET'])
+def get_daily_schedules_api(date_param=None, selected_type='전체'): # 인자를 직접 받도록 수정
+    if date_param is None: # API 엔드포인트로 직접 호출될 경우 request.args.get() 사용
+        date_param = request.args.get('date')
+        selected_type = request.args.get('type', '전체')
+
+    if not date_param:
+        return jsonify({"success": False, "message": "날짜 정보가 필요합니다."}), 400
+
+    try:
+        selected_date_obj = datetime.strptime(date_param, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({"success": False, "message": "유효하지 않은 날짜 형식입니다."}), 400
+
+    selected_start_of_day_dt = datetime.combine(selected_date_obj, time.min)
+    selected_end_of_day_dt = datetime.combine(selected_date_obj, time.max)
+
+    query = {
+        "start_date": {"$lte": selected_end_of_day_dt},
+        "end_date": {"$gte": selected_start_of_day_dt}
+    }
+
+    if selected_type != '전체':
+        query["type"] = selected_type # 선택된 타입에 따라 쿼리 필터링
+
+    schedules_cursor = timeline_collection.find(query).sort("start_date", 1)
+
+    daily_schedules = []
+    for schedule in schedules_cursor:
+        schedule_status = schedule.get("status", "")
+        status_tag_class = STATUS_TAG_CLASS_MAP.get(schedule_status, "default-status-tag")
+
+        daily_schedules.append({
+            "schedule_id_param": str(schedule["_id"]),
+            "name": schedule.get("title", "제목 없음"),
+            "status_tag_class": status_tag_class,
+            "status_display_text": schedule_status,
+            "type": schedule.get("type", "") # 타입 정보도 함께 넘겨줍니다. (JS에서 필터링하거나 활용 가능)
+        })
+    return jsonify({"success": True, "daily_schedules": daily_schedules})
 
 @app.route('/timeline/create_schedule', methods=['POST'])
 def create_schedule():
@@ -319,7 +362,7 @@ def create_schedule():
     
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
         print("ERROR: 필수 필드 누락.")
-        return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태)가 누락되었습니다."}), 400
+        return jsonify({"success": False, "message": "필수 필드(제목, 기간, 타입, 상태)가 누락되었습니다."}), 400
 
     user_id_from_session = session.get("user_id")
     if not user_id_from_session:
@@ -416,7 +459,7 @@ def update_schedule():
     
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
         print("ERROR: 필수 필드 누락.")
-        return jsonify({"success": False, "message": "필수 필드(일정 이름, 기간, 타입, 상태)가 누락되었습니다."}), 400
+        return jsonify({"success": False, "message": "필수 필드(제목, 기간, 타입, 상태)가 누락되었습니다."}), 400
 
     try:
         start_date_iso = data.get("start_date")
