@@ -31,10 +31,10 @@
                         <tbody>
                             {% for project in projects %}
                             <tr>
+                                <td>{{ project["client"] }}</td>
                                 <td>
-                                    <a href="/projectDetail/{{project["_id"]}}">{{ project["client"] }}</a>
+                                    <a href="/projectDetail/{{project["_id"]}}">{{ project["title"] }}</a>
                                 </td>
-                                <td>{{ project["title"] }}</td>
                                 <td>{{ project["manager_name"] }}</td>
                                 <td>
                                     <div class="progress-text"> {{ project["percentage"] }}% </div>

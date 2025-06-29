@@ -7,7 +7,6 @@ from bson import ObjectId
 from datetime import datetime, timedelta
 from pytz import timezone
 from math import ceil
-import json
 
 # env 파일 로드
 load_dotenv()
@@ -30,7 +29,7 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    # session["user_id"] = "685df192a2cd54b0683ea356"
+    session["user_id"] = "685df192a2cd54b0683ea356"
     user_id = ObjectId(session.get("user_id"))
     if user_id:
         user = user_collection.find_one({"_id": user_id})
@@ -137,7 +136,8 @@ def home():
     
     project_statuses = list(timeline_collection.aggregate(project_pipeline))
     # 딕셔너리로 변환
-    status_map = {s["project_id"]: round(s["percentage"], 1) for s in project_statuses}
+    status_map = {s["project_id"]: int(round(s["percentage"], 0)) for s in project_statuses}
+    print(status_map)
     team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
 
     # percent 붙이기
@@ -145,7 +145,7 @@ def home():
         if p["status"] == "완료":
             p["percentage"] = 100
         else:
-            p["percentage"] = 0 if status_map.get(p["_id"], 0) == 0.0 else status_map.get(p["_id"], 0)
+            p["percentage"] = 0 if status_map.get(p["_id"], 0) == 0 else status_map.get(p["_id"], 0)
             
         try:
             p["manager_name"] = user_collection.find_one({"_id": p["project_manager"]})["name"]
