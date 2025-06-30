@@ -1324,21 +1324,27 @@ def logout_bh():
     session.clear()
     return redirect(url_for("home"))
 
+# ✅ 회원가입
 @app.route("/signup", methods=["GET", "POST"])
-def signup_bh():
+def signup():
     if request.method == "POST":
         email_id = request.form.get("email_id")
         email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
         email = f"{email_id}@{email_domain}".strip()
+
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
-        phone = re.sub(r'\D', '', request.form["phone"])
+        phone = re.sub(r'\D', '', request.form["phone"])  # 숫자만 저장
+
         if password != confirm_password:
             return render_template("signup.html", error="비밀번호가 일치하지 않습니다.")
+
         if not re.match(r"^[^@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
             return render_template("signup.html", error="올바른 이메일 형식이 아닙니다.")
+
         if user_collection.find_one({"email": email}):
             return render_template("signup.html", error="이미 존재하는 이메일입니다.")
+
         new_user = OrderedDict([
             ("email", email),
             ("name", request.form["name"]),
@@ -1349,25 +1355,31 @@ def signup_bh():
             ("createAt", str(date.today())),
             ("phone_num", phone),
         ])
+
         user_collection.insert_one(new_user)
         return redirect(url_for("login"))
+
     return render_template("signup.html")
 
+# ✅ 개인정보 수정
 @app.route("/profile_edit", methods=["GET", "POST"])
-@login_required_bh
-def profile_edit_bh():
+@login_required
+def profile_edit():
     user_id = ObjectId(session["user_id"])
-    print("data check", user_id)
+
     if request.method == "POST":
         email_id = request.form.get("email_id")
         email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
         email = f"{email_id}@{email_domain}".strip()
+
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
         phone = re.sub(r'\D', '', request.form.get("phone", ""))
+
         if password != confirm_password:
             user = user_collection.find_one({"_id": user_id})
             return render_template("profile_edit.html", user=user, error="비밀번호가 일치하지 않습니다.")
+
         update_data = {
             "name": request.form.get("name"),
             "userPassword": password,
@@ -1377,14 +1389,17 @@ def profile_edit_bh():
             "profile": request.form.get("profile"),
             "email": email
         }
+
         user_collection.update_one({"_id": user_id}, {"$set": update_data})
         return redirect(url_for("mypage"))
+
     user = user_collection.find_one({"_id": user_id})
     return render_template("profile_edit.html", user=user)
 
+# ✅ 회원탈퇴
 @app.route("/delete_account", methods=["GET", "POST"])
-@login_required_bh
-def delete_account_bh():
+@login_required
+def delete_account():
     user_id = ObjectId(session["user_id"])
     if request.method == "POST":
         user_collection.delete_one({"_id": user_id})
