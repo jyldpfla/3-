@@ -238,10 +238,11 @@ def timeline():
 
                 selected_schedule_detail["content"] = schedule.get("content", "")
                 selected_schedule_detail["type"] = schedule.get("type", "")
-                selected_schedule_detail["status"] = schedule.get("status", "") 
+                selected_schedule_detail["status"] = schedule.get("status", "").strip().replace(" ", "").replace("\u00a0", "")
                 
                 user_name = get_user_name_by_id(schedule.get("user_id")) 
                 selected_schedule_detail["personName"] = user_name if user_name else "-"
+                selected_schedule_detail["personId"] = str(schedule.get("user_id")) if schedule.get("user_id") else "None" 
                 
                 project_title = get_project_title_by_id(schedule.get("project_id")) 
                 selected_schedule_detail["projectTitle"] = project_title if project_title else ""
@@ -315,7 +316,7 @@ def get_daily_schedules_api(date_param=None, selected_type='전체'):
 
     daily_schedules = []
     for schedule in schedules_cursor:
-        schedule_status = schedule.get("status", "")
+        schedule_status = schedule.get("status", "").strip().replace(" ", "").replace("\u00a0", "")
         status_tag_class = STATUS_TAG_CLASS_MAP.get(schedule_status, "default-status-tag")
 
         daily_schedules.append({
@@ -329,14 +330,14 @@ def get_daily_schedules_api(date_param=None, selected_type='전체'):
 
 @app.route('/timeline/create_schedule', methods=['POST'])
 def create_schedule():
+    user_id_from_session = session.get("user_id")
+    if not user_id_from_session:
+        return jsonify({"success": False, "message": "로그인된 사용자만 일정을 추가할 수 있습니다."}), 401 # 추가
+
     data = request.get_json()
     
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
         return jsonify({"success": False, "message": "필수 필드(제목, 기간, 타입, 상태)가 누락되었습니다."}), 400
-
-    user_id_from_session = session.get("user_id")
-    if not user_id_from_session:
-        return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
     
     try:
         start_date_iso = data.get("start_date")
@@ -358,7 +359,7 @@ def create_schedule():
     }
 
     # member_ids 처리 (프론트엔드에서 ObjectId 문자열 리스트로 받음)
-    member_ids_json = data.get("member_ids", "[]") # 'member_ids' 필드로 변경
+    member_ids_json = data.get("member_ids", "[]") 
     members_to_save = []
     print(f"DEBUG: raw member_ids_json from frontend: {member_ids_json}")
     if member_ids_json:
@@ -394,6 +395,10 @@ def create_schedule():
 
 @app.route('/timeline/update_schedule', methods=['POST'])
 def update_schedule():
+    user_id_from_session = session.get("user_id")
+    if not user_id_from_session:
+        return jsonify({"success": False, "message": "로그인된 사용자만 일정을 수정할 수 있습니다."}), 401 # 추가
+
     data = request.get_json()
 
     original_schedule_id_param = data.get("original_schedule_id_param")
@@ -406,9 +411,10 @@ def update_schedule():
     except Exception as e:
         return jsonify({"success": False, "message": f"유효하지 않은 일정 ID 형식입니다: {e}"}), 400
 
-    user_id_from_session = session.get("user_id")
-    if not user_id_from_session:
-        return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
+    # 이전에 제거했던 작성자 확인 로직은 다시 넣지 않습니다. (요구사항에 따라 로그인만 확인)
+    schedule_to_update = timeline_collection.find_one({"_id": schedule_obj_id_to_update})
+    if not schedule_to_update:
+        return jsonify({"success": False, "message": "수정할 일정을 찾을 수 없습니다."}), 404
     
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
         return jsonify({"success": False, "message": "필수 필드(제목, 기간, 타입, 상태)가 누락되었습니다."}), 400
@@ -433,7 +439,7 @@ def update_schedule():
     }
 
     # member_ids 처리 (프론트엔드에서 ObjectId 문자열 리스트로 받음)
-    member_ids_json = data.get("member_ids", "[]") # 'member_ids' 필드로 변경
+    member_ids_json = data.get("member_ids", "[]") 
     members_to_save = []
     if member_ids_json:
         try:
@@ -478,6 +484,10 @@ def update_schedule():
 
 @app.route('/timeline/delete_schedule', methods=['POST'])
 def delete_schedule():
+    user_id_from_session = session.get("user_id")
+    if not user_id_from_session:
+        return jsonify({"success": False, "message": "로그인된 사용자만 일정을 삭제할 수 있습니다."}), 401 # 추가
+
     data = request.get_json()
     schedule_id_param = data.get("schedule_id_param")
 
@@ -488,6 +498,10 @@ def delete_schedule():
         schedule_obj_id_to_delete = ObjectId(schedule_id_param)
     except Exception as e:
         return jsonify({"success": False, "message": f"유효하지 않은 일정 ID 형식입니다: {e}"}), 400
+
+    schedule_to_delete = timeline_collection.find_one({"_id": schedule_obj_id_to_delete})
+    if not schedule_to_delete:
+        return jsonify({"success": False, "message": "삭제할 일정을 찾을 수 없습니다."}), 404
 
     try:
         result = timeline_collection.delete_one({"_id": schedule_obj_id_to_delete}) 

@@ -1,8 +1,17 @@
 from collections import defaultdict
+from collections import defaultdict
 from flask import *
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+from bson import ObjectId
+from datetime import datetime, timedelta, date, time
+from pytz import timezone
+from math import ceil
+import json
+from functools import wraps
+from collections import OrderedDict
+import re
 from bson import ObjectId
 from datetime import datetime, timedelta, date, time
 from pytz import timezone
@@ -17,8 +26,12 @@ load_dotenv()
 id = os.getenv("USER_ID")
 pw = os.getenv("USER_PW")
 uri = f"mongodb+srv://{id}:{pw}@team3.fxbwcnh.mongodb.net/"
+id = os.getenv("USER_ID")
+pw = os.getenv("USER_PW")
+uri = f"mongodb+srv://{id}:{pw}@team3.fxbwcnh.mongodb.net/"
 
 app = Flask(__name__)
+app.secret_key = os.environ["SECRET_KEY"]
 app.secret_key = os.environ["SECRET_KEY"]
 
 client = MongoClient(uri)
@@ -76,8 +89,159 @@ def inject_user_context():
 
 
 # ========== yerim - main page ==========
+timeline_collection = db["timeline"]
+
+@app.context_processor
+def inject_user_context():
+    try:
+        user_id = session.get("user_id")
+        if not user_id:
+            return dict()
+
+        # 사용자 정보 (이름, 직급, 부서만)
+        user = user_collection.find_one(
+            {"_id": ObjectId(user_id)},
+            {"name": 1, "position": 1, "department": 1}
+        )
+
+        # 알림 가져오기
+        notifications = []
+        messages = []
+        has_notification = False
+
+        if "notifications" in db.list_collection_names():
+            unread_notes = list(db.notifications.find({
+                "user_id": ObjectId(user_id),
+                "read": False
+            }))
+            notifications = [
+                {
+                    "message": n.get("message", ""),
+                    "link": n.get("notification_link")
+                } for n in unread_notes
+            ]
+            messages = [n.get("message", "") for n in unread_notes]
+            has_notification = len(messages) > 0
+
+        return dict(
+            user_info=user,
+            notifications=notifications,
+            has_notification=has_notification,
+            current_page=request.endpoint
+        )
+    except Exception as e:
+        print(f"[inject_user_context] Error: {e}")
+        return dict()
+
+
+
+# ========== yerim - main page ==========
 @app.route("/")
 def home():
+    
+    projects = list(project_collection.find({}))
+    project_pipeline = [
+        {
+            "$match": {
+                "project_id": { "$ne": None }
+            }
+        },
+        {
+            "$project": {
+                "project_id": 1,
+                "status": 1,
+                "is_done": {
+                    "$cond": [{ "$eq": ["$status", "완료"] }, 1, 0]
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "project_id": "$project_id",
+                    "status": "$status"
+                },
+                "count": { "$sum": 1 },
+                "done_count": { "$sum": "$is_done" }  
+            }
+        },
+        {
+            "$group": {
+                "_id": "$_id.project_id",
+                "statuses": {
+                    "$push": {
+                        "status": "$_id.status",
+                        "count": "$count"
+                    }
+                },
+                "total": { "$sum": "$count" },
+                "done": { "$sum": "$done_count" } 
+            }
+        },
+        {
+            "$addFields": {
+                "percentage": {
+                    "$cond": [
+                        { "$eq": ["$total", 0] },
+                        0,
+                        { "$multiply": [ { "$divide": ["$done", "$total"] }, 100 ] }
+                    ]
+                }
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "project_id": "$_id",
+                "percentage": 1,
+                "total": "$total"
+            }
+        }
+    ]
+    
+    project_statuses = list(timeline_collection.aggregate(project_pipeline))
+    # 딕셔너리로 변환
+    status_map = {s["project_id"]: int(round(s["percentage"], 0)) for s in project_statuses}
+    team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
+
+    # percent 붙이기
+    for p in projects:
+        if p["status"] == "완료":
+            p["percentage"] = 100
+        else:
+            p["percentage"] = 0 if status_map.get(p["_id"], 0) == 0 else status_map.get(p["_id"], 0)
+            
+        try:
+            p["manager_name"] = user_collection.find_one({"_id": p["project_manager"]})["name"]
+        except Exception as e:
+            p["manager_name"] = "-"
+        p["team"] = [
+            user["name"] for user in user_collection.find(
+                { "_id": { "$in": team_map.get(p["_id"], []) } },
+                {"_id": 0, "name": 1}
+            )
+        ]
+    
+    # 일정 가져오기
+    target_date = datetime.today()
+
+
+    # 날짜 범위 설정
+    start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    end = start + timedelta(days=2)
+    timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}).sort("end_date", 1))
+    grouped_timeline = defaultdict(list) # defaultdict: key값 없을 때도 바로 append 가능하도록 설정
+    
+    for t in timeline:
+        t["start_date"] = datetime.strftime(t["start_date"], "%m월 %d일 (%a)")
+        t["end_date"] = datetime.strftime(t["end_date"], "%m월 %d일 (%a)")
+        
+        grouped_timeline[t["end_date"]].append(t)
+    
+    board_time = start - timedelta(days=-5)
+    board = board_collection.find({"update_date": {"$lte": board_time}})
+    
+    return render_template("/index.html", projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"), board=board)
     
     projects = list(project_collection.find({}))
     project_pipeline = [
