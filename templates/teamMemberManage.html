@@ -12,20 +12,20 @@
 <body>
   {% include 'components/nav.html' %}
   <main class="container">
-    <h2>| 👥팀원 관리</h2>
-    <form method="GET" action="{{ url_for('teamMemberManage', project_id=project_id) }}">
-      <input type="text" class="q" name="q" placeholder="이름 또는 이메일로 검색" value="{{ request.args.get('q', '') }}">
-      <button type="submit" class="btn btn-gray">검색</button>
-    </form>
+    <h2>| 팀원 관리</h2>
     <div class="btn-box">
       <button class="btn btn-blue" id="add-member-btn"
-        data-add-url="{{ url_for('teamMemberAdd', project_id=project_id) }}"
-        {% if not is_manager %}data-not-manager="1"{% endif %}>
-        + 팀원 추가
-      </button>
-      <button class="btn btn-blue" onclick="window.history.back()">뒤로 가기</button>
-    </div>
-
+      data-add-url="{{ url_for('teamMemberAdd', project_id=project_id) }}"
+      {% if not is_manager %}data-not-manager="1"{% endif %}>
+      + 팀원 추가
+    </button>
+    <button class="btn btn-blue" onclick="window.history.back()">뒤로 가기</button>
+  </div>
+  <form method="GET" action="{{ url_for('teamMemberManage', project_id=project_id) }}">
+    <input type="text" class="q" name="q" placeholder="이름 또는 이메일로 검색" value="{{ request.args.get('q', '') }}">
+    <button type="submit" class="btn btn-gray">검색</button>
+  </form>
+  <div class="table-wrapper">
     <table class="member-table">
       <thead>
         <tr>
@@ -39,36 +39,40 @@
       <tbody>
   {% for member in team_members %}
   <tr>
-    <td>
+    <td data-label="이름">
       {% if member.is_manager and not member.name %}
         -
       {% else %}
         {{ member.name }}
       {% endif %}
     </td>
-    <td>
+    <td data-label="이메일">
       {% if member.is_manager and not member.email %}
         -
       {% else %}
         {{ member.email }}
       {% endif %}
     </td>
-    <td>
-      {% if member.is_manager and not member.role %}
-        -
+    <td data-label="직급">
+      {% if member.is_manager %}
+        팀장
       {% else %}
         {{ member.position }}
       {% endif %}
     </td>
-    <td>
-      {% if member.status == '대기' %}
-        <span class="status-dot red"></span>
-      {% else %}
+    <td data-label="참여 상태">
+      {% if member.is_manager %}
         <span class="status-dot green"></span>
+      {% else %}
+        {% if member.status == '대기' %}
+          <span class="status-dot red"></span>
+        {% else %}
+          <span class="status-dot green"></span>
+        {% endif %}
+        {{ member.status }}
       {% endif %}
-      {{ member.status }}
     </td>
-    <td>
+    <td data-label="관리">
       {% if is_manager and not member.is_manager %}
         <form method="POST" action="{{ url_for('teamMemberUpdate', project_id=project_id, member_id=member._id|string) }}" style="display:inline;">
           <select name="status" class="status-select" data-current="{{ member.status }}">
@@ -80,14 +84,14 @@
         <form method="POST" action="{{ url_for('teamMemberDelete', project_id=project_id, member_id=member._id) }}" style="display:inline; margin-left:4px;">
           <button type="submit" class="btn btn-gray">삭제</button>
         </form>
-      {% else %}
-        <span>-</span>
       {% endif %}
     </td>
   </tr>
   {% endfor %}
 </tbody>
+
     </table>
+  </div>
   </main>
   <script src="{{ url_for('static', filename='js/teamMemberManage.js') }}"></script>
   <script src="{{ url_for('static', filename='js/notification.js') }}"></script>

@@ -15,8 +15,8 @@
         <ul>
         {% for faq in faqs %}
             <li>
-                <strong>{{ faq.title }}</strong> ({{ faq.category }})<br>
-                <span>{{ faq.content }}</span><br>
+                <strong>{{ faq.title }}</strong><br><br>
+                <span>{{ faq.content }}</span><br><br>
                 <div class="btn-group">
                     <a href="{{ url_for('faq_update', faq_id=faq._id) }}" class="btn btn-blue">수정</a>
                     <form action="{{ url_for('faq_delete', faq_id=faq._id) }}" method="post" style="display:inline;">
@@ -31,15 +31,12 @@
         <hr>
         <h3>새 질문 추가</h3>
         <form action="{{ url_for('faq_insert') }}" method="post">
-            <select name="category" required>
-                <option value="" disabled selected>카테고리를 선택하세요</option>
-                <option value="자유">자유</option>
-                <option value="FAQ">FAQ</option>
-            </select>
+            <input type="hidden" name="category" value="FAQ">
             <input type="text" name="title" placeholder="제목을 입력하세요" required>
             <textarea name="content" placeholder="내용을 입력하세요" required></textarea>
             <button type="submit" class="btn btn-blue">등록</button>
         </form>
+
     </div>
     {% include 'components/footer.html' %}
 </body>

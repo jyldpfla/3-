@@ -2,74 +2,114 @@ a {
     text-decoration: none;
     color: inherit;
 }
+
 .notification-list {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 1rem;
-            background: #fff;
-            border-radius: 10px;
-        }
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 10px;
+    box-sizing: border-box;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 
-        .notification-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+.notification-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
 
-        .notification-list li {
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            transition: background 0.2s;
-            margin-top: 50px;
-            margin-bottom: 50px;
-        }
+.notification-list li {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.2s;
+    margin: 20px 0;
+    border-bottom: 1px solid #eee;
+}
 
-        .notification-list li:last-child {
-            border-bottom: none;
-        }
+body > main > ul  p {
+    text-align: center;
+}
 
-        .notification-list li.unread {
-            background-color: #f8f9ff;
-            font-weight: bold;
-        }
+.notification-list li.unread {
+    background-color: #f8f9ff;
+    font-weight: bold;
+}
 
-        .notification-list > a {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #2a4fa7;
-            text-decoration: none;
-            flex: 1;
-            transition: color 0.2s;
-        }
+.notification-list li a {
+    transition: color 0.2s;
+    word-break: break-word;
+}
 
-        .notification-list a:hover {
-            text-decoration: underline;
-            color: #1a3570;
-        }
+.notification-list li a:hover {
+    text-decoration: underline;
+    color: #1a3570;
+}
 
-        .notification-time {
-            font-size: 0.85rem;
-            color: #888;
-            margin-left: 1rem;
-        }
+.notification-time {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 0.5rem;
+}
 
-        .no-notifications {
-            text-align: center;
-            margin: 2rem;
-            color: #aaa;
-        }
+.no-notifications {
+    text-align: center;
+    margin: 2rem;
+    color: #aaa;
+}
 
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        .pagination > * {
-            margin: 0 5px; 
-        }
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.pagination a, .pagination span {
+    padding: 6px 12px;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    color: #333;
+    background-color: #f9f9f9;
+}
+
+.pagination a.active, .pagination .active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.pagination a:hover {
+    background-color: #e0e0e0;
+}
+
+/* ✅ 반응형 대응 */
+@media screen and (max-width: 600px) {
+    .notification-list {
+        padding: 0.5rem;
+        margin: 1rem;
+    }
+
+    .notification-list li {
+        padding: 0.75rem;
+    }
+
+    .pagination a, .pagination span {
+        padding: 5px 8px;
+        font-size: 14px;
+    }
+
+    .notification-time {
+        font-size: 0.75rem;
+    }
+}
