@@ -26,7 +26,7 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    # session["user_id"] = "685df192a2cd54b0683ea346" # 테스트를 위한 임시 사용자 ID
+    session["user_id"] = "685df192a2cd54b0683ea346" # 테스트를 위한 임시 사용자 ID
     user_id = session.get("user_id")
     print(f"현재 세션 사용자 ID: {user_id}") # 디버깅용 유지
 

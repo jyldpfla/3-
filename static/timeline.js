@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ID를 사용하여 이름 가져오기 (이전 코드에서 loggedInUserName을 사용하지 않았으므로 제거 가능)
     // const loggedInUserName = loggedInUserId !== 'None' ? window.user_names.find(user => user._id === loggedInUserId)?.name : '-'; 
 
-
     const allUsersFlattened = {}; // ID로 사용자 정보를 빠르게 찾기 위한 평탄화된 객체
     if (window.user_names) { // window.user_names 직접 사용
         window.user_names.forEach(user => {
