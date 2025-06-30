@@ -30,7 +30,7 @@ timeline_collection = db["timeline"]
 
 @app.context_processor
 def inject_user():
-    session["user_id"] = "685df192a2cd54b0683ea356"
+    session["user_id"] = "6861efe44fb77f95c4085f18"
     user_id = ObjectId(session.get("user_id"))
     if user_id:
         user = user_collection.find_one({"_id": user_id})
@@ -186,9 +186,13 @@ def example():
 @app.route("/mypage")
 def mypage():
     user_id = ObjectId(session.get("user_id"))
+    if "user_id" not in session:
+            return "<script>alert('로그인 후 이용 가능합니다'); window.location.href = './login';</script>"
     # user 개인 정보 구성
     try:
         user = user_collection.find_one({"_id": user_id})
+        if user == None:
+            raise KeyError("해당 사용자가 존재하지 않습니다.")
     except Exception as e:
         print(f"User Data를 찾을 수 없습니다.: {e}")
         # user 탈퇴로 인해 user data가 없을 경우 필요없는 data인 user의 personal todo data 삭제
