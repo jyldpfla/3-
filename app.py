@@ -77,6 +77,7 @@ def inject_user_context():
 # ========== yerim - main page ==========
 @app.route("/")
 def home():
+    
     projects = list(project_collection.find({}))
     project_pipeline = [
         {
@@ -139,7 +140,7 @@ def home():
     
     project_statuses = list(timeline_collection.aggregate(project_pipeline))
     # 딕셔너리로 변환
-    status_map = {s["project_id"]: round(s["percentage"], 1) for s in project_statuses}
+    status_map = {s["project_id"]: int(round(s["percentage"], 0)) for s in project_statuses}
     team_map = {t["project_id"]: t["member"] for t in team_collection.find({})}
 
     # percent 붙이기
@@ -147,7 +148,7 @@ def home():
         if p["status"] == "완료":
             p["percentage"] = 100
         else:
-            p["percentage"] = 0 if status_map.get(p["_id"], 0) == 0.0 else status_map.get(p["_id"], 0)
+            p["percentage"] = 0 if status_map.get(p["_id"], 0) == 0 else status_map.get(p["_id"], 0)
             
         try:
             p["manager_name"] = user_collection.find_one({"_id": p["project_manager"]})["name"]
@@ -161,12 +162,13 @@ def home():
         ]
     
     # 일정 가져오기
-    target_date = datetime.strptime("2025-06-24", "%Y-%m-%d")
+    target_date = datetime.today()
+
 
     # 날짜 범위 설정
     start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
     end = start + timedelta(days=2)
-    timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}))
+    timeline = list(timeline_collection.find({"end_date": {"$gte": start, "$lte": end}, "project_id": { "$ne": None }}).sort("end_date", 1))
     grouped_timeline = defaultdict(list) # defaultdict: key값 없을 때도 바로 append 가능하도록 설정
     
     for t in timeline:
@@ -175,7 +177,10 @@ def home():
         
         grouped_timeline[t["end_date"]].append(t)
     
-    return render_template("/index.html", projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"))
+    board_time = start - timedelta(days=-5)
+    board = board_collection.find({"update_date": {"$lte": board_time}})
+    
+    return render_template("/index.html", projects=projects, timeline=grouped_timeline, today=target_date.strftime("%m월 %d일 (%a)"), board=board)
 
 @app.route("/example")
 def example():
