@@ -54,6 +54,9 @@ select.signup-input {
   box-sizing: border-box;
   background-color: white;
   transition: border 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  color: #111827;
 }
 
 /* 플레이스홀더 */
@@ -63,13 +66,13 @@ select.signup-input {
   color: #888;
 }
 
-/* 반쪽 필드 */
+/* 반쪽 필드 (이메일 아이디) */
 .signup-input.half {
   width: 300px;
   max-width: 100%;
 }
 
-/* select, 직접입력 input 크기 동일 */
+/* select, 직접입력 input 크기 동일 - 이메일용 */
 select.signup-input.half,
 #email_domain_input {
   width: 160px;
@@ -142,4 +145,66 @@ select::-ms-expand {
   font-size: 14px;
   text-align: left;
   padding-left: 10px;
+}
+
+/* select, 직접입력 input 크기 동일 - 직책용 */
+.signup-position-wrap select,
+.signup-position-wrap input {
+  width: 100%;
+}
+
+/* 프로필 이미지 업로드 커스텀 */
+.signup-profile-wrap .signup-label {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+  opacity: 0.95;
+}
+
+.custom-file-wrap {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  width: 100%;
+  border: 2px solid #2563EB;
+  border-radius: 10px;
+  background: #fff;
+  box-sizing: border-box;
+  padding: 0 16px;
+  opacity: 0.95;
+  font-size: 18px;
+  color: #111827;
+}
+
+.custom-file-wrap input[type="file"] {
+  display: none;
+}
+
+.custom-file-btn {
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: not-allowed;
+  margin-right: 16px;
+  transition: background 0.3s;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  pointer-events: none; 
+  opacity: 0.5;
+}
+
+.file-chosen {
+  font-size: inherit;
+  color: inherit;
+  line-height: 50px;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
