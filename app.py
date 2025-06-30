@@ -89,53 +89,6 @@ def inject_user_context():
 
 
 # ========== yerim - main page ==========
-timeline_collection = db["timeline"]
-
-@app.context_processor
-def inject_user_context():
-    try:
-        user_id = session.get("user_id")
-        if not user_id:
-            return dict()
-
-        # 사용자 정보 (이름, 직급, 부서만)
-        user = user_collection.find_one(
-            {"_id": ObjectId(user_id)},
-            {"name": 1, "position": 1, "department": 1}
-        )
-
-        # 알림 가져오기
-        notifications = []
-        messages = []
-        has_notification = False
-
-        if "notifications" in db.list_collection_names():
-            unread_notes = list(db.notifications.find({
-                "user_id": ObjectId(user_id),
-                "read": False
-            }))
-            notifications = [
-                {
-                    "message": n.get("message", ""),
-                    "link": n.get("notification_link")
-                } for n in unread_notes
-            ]
-            messages = [n.get("message", "") for n in unread_notes]
-            has_notification = len(messages) > 0
-
-        return dict(
-            user_info=user,
-            notifications=notifications,
-            has_notification=has_notification,
-            current_page=request.endpoint
-        )
-    except Exception as e:
-        print(f"[inject_user_context] Error: {e}")
-        return dict()
-
-
-
-# ========== yerim - main page ==========
 @app.route("/")
 def home():
     
