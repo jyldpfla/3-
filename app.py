@@ -682,7 +682,7 @@ def projectList():
     if q:
         filter_query["$or"] = [
             {"title": {"$regex": q, "$options": "i"}},
-            {"description": {"$regex": q, "$options": "i"}}
+            {"client": {"$regex": q, "$options": "i"}},
         ]
     page_size = 10
     skip = (page - 1) * page_size

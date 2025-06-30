@@ -28,7 +28,7 @@
 <button class="add-btn" onclick="window.location.href='{{ url_for('projectAdd') }}'">＋ 프로젝트 추가</button>
   <div class="search-bar">
     <form method="GET" action="{{ url_for('projectList') }}" class="search-form">
-      <input type="text" class="q" name="q" placeholder="프로젝트 이름 또는 설명으로 검색" value="{{ q }}">
+      <input type="text" class="q" name="q" placeholder="프로젝트명 / 클라이언트명 검색" value="{{ q }}">
       <button type="submit" class="btn btn-gray">검색</button>
     </form>
   </div>
