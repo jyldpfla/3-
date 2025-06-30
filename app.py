@@ -204,9 +204,13 @@ def example():
 @app.route("/mypage")
 def mypage():
     user_id = ObjectId(session.get("user_id"))
+    if "user_id" not in session:
+            return "<script>alert('로그인 후 이용 가능합니다'); window.location.href = './login';</script>"
     # user 개인 정보 구성
     try:
         user = user_collection.find_one({"_id": user_id})
+        if user == None:
+            raise KeyError("해당 사용자가 존재하지 않습니다.")
     except Exception as e:
         print(f"User Data를 찾을 수 없습니다.: {e}")
         # user 탈퇴로 인해 user data가 없을 경우 필요없는 data인 user의 personal todo data 삭제
@@ -1474,7 +1478,7 @@ def freeboard_detail(id):
 def insert_form():
     user_id = session.get("user_id")
     if request.method == 'GET':
-        if user_id == None:
+        if "user_id" not in session:
             return "<script>alert('로그인 후 이용 가능합니다'); window.location.href = './login';</script>"
         return render_template('/freeboard_insert.html')
     title = request.form.get("title")
@@ -1493,6 +1497,9 @@ def insert_form():
 
 @app.route('/board_delete', methods=['POST'])
 def delete():
+    if request.method == 'GET':
+        if "user_id" not in session:
+            return "<script>alert('로그인 후 이용 가능합니다'); window.location.href = './login';</script>"
     id = request.get_json()["_id"]
     board_collection.delete_one({"_id": ObjectId(id)})
 
