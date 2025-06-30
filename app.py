@@ -866,67 +866,60 @@ STATUS_TAG_CLASS_MAP = {
 SCHEDULE_TYPE_OPTIONS = [{"value": "전체", "text": "전체 일정"}, {"value": "개인", "text": "개인 일정"},
     {"value": "회사", "text": "회사 일정"}, {"value": "프로젝트", "text": "프로젝트 일정"}]
 
-# 헬퍼 함수: user_id(ObjectId)로 사용자 이름 가져오기
+# user_id(ObjectId)로 사용자 이름 가져오기
 def get_user_name_by_id(user_obj_id):
     try:
         if not isinstance(user_obj_id, ObjectId): # 문자열일 경우 ObjectId로 변환 시도
             user_obj_id = ObjectId(user_obj_id)
-        # 실제 DB 스키마에 따라 "name" 필드 이름 확인
         user = user_collection.find_one({"_id": user_obj_id}, {"name": 1}) 
         return user["name"] if user else None
     except Exception as e:
         print(f"사용자 ID로 이름 가져오기 오류: {e}")
         return None
 
-# 헬퍼 함수: 프로젝트 제목으로 project_id(ObjectId) 가져오기
+# 프로젝트 제목으로 project_id(ObjectId) 가져오기
 def get_project_id_by_title(project_title):
-    # 실제 DB 스키마에 따라 "title" 필드 이름 확인
     project = project_collection.find_one({"title": project_title}) 
     return project["_id"] if project else None
 
-# 헬퍼 함수: project_id(ObjectId)로 프로젝트 제목 가져오기
+# project_id(ObjectId)로 프로젝트 제목 가져오기
 def get_project_title_by_id(project_obj_id):
     try:
         if not isinstance(project_obj_id, ObjectId): # 문자열일 경우 ObjectId로 변환 시도
             project_obj_id = ObjectId(project_obj_id)
-        # 실제 DB 스키마에 따라 "title" 필드 이름 확인
         project = project_collection.find_one({"_id": project_obj_id}) 
         return project["title"] if project else None
     except Exception as e:
         print(f"프로젝트 ID로 제목 가져오기 오류: {e}")
         return None
 
-# 메인 타임라인 라우트
+# 라우팅
 @app.route('/timeline')
 def timeline():
-    # user_info는 @app.context_processor에 의해 자동으로 템플릿에 주입됩니다.
-    
     year_param = request.args.get('year')
     month_param = request.args.get('month')
     date_param = request.args.get('date')
     schedule_id_param = request.args.get('schedule_id')
-    type_filter_param = request.args.get('type', '전체') # 기본값 '전체'
+    type_filter_param = request.args.get('type', '전체')
 
-    # ObjectId를 문자열로 변환하여 모든 사용자 정보를 검색합니다.
-    # 이는 JavaScript의 allUsersFlattened 객체 및 schedulePersonNameSelect 옵션에 사용됩니다.
     user_names = [] 
     for user in user_collection.find({}, {"_id": 1, "name": 1, "position": 1, "department": 1}):
         user_data = {
             "_id": str(user["_id"]), # ObjectId를 문자열로 변환
-            "name": user.get("name", "이름 없음"), # 'name'이 존재하는지 확인하고 기본값 제공
+            "name": user.get("name", "이름 없음"),
             "position": user.get("position", ""),
             "department": user.get("department", "")
         }
         user_names.append(user_data) 
     
-    # 부서별로 그룹화된 사용자 목록 (JavaScript의 grouped_users_by_department에 사용됨)
+    # 부서별로 그룹화된 사용자 목록
     grouped_users_by_department = {}
     for user_data in user_names: 
         department = user_data.get("department", "기타")
         if department not in grouped_users_by_department:
             grouped_users_by_department[department] = []
         grouped_users_by_department[department].append({
-            "id": user_data["_id"], # _id는 이미 문자열
+            "id": user_data["_id"],
             "name": user_data["name"],
             "position": user_data["position"]
         })
@@ -940,9 +933,8 @@ def timeline():
     end_of_month = (start_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
     
     calendar_days = []
-    # 캘린더 첫 주의 시작 요일을 일요일(0)에 맞추기 위한 오프셋 계산
-    first_day_of_week = start_of_month.weekday() # 월요일(0) ~ 일요일(6)
-    start_offset = (first_day_of_week + 1) % 7 # 일요일부터 시작하는 캘린더에 맞게 조정
+    first_day_of_week = start_of_month.weekday()
+    start_offset = (first_day_of_week + 1) % 7
     start_date = start_of_month - timedelta(days=start_offset)
 
     # 캘린더에 표시할 35일(5주) 계산
@@ -972,7 +964,7 @@ def timeline():
     if date_param:
         selected_date_obj = datetime.strptime(date_param, '%Y-%m-%d').date()
     else:
-        selected_date_obj = today # URL에 날짜 매개변수가 없으면 오늘 날짜로 설정
+        selected_date_obj = today
     
     selected_date_str = selected_date_obj.strftime('%Y-%m-%d')
 
@@ -1026,7 +1018,7 @@ def timeline():
                     # 문자열 ID와 ObjectId를 모두 ObjectId로 변환한 다음 중복 제거
                     member_object_ids = [ObjectId(mid) for mid in member_ids if isinstance(mid, str) and ObjectId.is_valid(mid)]
                     member_object_ids.extend([mid for mid in member_ids if isinstance(mid, ObjectId)])
-                    member_object_ids = list(set(member_object_ids)) # 중복 제거
+                    member_object_ids = list(set(member_object_ids))
 
                     for user_doc in user_collection.find(
                         {"_id": {"$in": member_object_ids}},
@@ -1054,13 +1046,13 @@ def timeline():
                            selected_schedule_detail=selected_schedule_detail,
                            status_options_by_type=STATUS_OPTIONS_BY_TYPE,
                            project_titles=project_titles, 
-                           user_names=user_names, # ID 및 이름이 포함된 객체 목록
+                           user_names=user_names,
                            grouped_users_by_department=grouped_users_by_department,
                            schedule_type_options=SCHEDULE_TYPE_OPTIONS,
                            selected_type_filter=type_filter_param
                           )
 
-# API: 일일 일정 필터링 및 검색
+# 일일 일정 필터링 및 검색
 @app.route('/timeline/get_daily_schedules', methods=['GET'])
 def get_daily_schedules_api(date_param=None, selected_type='전체'):
     if date_param is None:
@@ -1116,7 +1108,7 @@ def create_schedule():
 
     # 일정 작성자는 세션에 로그인된 사용자 ID로 자동 설정
     author_id_to_save = user_id_from_session
-    if not author_id_to_save: # 세션에 user_id가 없으면 오류 반환
+    if not author_id_to_save:
         return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인해 주세요."}), 401
     
     try:
@@ -1295,6 +1287,9 @@ def delete_schedule():
     except Exception as e: 
         print(f"일정 삭제 오류: {e}")
         return jsonify({"success": False, "message": f"일정 삭제 오류: {str(e)}"}), 500
+
+if __name__ == '__main__':
+    app.run('0.0.0.0', port=5000, debug=True)
 
 
 # ========== bonghyeon - login ==========
