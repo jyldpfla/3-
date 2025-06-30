@@ -93,7 +93,6 @@ def signup():
             ("email", email),
             ("name", request.form["name"]),
             ("userPassword", password),
-            ("role", request.form.get("role", "직원")),
             ("profile", request.form.get("profile", "")),
             ("department", request.form["department"]),
             ("position", request.form["position"]),
@@ -131,7 +130,6 @@ def profile_edit():
             "phone_num": phone,
             "department": request.form.get("department"),
             "position": request.form.get("position"),
-            "role": request.form.get("role"),
             "profile": request.form.get("profile"),
             "email": email
         }

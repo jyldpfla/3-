@@ -1,4 +1,4 @@
-/* 제목 */
+/* 제목 영역 */
 .signup-title-left {
   margin-left: 40px;
   margin-top: 12px;
@@ -13,7 +13,7 @@
   margin-bottom: 0;
 }
 
-/* 메인 */
+/* 메인 영역 */
 .signup-center {
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
   box-sizing: border-box;
 }
 
-/* 폼 */
+/* 폼 전체 */
 .signup-form {
   display: flex;
   flex-direction: column;
@@ -41,11 +41,12 @@
   margin-bottom: 10px;
 }
 
-/* 입력 필드 */
+/* 입력 필드 공통 */
 .signup-input,
 .signup-input.half,
 select.signup-input,
-#email_domain_input {
+#email_domain_input,
+.signup-input[type="file"] {
   height: 50px;
   padding: 14px 16px;
   font-size: 16px;
@@ -55,21 +56,32 @@ select.signup-input,
   box-sizing: border-box;
   background-color: white;
   transition: border 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  color: #111827;
 }
 
+/* 플레이스홀더 */
 .signup-input::placeholder,
 .signup-input.half::placeholder {
   font-size: 15px;
   color: #888;
 }
 
-/* 반쪽 입력창 */
+/* 반쪽 입력창 (이메일 아이디) */
 .signup-input.half {
   width: 300px;
   max-width: 100%;
 }
 
-/* 이메일 영역 */
+/* select, 직접입력 input 크기 동일 - 이메일용 */
+select.signup-input.half,
+#email_domain_input {
+  width: 160px;
+  max-width: 100%;
+}
+
+/* 이메일 입력 영역 */
 .signup-email-wrap {
   display: flex;
   gap: 8px;
@@ -85,14 +97,7 @@ select.signup-input,
   color: #333;
 }
 
-/* 이메일 select & input */
-select.signup-input.half,
-#email_domain_input {
-  width: 160px;
-  max-width: 100%;
-}
-
-/* select 스타일 */
+/* select 모양 커스터마이징 */
 select.signup-input {
   appearance: none;
   -webkit-appearance: none;
@@ -109,11 +114,11 @@ select::-ms-expand {
   display: none;
 }
 
-/* 버튼 그룹 */
+/* 버튼 스타일 */
 .profile-btn-group {
   display: flex;
   gap: 16px;
-  margin-top: 24px;
+  margin-top: 8px;
   width: 100%;
   max-width: 500px;
 }
@@ -159,10 +164,82 @@ select::-ms-expand {
 }
 
 /* 숨김/표시 상태 */
-.hidden {
-  display: none !important;
+.hidden { display: none !important; }
+.visible { display: inline-block !important; }
+
+/* 비밀번호 불일치 메시지 */
+.pw-mismatch {
+  color: red;
+  font-size: 14px;
+  text-align: left;
+  padding-left: 10px;
 }
 
-.visible {
-  display: inline-block !important;
+/* select, 직접입력 input 크기 동일 - 직책용 */
+.signup-position-wrap select,
+.signup-position-wrap input {
+  width: 100%;
+}
+
+/* 프로필 이미지 업로드 커스텀 */
+.signup-profile-wrap .signup-label {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+  opacity: 0.95;
+}
+
+.custom-file-wrap {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  width: 100%;
+  border: 2px solid #2563EB;
+  border-radius: 10px;
+  background: #fff;
+  box-sizing: border-box;
+  padding: 0 16px;
+  opacity: 0.95;
+  font-size: 18px;
+  color: #111827;
+}
+.custom-file-wrap input[type="file"] {
+  display: none;
+}
+
+.custom-file-btn {
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: not-allowed;
+  margin-right: 16px;
+  transition: background 0.3s;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  pointer-events: none; 
+  opacity: 0.5;
+}
+
+.file-chosen {
+  font-size: inherit;
+  color: inherit;
+  line-height: 50px;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 프로필 이미지 미리보기 (있을 경우) */
+.signup-profile-wrap img {
+  margin-top: 8px;
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 10px;
 }
