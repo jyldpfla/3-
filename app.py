@@ -332,7 +332,7 @@ def mypage():
             t["end_date"] = t["end_date"].strftime("%Y-%m-%d")
     for p in project_timeline:
         status = p.get("status", "")
-        if status in ["진행 대기", "지연", "중단"]:
+        if status in ["진행 대기", "진행대기", "지연", "중단"]:
             p["status"] = "To do"
         elif status == "진행중":
             p["status"] = "In Progress"
