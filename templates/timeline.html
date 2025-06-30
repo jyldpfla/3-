@@ -177,7 +177,6 @@
                 <select id="schedulePersonName" class="form-input">
                     <option value="">-- 작성자 선택 --</option> {# JS에서 자동 채움 및 비활성화 처리 #}
                     {% for user_data in user_names %}
-                        {# option value를 user_id로 변경 #}
                         <option value="{{ user_data["_id"] }}">{{ user_data["name"] }}</option> 
                     {% endfor %}
                 </select>
@@ -255,7 +254,7 @@
         window.currentMonth = {{ current_month }};
         window.selectedDate = "{{ selected_date }}"; {# 문자열로 전달 #}
         window.currentTypeFilter = "{{ selected_type_filter }}"; {# selected_type_filter로 이름 통일 #}
-        window.is_logged_in = {{ 'true' if user_info and user_info._id else 'false' }}; {# 로그인 상태 (boolean) #}
+        window.is_logged_in = {{ 'true' if user_info and user_info._id else 'false' }}; {# 로그인 상태 #}
     </script>
     <script src="{{ url_for('static', filename='timeline.js') }}"></script>
 </body>

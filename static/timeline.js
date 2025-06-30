@@ -674,7 +674,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (scheduleTypeFilter) {
         scheduleTypeFilter.addEventListener('change', function() {
             const selectedType = this.value;
-            // Refresh page to apply new type filter
             window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}&type=${selectedType}`;
         });
     } else {
