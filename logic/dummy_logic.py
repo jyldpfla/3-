@@ -122,3 +122,12 @@ if __name__ == "__main__":
     #             {"$set": {"profile": None}}
     #         )
     
+    # user 전화번호 string으로 전달
+    # all = list(user_collection.find())
+    
+    # for a in all:
+    #     a["phone_num"] = "0" + str(a["phone_num"])
+    #     user_collection.update_one(
+    #         {"_id": a["_id"]},
+    #         {"$set": {"phone_num": a["phone_num"]}}
+    #     )
