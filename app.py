@@ -614,41 +614,50 @@ def to_str(date):
 
 @app.route("/projectList")
 def projectList():
+    from bson import ObjectId
     def to_str(date):
         if not date:
             return ""
         return date[:10] if isinstance(date, str) else date.strftime("%Y-%m-%d")
-
     page = int(request.args.get('page', 1))
-    per_page = 10
-    skip = (page - 1) * per_page
-
-    total_projects = project_collection.count_documents({})
-    total_pages = (total_projects + per_page - 1) // per_page
-
-    project_list = list(project_collection.find().skip(skip).limit(per_page))
-
-    for project in project_list:
-        manager = user_collection.find_one({"_id": project["project_manager"]})
+    q = request.args.get('q', '').strip()
+    filter_query = {}
+    if q:
+        filter_query["$or"] = [
+            {"title": {"$regex": q, "$options": "i"}},
+            {"description": {"$regex": q, "$options": "i"}}
+        ]
+    page_size = 10
+    skip = (page - 1) * page_size
+    projects_cursor = project_collection.find(filter_query).skip(skip).limit(page_size)
+    filtered_projects = list(projects_cursor)
+    # :흰색_확인_표시: 전체 개수와 total_pages 계산
+    total_projects = project_collection.count_documents(filter_query)
+    total_pages = (total_projects + page_size - 1) // page_size
+    # :흰색_확인_표시: 매니저 이름, 날짜 포맷
+    for project in filtered_projects:
+        manager_id = project.get("project_manager")
+        if isinstance(manager_id, str):
+            manager_id = ObjectId(manager_id)
+        manager = user_collection.find_one({"_id": manager_id})
         project["project_manager"] = manager["name"] if manager else "알 수 없음"
         project["start_date"] = to_str(project.get("start_date"))
         project["end_date"] = to_str(project.get("end_date"))
-
-    done = [t for t in project_list if t['status'] == '완료']
-    doing = [t for t in project_list if t['status'] == '진행중']
-    wait = [t for t in project_list if t['status'] == '진행 대기']
-
-    return render_template(
-        "/projectList.html",
-        project_list=project_list,
-        done=done,
-        doing=doing,
-        wait=wait,
-        page=page,
-        total_pages=total_pages
-    )
-
-from datetime import datetime
+    # :흰색_확인_표시: 상태 분류 (검색 결과 기준)
+    done = [p for p in filtered_projects if p.get('status') == '완료']
+    doing = [p for p in filtered_projects if p.get('status') == '진행중']
+    wait = [p for p in filtered_projects if p.get('status') == '진행 대기']
+    # :흰색_확인_표시: 상태 정렬
+    status_order = {"진행 대기": 0, "진행중": 1, "완료": 2}
+    filtered_projects.sort(key=lambda x: status_order.get(x.get("status"), 99))
+    return render_template("projectList.html",
+                            project_list=filtered_projects,
+                            done=done,
+                            doing=doing,
+                            wait=wait,
+                            q=q,
+                            page=page,
+                            total_pages=total_pages)
 
 # ✅ 로그인 필요
 @app.route("/projectAdd", methods=["GET", "POST"])

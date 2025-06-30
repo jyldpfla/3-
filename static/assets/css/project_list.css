@@ -6,103 +6,106 @@
     flex-wrap: wrap;
     justify-content: center;
 }
-
 .card {
-    background: #f1f4f9;
+    background: #F1F4F9;
     border-radius: 20px;
     padding: 20px 40px;
     text-align: center;
     min-width: 150px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
-
 .card.active {
-    background: #e7f0fc;
-    border: 2px solid #007bff;
+    background: #E7F0FC;
+    border: 2px solid #007BFF;
 }
-
 .card p {
     font-weight: bold;
     margin: 0;
     color: #555;
 }
-
 .card h2 {
     font-size: 32px;
     margin: 5px 0 0;
-    color: #007bff;
+    color: #007BFF;
 }
-
 .add-btn {
     display: flex;
     margin-left: auto;
     padding: 10px 20px;
     border: none;
     border-radius: 20px;
-    background: #007bff;
+    background: #007BFF;
     color: white;
     font-weight: bold;
     cursor: pointer;
 }
-
 .project-table table {
     width: 100%;
     border-collapse: collapse;
     border-radius: 10px;
     overflow: hidden;
 }
-
 .project-table th,
 .project-table td {
     padding: 15px;
     text-align: center;
     border-bottom: 1px solid #eee;
 }
-
 .project-table thead {
-    background: #f0f4f8;
+    background: #F0F4F8;
     font-weight: bold;
 }
-
 .status {
     font-weight: bold;
     display: inline-block;
 }
-
 .status.in-progress {
-    color: #28a745;
+    color: #28A745;
     /* 초록색 */
 }
-
 .status.pending {
-    color: #ff5722;
+    color: #FF5722;
     /* 주황색 */
 }
-
+.search-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    /* 반응형 대응 */
+    gap: 10px;
+}
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 50px;
+}
+.q {
+    width: 240px;
+    height: 38px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
 .pagination {
-    margin-top: 30px;
-    text-align: center;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
 }
-
-.pagination a,
-.pagination strong {
-    display: inline-block;
-    margin: 0 5px;
-    padding: 8px 14px;
+.pagination a {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
     text-decoration: none;
-    color: #007bff;
-    border: 1px solid #007bff;
-    border-radius: 20px;
+    color: #333;
+}
+.pagination a.active {
+    background-color: #3F51B5;
+    color: white;
     font-weight: bold;
-    transition: all 0.2s ease-in-out;
-}
-
-.pagination a:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-.pagination strong {
-    background-color: #007bff;
-    color: white;
 }

@@ -10,12 +10,11 @@
 </head>
 <body>
     {% include 'components/nav.html' %}
-
     <main>
     <section class="status-cards">
     <div class="card">
       <p>진행 완료</p>
-      <h2>{{ done|length}}</h2> 
+      <h2>{{ done|length}}</h2>
     </div>
     <div class="card active">
       <p>진행중</p>
@@ -27,8 +26,12 @@
     </div>
 </section>
 <button class="add-btn" onclick="window.location.href='{{ url_for('projectAdd') }}'">＋ 프로젝트 추가</button>
-
-
+  <div class="search-bar">
+    <form method="GET" action="{{ url_for('projectList') }}" class="search-form">
+      <input type="text" class="q" name="q" placeholder="프로젝트 이름 또는 설명으로 검색" value="{{ q }}">
+      <button type="submit" class="btn btn-gray">검색</button>
+    </form>
+  </div>
   <section class="project-table">
     <table>
       <thead>
@@ -51,34 +54,36 @@
             <td>{{ project["project_manager"] }}</td>
             <td>{{ project["start_date"] or '미정' }}</td>
             <td>{{ project["end_date"] or '미정' }}</td>
-
             <td>{{ project["status"] }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
-
-        <div class="pagination" style="text-align:center; margin-top: 20px;">
+    {% set ns = namespace(start=1, end=1) %}
+    {% set ns.start = 1 if page - 2 < 1 else page - 2 %}
+    {% set ns.end = total_pages if page + 2 > total_pages else page + 2 %}
+    <div class="pagination">
       {% if page > 1 %}
-        <a href="{{ url_for('projectList', page=page-1) }}">&laquo; 이전</a>
+        <a href="{{ url_for('projectList', page=1, q=q) }}">« 처음</a>
       {% endif %}
-
-      {% for p in range(1, total_pages + 1) %}
-        {% if p == page %}
-          <strong style="margin: 0 5px;">{{ p }}</strong>
-        {% else %}
-          <a href="{{ url_for('projectList', page=p) }}" style="margin: 0 5px;">{{ p }}</a>
-        {% endif %}
+      {% if page > 1 %}
+        <a href="{{ url_for('projectList', page=page-1, q=q) }}">이전</a>
+      {% endif %}
+      {% for p in range(ns.start, ns.end + 1) %}
+        <a href="{{ url_for('projectList', page=p, q=q) }}"
+          class="{% if p == page %}active{% endif %}">
+          {{ p }}
+        </a>
       {% endfor %}
-
       {% if page < total_pages %}
-        <a href="{{ url_for('projectList', page=page+1) }}">다음 &raquo;</a>
+        <a href="{{ url_for('projectList', page=page+1, q=q) }}">다음</a>
+      {% endif %}
+      {% if page < total_pages %}
+        <a href="{{ url_for('projectList', page=total_pages, q=q) }}">끝 »</a>
       {% endif %}
     </div>
-    <!-- ✅ 여기까지 페이징 버튼 -->
-  </section>
+    </section>
     </main>
-
     {% include 'components/footer.html' %}
 </body>
 </html>
