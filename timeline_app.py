@@ -238,7 +238,7 @@ def timeline():
 
                 selected_schedule_detail["content"] = schedule.get("content", "")
                 selected_schedule_detail["type"] = schedule.get("type", "")
-                selected_schedule_detail["status"] = schedule.get("status", "") 
+                selected_schedule_detail["status"] = schedule.get("status", "").strip().replace(" ", "").replace("\u00a0", "")
                 
                 user_name = get_user_name_by_id(schedule.get("user_id")) 
                 selected_schedule_detail["personName"] = user_name if user_name else "-"
@@ -315,7 +315,7 @@ def get_daily_schedules_api(date_param=None, selected_type='전체'):
 
     daily_schedules = []
     for schedule in schedules_cursor:
-        schedule_status = schedule.get("status", "")
+        schedule_status = schedule.get("status", "").strip().replace(" ", "").replace("\u00a0", "")
         status_tag_class = STATUS_TAG_CLASS_MAP.get(schedule_status, "default-status-tag")
 
         daily_schedules.append({
