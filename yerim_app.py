@@ -10,9 +10,10 @@ from math import ceil
 
 # env 파일 로드
 load_dotenv()
-user = os.getenv("USER")
+id = os.getenv("USER_ID")
+pw = os.getenv("USER_PW")
 # session_key = os.getenv("SECRET_KEY")
-uri = f"mongodb+srv://{user}@team3.fxbwcnh.mongodb.net/"
+uri = f"mongodb+srv://{id}:{pw}@team3.fxbwcnh.mongodb.net/"
 
 app = Flask(__name__)
 app.secret_key = os.environ["SECRET_KEY"]
@@ -157,7 +158,7 @@ def home():
             )
         ]
     
-    # 일정 가져오
+    # 일정 가져오기
     target_date = datetime.today()
 
 
