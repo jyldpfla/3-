@@ -8,13 +8,13 @@ import os
 
 # env 파일 로드
 load_dotenv()
-user = os.getenv("USER")
-uri = f"mongodb+srv://{user}@team3.fxbwcnh.mongodb.net/"
+id = os.getenv("USER_ID")
+pw = os.getenv("USER_PW")
+# session_key = os.getenv("SECRET_KEY")
+uri = f"mongodb+srv://{id}:{pw}@team3.fxbwcnh.mongodb.net/"
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY") 
-
-# MongoDB 연결 설정
+app.secret_key = os.environ["SECRET_KEY"]
 client = MongoClient(uri)
 db = client['team3']
 
