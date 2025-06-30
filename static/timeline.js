@@ -321,6 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentScheduleId = listItem.dataset.scheduleId;
             // 선택된 일정 ID로 이동 (타입 필터 유지)
             window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}&schedule_id=${currentScheduleId}&type=${currentTypeFilter}`;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
     });
 
