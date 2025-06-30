@@ -29,9 +29,8 @@ timeline_collection = db["timeline"]
 @app.context_processor
 def inject_user():
     # 실제 환경에서 사용자 로그인 정보를 세션에서 가져와야함.
-    # session["user_id"] = "685df192a2cd54b0683ea346" 
+    session["user_id"] = "685df192a2cd54b0683ea346" 
     user_id = session.get("user_id")
-    print(f"Current session user_id: {user_id}")
     user = None
     if user_id:
         try:
