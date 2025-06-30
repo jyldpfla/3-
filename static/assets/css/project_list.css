@@ -78,3 +78,31 @@
     color: #ff5722;
     /* 주황색 */
 }
+
+.pagination {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.pagination a,
+.pagination strong {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 14px;
+    text-decoration: none;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+.pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.pagination strong {
+    background-color: #007bff;
+    color: white;
+}
