@@ -11,7 +11,7 @@ from math import ceil
 # env 파일 로드
 load_dotenv()
 id = os.getenv("USER_ID")
-pw = os.getenv("USER_ID")
+pw = os.getenv("USER_PW")
 # session_key = os.getenv("SECRET_KEY")
 uri = f"mongodb+srv://{id}:{pw}@team3.fxbwcnh.mongodb.net/"
 
