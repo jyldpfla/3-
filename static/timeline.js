@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const projectSelectionArea = document.getElementById('projectSelectionArea');
     const scheduleProjectTitleSelect = document.getElementById('scheduleProjectTitle');
     const scheduleNameInput = document.getElementById('scheduleName');
-    const schedulePersonNameSelect = document.getElementById('schedulePersonName'); // 작성자 이름 select 박스
+    const schedulePersonNameSelect = document.getElementById('schedulePersonName');
     const scheduleStartDateInput = document.getElementById('scheduleStartDate');
     const scheduleStartTimeInput = document.getElementById('scheduleStartTime');
     const scheduleEndDateInput = document.getElementById('scheduleEndDate');
@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const selectedMembers = new Set(); // 참여자 관리를 위한 Set (id와 name 객체 저장)
     const memberList = document.getElementById('memberList'); // 참여자 목록 UI
-    // const scheduleMembersSelect = document.getElementById("scheduleMembers"); // 이제 이 요소는 사용하지 않습니다.
 
     // 새로운 참여자 선택 UI 컨테이너
     const departmentMemberPicker = document.getElementById('departmentMemberPicker');
@@ -46,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loggedInUserName = scheduleDataElement.dataset.loggedInUserName;
 
     const allUsersFlattened = {}; // ID로 사용자 정보를 빠르게 찾기 위한 평탄화된 객체
-    // timeline.html에서 window.grouped_users_by_department가 정의되었다고 가정
     if (window.grouped_users_by_department) {
         for (const dept in window.grouped_users_by_department) {
             window.grouped_users_by_department[dept].forEach(user => {
@@ -54,16 +52,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     id: user.id,
                     name: user.name,
                     position: user.position,
-                    department: dept // department 정보 추가
+                    department: dept
                 };
             });
         }
     } else {
         console.warn("WARN: window.grouped_users_by_department가 정의되지 않았습니다. 사용자 데이터 로딩에 문제가 있을 수 있습니다.");
     }
-
-    // 기존의 scheduleMembersSelect 관련 이벤트 리스너는 제거합니다.
-    // if (scheduleMembersSelect) { /* ... */ }
 
     let currentScheduleId = null; // 현재 선택되거나 수정/삭제될 일정의 ID
     let isEditMode = false; // 수정 모드 여부
@@ -76,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             month: parseInt(params.get('month')) || new Date().getMonth() + 1,
             date: params.get('date') || new Date().toISOString().slice(0, 10),
             schedule_id: params.get('schedule_id') || null,
-            type: params.get('type') || '전체' // 'type' 파라미터 추가, 기본값 '전체'
+            type: params.get('type') || '전체'
         };
     }
 
@@ -115,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
             li.textContent = `${member.name} (${member.position} - ${member.department})`; 
 
             const removeBtn = document.createElement("button");
-            removeBtn.textContent = "❌"; // 삭제 아이콘
+            removeBtn.textContent = "❌";
             removeBtn.style.marginLeft = "10px";
             removeBtn.style.backgroundColor = "transparent";
             removeBtn.style.border = "none";
@@ -139,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 새로운 함수: 부서별 참여자 선택 UI 렌더링
+    // 부서별 참여자 선택 UI 렌더링
     function renderDepartmentMemberPicker() {
         if (!departmentMemberPicker) {
             console.error("ERROR: 'departmentMemberPicker' element not found.");
@@ -188,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 체크박스 변경 이벤트 리스너
                 checkbox.addEventListener('change', function() {
                     const memberId = this.value;
-                    const userObj = allUsersFlattened[memberId]; // 전역 사용자 데이터에서 정보 찾기
+                    const userObj = allUsersFlattened[memberId];
 
                     if (this.checked) {
                         if (userObj) {
@@ -261,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             projectSelectionArea.style.display = 'none';
             scheduleProjectTitleSelect.required = false;
-            scheduleProjectTitleSelect.value = ''; // 프로젝트 선택 초기화
+            scheduleProjectTitleSelect.value = '';
         }
     });
 
@@ -342,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedMembers.clear(); // 참여자 목록 초기화
         
         renderDepartmentMemberPicker(); // 새로운 참여자 선택 UI 렌더링 (체크박스 초기화 상태)
-        updateMemberListUI(); // 참여자 UI 업데이트 (비어있을 것임)
+        updateMemberListUI(); // 참여자 UI 업데이트 (비어있을 것)
 
         openModal(scheduleFormModal); // 모달 열기
     });
@@ -354,7 +349,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const detailScheduleId = scheduleDataElement.dataset.scheduleId;
 
             if (detailScheduleId === 'None' || !detailScheduleId) {
-                // 커스텀 메시지 박스로 대체 (alert 사용 금지)
                 showCustomMessageBox('수정할 일정을 선택해주세요.');
                 return;
             }
@@ -503,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 성공 시 페이지 새로고침 (선택된 날짜와 일정 ID 유지, 타입 필터 유지)
                 const refreshUrl = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}` + 
                                      (currentScheduleId ? `&schedule_id=${currentScheduleId}` : '') +
-                                     `&type=${currentTypeFilter}`; // 타입 필터 추가
+                                     `&type=${currentTypeFilter}`;
                 window.location.href = refreshUrl;
             } else {
                 showCustomMessageBox('오류: ' + data.message);
@@ -570,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeModal(deleteConfirmModal);
                 currentScheduleId = null; // 일정 ID 초기화
                 // 성공 시 페이지 새로고침 (선택된 날짜 유지, 타입 필터 유지)
-                window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}&type=${currentTypeFilter}`; // 타입 필터 추가
+                window.location.href = `/timeline?year=${currentYear}&month=${currentMonth}&date=${selectedDate}&type=${currentTypeFilter}`;
             } else {
                 showCustomMessageBox('오류: ' + data.message);
             }
@@ -591,9 +585,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Alert 대신 사용할 커스텀 메시지 박스 함수 (선택 사항)
+    // Alert 대신 사용할 커스텀 메시지 박스 함수
     function showCustomMessageBox(message) {
-        alert(message); // alert() 대신 사용자 정의 모달 사용 권장
+        alert(message);
     }
 
     // 일정 타입 필터 변경 이벤트 리스너 추가 [새로운 로직]

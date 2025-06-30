@@ -39,7 +39,6 @@ def inject_user():
                 {"name": 1, "position": 1, "department": 1}
             )
         except Exception as e:
-            print(f"Error fetching user info for ID {user_id}: {e}")
             user = None
 
     # notifications 컬렉션에서 안 읽은 알림 불러오기
@@ -54,7 +53,6 @@ def inject_user():
             messages = [n["message"] for n in unread_notes]
             has_notification = len(messages) > 0
         except Exception as e:
-            print(f"Error fetching notifications for user {user_id}: {e}")
             messages = []
     else:
         messages = []
@@ -65,6 +63,9 @@ def inject_user():
         has_notification=has_notification
     )
 
+# 일정 타입
+TYPE_TAG_CLASS_MAP = {"개인": "personal-schedule-tag", "회사": "company-schedule-tag", "프로젝트": "project-schedule-tag"}
+
 # 일정 타입에 따른 상태 옵션
 STATUS_OPTIONS_BY_TYPE = {
     "개인": [{"value": "연차", "text": "연차"}, {"value": "월차", "text": "월차"},
@@ -73,34 +74,17 @@ STATUS_OPTIONS_BY_TYPE = {
     "프로젝트": [{"value": "진행중", "text": "진행중"}, {"value": "진행대기", "text": "진행대기"},
         {"value": "지연", "text": "지연"}, {"value": "중단", "text": "중단"}, {"value": "완료", "text": "완료"}]}
 
-# 일정 타입
-TYPE_TAG_CLASS_MAP = {
-    "개인": "personal-schedule-tag",
-    "회사": "company-schedule-tag",
-    "프로젝트": "project-schedule-tag",
-}
-
 # 일정 상태에 따른 태그 클래스
 STATUS_TAG_CLASS_MAP = {
-    "연차": "vacation-year-tag",
-    "월차": "vacation-month-tag",
-    "병가": "sick-leave-tag",
-    "출장": "travel-tag",
+    "연차": "vacation-year-tag", "월차": "vacation-month-tag", "병가": "sick-leave-tag", "출장": "travel-tag",
     "사내일정": "company-event-tag",
-    "진행중": "status-inprogress-tag",
-    "진행대기": "status-wait-tag",
-    "지연": "status-delayed-tag",
-    "중단": "status-stopped-tag",
-    "완료": "status-completed-tag",
+    "진행중": "status-inprogress-tag", "진행대기": "status-wait-tag", "지연": "status-delayed-tag",
+    "중단": "status-stopped-tag", "완료": "status-completed-tag",
 }
 
-# 일정 타입 옵션 (드롭다운을 위해 전달)
-SCHEDULE_TYPE_OPTIONS = [
-    {"value": "전체", "text": "전체 일정"}, # "전체" 옵션 추가
-    {"value": "개인", "text": "개인 일정"},
-    {"value": "회사", "text": "회사 일정"},
-    {"value": "프로젝트", "text": "프로젝트 일정"},
-]
+# 일정 타입 옵션 (드롭다운)
+SCHEDULE_TYPE_OPTIONS = [{"value": "전체", "text": "전체 일정"}, {"value": "개인", "text": "개인 일정"},
+    {"value": "회사", "text": "회사 일정"}, {"value": "프로젝트", "text": "프로젝트 일정"}]
 
 # 헬퍼 함수
 # 사용자 이름으로 user_id (ObjectId) 찾아 반환
@@ -116,7 +100,6 @@ def get_user_name_by_id(user_obj_id):
         user = user_collection.find_one({"_id": user_obj_id}, {"name": 1})
         return user["name"] if user else None
     except Exception as e:
-        print(f"Error converting user ID {user_obj_id} to name: {e}")
         return None
 
 # user_id 리스트로 사용자 이름 리스트 찾아 반환
@@ -135,7 +118,6 @@ def get_user_names_by_ids(user_ids):
         users = user_collection.find({"_id": {"$in": valid_ids}}, {"name": 1})
         return [user["name"] for user in users]
     except Exception as e:
-        print(f"Error converting user IDs to names: {e}")
         return []
 
 # 프로젝트 제목으로 project_id (ObjectId) 찾아 반환
@@ -151,7 +133,6 @@ def get_project_title_by_id(project_obj_id):
         project = project_collection.find_one({"_id": project_obj_id})
         return project["title"] if project else None
     except Exception as e:
-        print(f"Error converting project ID {project_obj_id} to title: {e}")
         return None
 
 # 라우팅
@@ -171,7 +152,6 @@ def timeline():
         if "name" in user and user["name"] is not None:
             user_data["name"] = user["name"]
         else:
-            print(f"WARN: User document with _id {user.get('_id', 'UNKNOWN_ID')} is missing or has a None 'name' field.")
             user_data["name"] = "이름 없음"
 
         user_data["position"] = user.get("position", "")
@@ -181,7 +161,7 @@ def timeline():
     
     grouped_users_by_department = {}
     for user_data in user_names:
-        department = user_data.get("department", "기타") # 'department' 필드가 없으면 '기타'로 분류
+        department = user_data.get("department", "기타")
         if department not in grouped_users_by_department:
             grouped_users_by_department[department] = []
         grouped_users_by_department[department].append({
@@ -289,33 +269,26 @@ def timeline():
                 selected_schedule_detail["memberNames"] = [m["name"] for m in members_detailed_info]
                 selected_schedule_detail["memberIds"] = [m["id"] for m in members_detailed_info]
 
-            else:
-                print(f"DEBUG: No schedule found for ID: {schedule_id_param}")
         except Exception as e:
-            print(f"ERROR: Failed to fetch schedule detail for ID {schedule_id_param}: {e}")
             selected_schedule_detail = {}
 
     project_titles = [p["title"] for p in project_collection.find({}, {"title": 1})]
 
     return render_template('timeline.html',
-                           current_year=current_year,
-                           current_month=current_month,
-                           calendar_days=calendar_days,
-                           daily_schedules=daily_schedules, # 이제 이 값은 초기 필터링된 결과
-                           selected_date=selected_date_str,
+                           current_year=current_year, current_month=current_month, calendar_days=calendar_days,
+                           daily_schedules=daily_schedules, selected_date=selected_date_str,
                            selected_schedule_detail=selected_schedule_detail,
-                           status_options_by_type=STATUS_OPTIONS_BY_TYPE, # 이 부분이 이미 있어서 다행입니다!
-                           project_titles=project_titles,
-                           user_names=user_names,
+                           status_options_by_type=STATUS_OPTIONS_BY_TYPE,
+                           project_titles=project_titles, user_names=user_names,
                            grouped_users_by_department=grouped_users_by_department,
-                           schedule_type_options=SCHEDULE_TYPE_OPTIONS, # 이 부분 추가
-                           selected_type_filter=type_filter_param # 현재 선택된 필터값도 전달
+                           schedule_type_options=SCHEDULE_TYPE_OPTIONS,
+                           selected_type_filter=type_filter_param
                           )
 
-# --- 새로 추가할 API 엔드포인트: 일별 일정 필터링 ---
+# 일별 일정 필터링
 @app.route('/timeline/get_daily_schedules', methods=['GET'])
-def get_daily_schedules_api(date_param=None, selected_type='전체'): # 인자를 직접 받도록 수정
-    if date_param is None: # API 엔드포인트로 직접 호출될 경우 request.args.get() 사용
+def get_daily_schedules_api(date_param=None, selected_type='전체'):
+    if date_param is None:
         date_param = request.args.get('date')
         selected_type = request.args.get('type', '전체')
 
@@ -336,7 +309,7 @@ def get_daily_schedules_api(date_param=None, selected_type='전체'): # 인자�
     }
 
     if selected_type != '전체':
-        query["type"] = selected_type # 선택된 타입에 따라 쿼리 필터링
+        query["type"] = selected_type
 
     schedules_cursor = timeline_collection.find(query).sort("start_date", 1)
 
@@ -350,23 +323,19 @@ def get_daily_schedules_api(date_param=None, selected_type='전체'): # 인자�
             "name": schedule.get("title", "제목 없음"),
             "status_tag_class": status_tag_class,
             "status_display_text": schedule_status,
-            "type": schedule.get("type", "") # 타입 정보도 함께 넘겨줍니다. (JS에서 필터링하거나 활용 가능)
+            "type": schedule.get("type", "")
         })
     return jsonify({"success": True, "daily_schedules": daily_schedules})
 
 @app.route('/timeline/create_schedule', methods=['POST'])
 def create_schedule():
     data = request.get_json()
-    print("\n--- create_schedule API 호출됨 ---")
-    print("수신 데이터 (create_schedule):", data) 
     
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
-        print("ERROR: 필수 필드 누락.")
         return jsonify({"success": False, "message": "필수 필드(제목, 기간, 타입, 상태)가 누락되었습니다."}), 400
 
     user_id_from_session = session.get("user_id")
     if not user_id_from_session:
-        print("ERROR: 세션 사용자 ID 없음.")
         return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
     
     try:
@@ -375,7 +344,6 @@ def create_schedule():
         start_date_dt = datetime.fromisoformat(start_date_iso)
         end_date_dt = datetime.fromisoformat(end_date_iso)
     except ValueError as e:
-        print(f"ERROR: 유효하지 않은 날짜/시간 형식: {e}")
         return jsonify({"success": False, "message": "유효하지 않은 날짜/시간 형식입니다. (YYYY-MM-DDTHH:MM:SS)"}), 400
 
     new_schedule = {
@@ -396,22 +364,14 @@ def create_schedule():
     if member_ids_json:
         try:
             parsed_member_ids = json.loads(member_ids_json)
-            print(f"DEBUG: parsed_member_ids (after json.loads): {parsed_member_ids}, type: {type(parsed_member_ids)}")
             if isinstance(parsed_member_ids, list):
                 for member_id_str in parsed_member_ids:
-                    print(f"DEBUG: processing member_id_str: {member_id_str}")
                     if ObjectId.is_valid(member_id_str):
                         members_to_save.append(ObjectId(member_id_str))
-                        print(f"DEBUG: added valid ObjectId: {member_id_str}")
-                    else:
-                        print(f"WARN: Invalid ObjectId string received for member (skipped): {member_id_str}")
-            else:
-                print(f"WARN: member_ids is not a list after parsing: {parsed_member_ids}")
         except json.JSONDecodeError as e:
-            print(f"ERROR: JSONDecodeError for member_ids: {e} - Raw: {member_ids_json}")
+            pass
     
     new_schedule["member"] = members_to_save
-    print(f"DEBUG: Final members_to_save before DB insert: {new_schedule['member']}")
 
     if new_schedule["type"] == "프로젝트":
         project_title = data.get("project_title")
@@ -428,37 +388,29 @@ def create_schedule():
 
     try:
         result = timeline_collection.insert_one(new_schedule) 
-        print(f"INFO: 일정 생성 성공. Inserted ID: {result.inserted_id}")
         return jsonify({"success": True, "message": "일정이 성공적으로 생성되었습니다."})
     except Exception as e:
-        print(f"ERROR: 일정 생성 중 오류 발생: {str(e)}")
         return jsonify({"success": False, "message": f"일정 생성 중 오류 발생: {str(e)}"}), 500
 
 @app.route('/timeline/update_schedule', methods=['POST'])
 def update_schedule():
     data = request.get_json()
-    print("\n--- update_schedule API 호출됨 ---")
-    print("수신 데이터 (update_schedule):", data) 
 
     original_schedule_id_param = data.get("original_schedule_id_param")
 
     if not original_schedule_id_param:
-        print("ERROR: 수정할 일정 ID 누락.")
         return jsonify({"success": False, "message": "수정할 일정 ID가 누락되었습니다."}), 400
 
     try:
         schedule_obj_id_to_update = ObjectId(original_schedule_id_param)
     except Exception as e:
-        print(f"ERROR: 유효하지 않은 일정 ID 형식: {e}")
         return jsonify({"success": False, "message": f"유효하지 않은 일정 ID 형식입니다: {e}"}), 400
 
     user_id_from_session = session.get("user_id")
     if not user_id_from_session:
-        print("ERROR: 세션 사용자 ID 없음.")
         return jsonify({"success": False, "message": "로그인된 사용자 정보가 없습니다. 다시 로그인 해주세요."}), 401
     
     if not all(k in data for k in ['schedule_name', 'start_date', 'end_date', 'type', 'status']):
-        print("ERROR: 필수 필드 누락.")
         return jsonify({"success": False, "message": "필수 필드(제목, 기간, 타입, 상태)가 누락되었습니다."}), 400
 
     try:
@@ -468,7 +420,6 @@ def update_schedule():
         start_date_dt = datetime.fromisoformat(start_date_iso.replace('Z', '+00:00'))
         end_date_dt = datetime.fromisoformat(end_date_iso.replace('Z', '+00:00'))
     except ValueError as e:
-        print(f"ERROR: 유효하지 않은 날짜/시간 형식: {e}")
         return jsonify({"success": False, "message": f"유효하지 않은 날짜/시간 형식입니다: {e}"}), 400
 
     updated_schedule_data = {
@@ -484,26 +435,17 @@ def update_schedule():
     # member_ids 처리 (프론트엔드에서 ObjectId 문자열 리스트로 받음)
     member_ids_json = data.get("member_ids", "[]") # 'member_ids' 필드로 변경
     members_to_save = []
-    print(f"DEBUG: raw member_ids_json from frontend: {member_ids_json}")
     if member_ids_json:
         try:
             parsed_member_ids = json.loads(member_ids_json)
-            print(f"DEBUG: parsed_member_ids (after json.loads): {parsed_member_ids}, type: {type(parsed_member_ids)}")
             if isinstance(parsed_member_ids, list):
                 for member_id_str in parsed_member_ids:
-                    print(f"DEBUG: processing member_id_str: {member_id_str}")
                     if ObjectId.is_valid(member_id_str):
                         members_to_save.append(ObjectId(member_id_str))
-                        print(f"DEBUG: added valid ObjectId: {member_id_str}")
-                    else:
-                        print(f"WARN: Invalid ObjectId string received for member (skipped): {member_id_str}")
-            else:
-                print(f"WARN: member_ids is not a list after parsing: {parsed_member_ids}")
         except json.JSONDecodeError as e:
-            print(f"ERROR: JSONDecodeError for member_ids: {e} - Raw: {member_ids_json}")
+            pass
     
     updated_schedule_data["member"] = members_to_save
-    print(f"DEBUG: Final members_to_save before DB update: {updated_schedule_data['member']}")
 
     if updated_schedule_data["type"] == "프로젝트":
         project_title = data.get("project_title")
@@ -524,18 +466,14 @@ def update_schedule():
             {"$set": updated_schedule_data}
         )
         if result.modified_count == 1:
-            print("INFO: 일정 수정 성공.")
             return jsonify({"success": True, "message": "일정이 성공적으로 수정되었습니다."})
         else:
             found_document = timeline_collection.find_one({"_id": schedule_obj_id_to_update})
             if found_document:
-                print("INFO: 일정 내용 변경 없음.")
                 return jsonify({"success": True, "message": "일정 내용이 변경되지 않았습니다."})
             else:
-                print("ERROR: 수정할 일정을 찾을 수 없음.")
                 return jsonify({"success": False, "message": "일정을 찾을 수 없습니다."}), 404
     except Exception as e:
-        print(f"ERROR update_schedule: {e}")
         return jsonify({"success": False, "message": f"일정 수정 중 오류 발생: {str(e)}"}), 500
 
 @app.route('/timeline/delete_schedule', methods=['POST'])
@@ -557,8 +495,7 @@ def delete_schedule():
             return jsonify({"success": True, "message": "일정이 성공적으로 삭제되었습니다."})
         else:
             return jsonify({"success": False, "message": "일정을 찾을 수 없었습니다."}), 404
-    except Exception as e:
-        print(f"ERROR delete_schedule: {e}") 
+    except Exception as e: 
         return jsonify({"success": False, "message": f"일정 삭제 중 오류 발생: {str(e)}"}), 500
 
 if __name__ == '__main__':
