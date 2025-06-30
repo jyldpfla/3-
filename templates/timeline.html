@@ -8,6 +8,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/timeline.css') }}">
+    <style>
+        /* 비활성화된 버튼 스타일 */
+        .disabled-btn {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none; /* 클릭 이벤트 자체를 방지 */
+        }
+    </style>
 </head>
 <body>
     <div class="nav-container">
@@ -55,7 +63,12 @@
                         {% endfor %}
                     </select>
                 </div>
+                {# 일정 추가 버튼: 로그인된 사용자만 활성화 #}
+                {% if user_info and user_info._id %}
                 <button id="addScheduleBtn" class="add-btn"><i class="fa-solid fa-plus"></i>일정 추가</button>
+                {% else %}
+                <button id="addScheduleBtn" class="add-btn disabled-btn" disabled title="로그인 후 이용 가능합니다."><i class="fa-solid fa-plus"></i>일정 추가</button>
+                {% endif %}
             </div>
 
             <ul id="dailyScheduleList" class="schedule-list">
@@ -74,6 +87,7 @@
                 data-schedule-id="{{ selected_schedule_detail.get('scheduleId', 'None') }}" 
                 data-schedule-name="{{ selected_schedule_detail.get('scheduleName', '') }}"
                 data-person-name="{{ selected_schedule_detail.get('personName', '') }}" 
+                data-person-id="{{ selected_schedule_detail.get('personId', 'None') }}" {# 일정 작성자의 ID를 추가 #}
                 data-start-date="{{ selected_schedule_detail.get('startDate', '') }}"
                 data-end-date="{{ selected_schedule_detail.get('endDate', '') }}"
                 data-content="{{ selected_schedule_detail.get('content', '') }}"
@@ -84,7 +98,7 @@
                 data-member-ids='{{ selected_schedule_detail.get('memberIds', []) | tojson | safe }}'
                 data-start-time="{{ selected_schedule_detail.get('startTime', '') }}" 
                 data-end-time="{{ selected_schedule_detail.get('endTime', '') }}"
-                data-logged-in-user-name="{{ user_info.name if user_info else '-' }}"
+                data-logged-in-user-id="{{ user_info._id if user_info and user_info._id else 'None' }}" {# 로그인된 사용자 ID를 추가 #}
             ></div>
 
             <div class="section-title">선택된 일정 상세 정보</div>
@@ -113,8 +127,18 @@
                     </p>
                     <p><span class="detail-label">내용:</span> <span class="detail-value">{{ selected_schedule_detail.get('content', '') | replace('\n', '<br>') | safe }}</span></p>
                     <div class="action-buttons">
+                        {# 일정 수정 버튼: 로그인된 사용자만 활성화 #}
+                        {% if user_info and user_info._id %}
                         <button id="editScheduleBtn" class="btn action-btn btn-secondary"><i class="fa-solid fa-pencil"></i> 일정 수정</button>
+                        {% else %}
+                        <button id="editScheduleBtn" class="btn action-btn btn-secondary disabled-btn" disabled title="로그인 후 이용 가능합니다."><i class="fa-solid fa-pencil"></i> 일정 수정</button>
+                        {% endif %}
+                        {# 일정 삭제 버튼: 로그인된 사용자만 활성화 #}
+                        {% if user_info and user_info._id %}
                         <button id="deleteScheduleBtn" class="btn action-btn btn-danger"><i class="fa-solid fa-trash-can"></i> 일정 삭제</button>
+                        {% else %}
+                        <button id="deleteScheduleBtn" class="btn action-btn btn-danger disabled-btn" disabled title="로그인 후 이용 가능합니다."><i class="fa-solid fa-trash-can"></i> 일정 삭제</button>
+                        {% endif %}
                     </div>
                 {% else %}
                     <p class="no-schedule-selected">일정을 선택해주세요.</p>
@@ -152,8 +176,8 @@
                 <label for="schedulePersonName"> 작성자 <span class="required">*</span></label>
                 <select id="schedulePersonName" class="form-input">
                     <option value="">-- 작성자 선택 --</option> {# JS에서 자동 채움 및 비활성화 처리 #}
-                    {% for user_name in user_names %}
-                        <option value="{{ user_name["name"] }}">{{ user_name["name"] }}</option>
+                    {% for user_data in user_names %}
+                        <option value="{{ user_data["_id"] }}">{{ user_data["name"] }}</option> 
                     {% endfor %}
                 </select>
             </div>
@@ -190,7 +214,12 @@
             </div>
             <div class="modal-buttons">
                 <button id="cancelScheduleBtn" class="btn btn-secondary">취소</button>
+                {# 일정 추가/수정 버튼: 로그인된 사용자만 활성화 #}
+                {% if user_info and user_info._id %}
                 <button id="saveScheduleBtn" class="btn btn-primary">일정 추가</button>
+                {% else %}
+                <button id="saveScheduleBtn" class="btn btn-primary disabled-btn" disabled title="로그인 후 이용 가능합니다.">일정 추가</button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -201,7 +230,12 @@
             <p>정말로 이 일정을 삭제하시겠습니까?</p>
             <div class="modal-buttons">
                 <button id="cancelDeleteBtn" class="btn btn-secondary">취소</button>
+                {# 일정 삭제 확인 버튼: 로그인된 사용자만 활성화 #}
+                {% if user_info and user_info._id %}
                 <button id="confirmDeleteBtn" class="btn btn-danger">삭제</button>
+                {% else %}
+                <button id="confirmDeleteBtn" class="btn btn-danger disabled-btn" disabled title="로그인 후 이용 가능합니다.">삭제</button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -211,9 +245,16 @@
     </div>
 
     <script>
+        // Python 백엔드에서 전달된 데이터는 전역 변수로 접근 가능
         const STATUS_OPTIONS_BY_TYPE = {{ status_options_by_type | tojson }};
         window.user_names = {{ user_names | tojson | safe }};
         window.grouped_users_by_department = {{ grouped_users_by_department | tojson | safe }};
+        window.project_titles = {{ project_titles | tojson | safe }}; {# project_titles도 JS로 전달 #}
+        window.currentYear = {{ current_year }};
+        window.currentMonth = {{ current_month }};
+        window.selectedDate = "{{ selected_date }}"; {# 문자열로 전달 #}
+        window.currentTypeFilter = "{{ selected_type_filter }}"; {# selected_type_filter로 이름 통일 #}
+        window.is_logged_in = {{ 'true' if user_info and user_info._id else 'false' }}; {# 로그인 상태 #}
     </script>
     <script src="{{ url_for('static', filename='timeline.js') }}"></script>
 </body>
