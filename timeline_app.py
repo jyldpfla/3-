@@ -97,6 +97,7 @@ STATUS_TAG_CLASS_MAP = {
 SCHEDULE_TYPE_OPTIONS = [{"value": "전체", "text": "전체 일정"}, {"value": "개인", "text": "개인 일정"},
     {"value": "회사", "text": "회사 일정"}, {"value": "프로젝트", "text": "프로젝트 일정"}]
 
+# 헬퍼 함수
 # user_id(ObjectId)로 사용자 이름 가져오기
 def get_user_name_by_id(user_obj_id):
     try:
