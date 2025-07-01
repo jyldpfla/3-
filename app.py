@@ -1308,7 +1308,7 @@ def login():
         user = user_collection.find_one({"email": email})
         if user and str(user["userPassword"]) == pw:
             session["user_id"] = str(user["_id"])
-            return redirect(url_for("index"))
+            return redirect(url_for("home"))
         else:
             return render_template("login.html", error="이메일 또는 비밀번호가 틀렸습니다.")
     return render_template("login.html")
@@ -1318,7 +1318,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for("home"))
 
 # ✅ 회원가입
 @app.route("/signup", methods=["GET", "POST"])
