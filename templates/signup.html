@@ -78,7 +78,6 @@
      <input type="file" class="signup-input" disabled onclick="return false;" onkeydown="return false;">
    </div>
 
-
     <button type="submit" class="signup-btn">완료</button>
   </form>
 </main>
@@ -95,6 +94,8 @@
       inputEl.required = true;
       inputEl.value = "";
       inputEl.focus();
+      // ★ name 동적으로 할당
+      inputEl.setAttribute("name", "email_domain");
       selectEl.removeAttribute("name");
     } else {
       inputEl.classList.remove("visible");
@@ -102,7 +103,9 @@
       selectEl.classList.remove("hidden");
       inputEl.required = false;
       inputEl.value = selectEl.value;
+      // ★ select에 name 복원, input에 name 제거
       selectEl.setAttribute("name", "email_domain");
+      inputEl.removeAttribute("name");
     }
   }
 
@@ -115,6 +118,7 @@
       inputEl.required = true;
       inputEl.value = "";
       inputEl.focus();
+      inputEl.setAttribute("name", "position");
       selectEl.removeAttribute("name");
     } else {
       inputEl.classList.remove("visible");
@@ -123,6 +127,7 @@
       inputEl.required = false;
       inputEl.value = selectEl.value;
       selectEl.setAttribute("name", "position");
+      inputEl.removeAttribute("name");
     }
   }
 
@@ -155,6 +160,7 @@
           emailInput.classList.replace("visible", "hidden");
           emailSelect.classList.remove("hidden");
           emailSelect.setAttribute("name", "email_domain");
+          emailInput.removeAttribute("name");
         }
       }
       // 직책
@@ -166,6 +172,7 @@
           posInput.classList.replace("visible", "hidden");
           posSelect.classList.remove("hidden");
           posSelect.setAttribute("name", "position");
+          posInput.removeAttribute("name");
           posSelect.value = "";
         }
       }
@@ -185,12 +192,18 @@
       pw.focus();
       return false;
     }
-    if (emailInput.classList.contains("visible") && !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailInput.value.trim())) {
+    if (
+      emailInput.classList.contains("visible") && !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/.test(emailInput.value.trim())
+    ) {
       alert("유효한 이메일 도메인을 입력해주세요.");
       emailInput.focus();
       return false;
     }
-    if (!emailInput.classList.contains("visible") && !emailSelect.value) {
+
+    if (
+      !emailInput.classList.contains("visible") &&
+      !emailSelect.value
+    ) {
       alert("이메일 도메인을 선택해주세요.");
       return false;
     }

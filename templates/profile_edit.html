@@ -254,7 +254,7 @@
 
     if (domainInput.classList.contains("visible")) {
       const domainVal = domainInput.value.trim();
-      const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
       if (!domainPattern.test(domainVal)) {
         alert("유효한 이메일 도메인 형식을 입력해주세요.\n예: example.com");
         domainInput.focus();
