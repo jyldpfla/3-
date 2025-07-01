@@ -96,7 +96,7 @@
     padding: 20px; box-sizing: border-box;}
 .modal-content {background-color: #fefefe; margin: auto; padding: 30px; border: 1px solid #888;
     border-radius: 8px; width: 90%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative; box-sizing: border-box;}
+    position: relative; box-sizing: border-box; max-height: 90vh; overflow-y: auto;}
 .modal-title {font-size: 1.5em; color: #333; margin-bottom: 20px; text-align: center; border-bottom: 1px solid #eee; padding-bottom: 10px;}
 
 .form-group {margin-bottom: 15px;}
@@ -125,6 +125,7 @@ textarea.form-input {resize: vertical;}
     .detail-label {min-width: 60px;}
     .action-buttons .btn {padding: 8px 15px; font-size: 0.9em;}
     .modal-title {font-size: 1.3em;}
+    .modal-content {max-height: 85vh;}
     .form-input {padding: 8px; font-size: 0.95em;}}
 
 /* Department Member Picker Styles */
