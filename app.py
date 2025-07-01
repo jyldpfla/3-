@@ -1289,7 +1289,8 @@ def delete_schedule():
         return jsonify({"success": False, "message": f"일정 삭제 오류: {str(e)}"}), 500
 
 # ========== bonghyeon - login ==========
-def login_required_bh(f):
+# ✅ 로그인 확인 데코레이터
+def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
@@ -1297,23 +1298,27 @@ def login_required_bh(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# ✅ 로그인
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         email = request.form.get("email").strip()
         pw = request.form.get("password")
+
         user = user_collection.find_one({"email": email})
         if user and str(user["userPassword"]) == pw:
             session["user_id"] = str(user["_id"])
-            return redirect(url_for("home"))
+            return redirect(url_for("index"))
         else:
             return render_template("login.html", error="이메일 또는 비밀번호가 틀렸습니다.")
     return render_template("login.html")
 
+
+# ✅ 로그아웃
 @app.route("/logout")
-def logout_bh():
+def logout():
     session.clear()
-    return redirect(url_for("home"))
+    return redirect(url_for("index"))
 
 # ✅ 회원가입
 @app.route("/signup", methods=["GET", "POST"])
@@ -1323,6 +1328,10 @@ def signup():
         email_domain = request.form.get("email_domain") or request.form.get("email_domain_input")
         email = f"{email_id}@{email_domain}".strip()
 
+        print("email_id:", repr(email_id))
+        print("email_domain:", repr(email_domain))
+        print("조합된 email:", repr(email))
+
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         phone = re.sub(r'\D', '', request.form["phone"])  # 숫자만 저장
@@ -1330,8 +1339,9 @@ def signup():
         if password != confirm_password:
             return render_template("signup.html", error="비밀번호가 일치하지 않습니다.")
 
-        if not re.match(r"^[^@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
-            return render_template("signup.html", error="올바른 이메일 형식이 아닙니다.")
+        if not re.match(r"^[^@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$", email):
+             return render_template("signup.html", error="올바른 이메일 형식이 아닙니다.")
+
 
         if user_collection.find_one({"email": email}):
             return render_template("signup.html", error="이미 존재하는 이메일입니다.")
