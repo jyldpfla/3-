@@ -324,6 +324,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 페이지 새로고침 후 자동 스크롤 내림
+    if (currentScheduleId) {
+        window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    }
+
     // '일정 추가' 버튼 클릭 이벤트
     if (addScheduleBtn) {
         addScheduleBtn.addEventListener('click', function() {
