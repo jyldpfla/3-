@@ -1413,9 +1413,13 @@ def delete_account():
 def faq_main():
     faqs = list(board_collection.find().sort("create_date", -1))
     return render_template("faq_main.html", faqs=faqs)
-
 @app.route("/faq/insert", methods=["POST"])
 def faq_insert():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    user = user_collection.find_one({"_id": ObjectId(session["user_id"])})
+    if user.get("position") not in ["팀장"]:
+        return "<script>alert('팀장 이상만 질문 등록이 가능합니다.'); window.location.href='/faq';</script>"
     title = request.form.get("title")
     content = request.form.get("content")
     category = request.form.get("category")
@@ -1429,9 +1433,13 @@ def faq_insert():
             "update_date": now
         })
     return redirect(url_for("faq_main"))
-
 @app.route("/faq/update/<faq_id>", methods=["GET", "POST"])
 def faq_update(faq_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    user = user_collection.find_one({"_id": ObjectId(session["user_id"])})
+    if user.get("position") not in ["팀장"]:
+        return "<script>alert('팀장 이상만 FAQ 수정이 가능합니다.'); window.location.href='/faq';</script>"
     if request.method == "POST":
         title = request.form.get("title")
         content = request.form.get("content")
@@ -1451,9 +1459,13 @@ def faq_update(faq_id):
     else:
         faq = board_collection.find_one({"_id": ObjectId(faq_id)})
         return render_template("faq_update.html", faq=faq)
-
 @app.route("/faq/delete/<faq_id>", methods=["POST"])
 def faq_delete(faq_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    user = user_collection.find_one({"_id": ObjectId(session["user_id"])})
+    if user.get("position") not in ["팀장"]:
+        return "<script>alert('팀장 이상만 FAQ 삭제가 가능합니다.'); window.location.href='/faq';</script>"
     board_collection.delete_one({"_id": ObjectId(faq_id)})
     return redirect(url_for("faq_main"))
 

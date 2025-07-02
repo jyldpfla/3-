@@ -33,7 +33,8 @@
 }
 .faq-update-container input[type="text"],
 .faq-update-container textarea {
-    width: 100%;
+    width: 95%;
+    margin: 0 auto;
     padding: 12px;
     border: 1.5px solid #D1D5DB;
     border-radius: 7px;

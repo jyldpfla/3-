@@ -66,8 +66,9 @@ hr {
 }
 form input[type="text"],
 form textarea {
-    width: 100%;
+    width: 95%;
     padding: 12px;
+    margin: 0 auto;
     margin-bottom: 14px;
     border: 1.5px solid #D1D5DB;
     border-radius: 7px;

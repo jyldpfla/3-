@@ -28,15 +28,15 @@
             <li>등록된 FAQ가 없습니다.</li>
         {% endfor %}
         </ul>
-        <hr>
-        <h3>새 질문 추가</h3>
-        <form action="{{ url_for('faq_insert') }}" method="post">
-            <input type="hidden" name="category" value="FAQ">
-            <input type="text" name="title" placeholder="제목을 입력하세요" required>
-            <textarea name="content" placeholder="내용을 입력하세요" required></textarea>
-            <button type="submit" class="btn btn-blue">등록</button>
-        </form>
-
+        {% if user_info and user_info.position in ["팀장", "임원", "대표"] %}
+            <h3>새 질문 추가</h3>
+            <form action="{{ url_for('faq_insert') }}" method="post">
+                <input type="hidden" name="category" value="FAQ">
+                <input type="text" name="title" placeholder="제목을 입력하세요" required>
+                <textarea name="content" placeholder="내용을 입력하세요" required></textarea>
+                <button type="submit" class="btn btn-blue">등록</button>
+            </form>
+        {% endif %}
     </div>
     {% include 'components/footer.html' %}
 </body>
