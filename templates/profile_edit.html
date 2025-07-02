@@ -22,9 +22,10 @@
       <div class="signup-error">{{ error }}</div>
     {% endif %}
 
-    <div id="pw-error" class="signup-error" style="display: none;"></div>
     <input type="password" name="password" id="password" class="signup-input" placeholder="비밀번호를 입력하세요" required>
     <input type="password" name="confirm_password" id="confirm_password" class="signup-input" placeholder="비밀번호 확인" required>
+     <div id="pw-error" class="pw-mismatch" style="display: none;">비밀번호가 일치하지 않습니다.</div>
+
 
     <!-- 이메일 -->
     <div class="signup-email-wrap">
